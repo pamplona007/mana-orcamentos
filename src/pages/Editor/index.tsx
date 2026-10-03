@@ -1,22 +1,22 @@
-import { useState } from 'react'
+import { useOrcamento } from '@/hooks/useOrcamento'
 import { PLANOS } from '@/data/plans'
 import { PlanCard } from '@/components/PlanCard'
 import { GuestBreakdown } from '@/components/GuestBreakdown'
 import { AddonToggle } from '@/components/AddonToggle'
+import { OrcamentoSummary } from '@/components/OrcamentoSummary'
 import { OPCIONAIS } from '@/data/plans'
-import type { Adicional, Convidado, Pagamento, PlanoId } from '@/types/orcamento'
 import styles from './styles.module.scss'
 
-const emptyConvidado: Convidado = { adultos: 25, criancas0a4: 0, criancas5a9: 0 }
-const emptyAdicional: Adicional = { entrada: false, salgadosExtras: 0 }
-
 export function Editor() {
-  const [plano, setPlano] = useState<PlanoId>('premium')
-  const [convidados, setConvidados] = useState<Convidado>(emptyConvidado)
-  const [adicionais, setAdicionais] = useState<Adicional>(emptyAdicional)
-  const [pagamento, setPagamento] = useState<Pagamento>('parcelado')
-  const [cliente, setCliente] = useState({ nome: '', whatsapp: '' })
-  const [evento, setEvento] = useState({ data: '', cidadeBairro: '', observacoes: '' })
+  const {
+    state,
+    setCliente,
+    setEvento,
+    setConvidados,
+    setPlano,
+    setAdicionais,
+    setPagamento,
+  } = useOrcamento()
 
   return (
     <div className={styles.editor}>
@@ -41,8 +41,8 @@ export function Editor() {
               <input
                 id="cliente-nome"
                 className={styles.fieldInput}
-                value={cliente.nome}
-                onChange={(e) => setCliente({ ...cliente, nome: e.target.value })}
+                value={state.cliente.nome}
+                onChange={(e) => setCliente({ ...state.cliente, nome: e.target.value })}
                 placeholder="Ex: Maria Silva"
               />
             </div>
@@ -51,8 +51,8 @@ export function Editor() {
               <input
                 id="cliente-whats"
                 className={styles.fieldInput}
-                value={cliente.whatsapp}
-                onChange={(e) => setCliente({ ...cliente, whatsapp: e.target.value })}
+                value={state.cliente.whatsapp}
+                onChange={(e) => setCliente({ ...state.cliente, whatsapp: e.target.value })}
                 placeholder="(85) 9 9999-9999"
               />
             </div>
@@ -62,8 +62,8 @@ export function Editor() {
                 id="evento-data"
                 type="date"
                 className={styles.fieldInput}
-                value={evento.data}
-                onChange={(e) => setEvento({ ...evento, data: e.target.value })}
+                value={state.evento.data}
+                onChange={(e) => setEvento({ data: e.target.value })}
               />
             </div>
             <div className={styles.field}>
@@ -71,8 +71,8 @@ export function Editor() {
               <input
                 id="evento-local"
                 className={styles.fieldInput}
-                value={evento.cidadeBairro}
-                onChange={(e) => setEvento({ ...evento, cidadeBairro: e.target.value })}
+                value={state.evento.cidadeBairro}
+                onChange={(e) => setEvento({ cidadeBairro: e.target.value })}
                 placeholder="Ex: Fortaleza — Aldeota"
               />
             </div>
@@ -84,7 +84,7 @@ export function Editor() {
             <h2 className={styles.sectionTitle}>Convidados</h2>
             <span className={styles.sectionStep}>Etapa 2 de 3</span>
           </div>
-          <GuestBreakdown value={convidados} onChange={setConvidados} />
+          <GuestBreakdown value={state.convidados} onChange={setConvidados} />
         </section>
 
         <section className={styles.section} aria-label="Plano">
@@ -97,10 +97,10 @@ export function Editor() {
               <PlanCard
                 key={p.id}
                 plano={p}
-                selected={plano === p.id}
+                selected={state.plano === p.id}
                 onSelect={setPlano}
                 mode="editor"
-                pagamento={pagamento}
+                pagamento={state.pagamento}
               />
             ))}
           </div>
@@ -109,13 +109,13 @@ export function Editor() {
             <button
               type="button"
               onClick={() => setPagamento('parcelado')}
-              aria-pressed={pagamento === 'parcelado'}
+              aria-pressed={state.pagamento === 'parcelado'}
               className={styles.fieldInput}
               style={{
                 cursor: 'pointer',
                 textAlign: 'left',
-                borderColor: pagamento === 'parcelado' ? 'var(--rust)' : 'var(--coal-3)',
-                background: pagamento === 'parcelado' ? 'rgba(181, 71, 27, 0.08)' : 'var(--coal)',
+                borderColor: state.pagamento === 'parcelado' ? 'var(--rust)' : 'var(--coal-3)',
+                background: state.pagamento === 'parcelado' ? 'rgba(181, 71, 27, 0.08)' : 'var(--coal)',
               }}
             >
               <div style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 4 }}>Parcelado</div>
@@ -124,13 +124,13 @@ export function Editor() {
             <button
               type="button"
               onClick={() => setPagamento('pix')}
-              aria-pressed={pagamento === 'pix'}
+              aria-pressed={state.pagamento === 'pix'}
               className={styles.fieldInput}
               style={{
                 cursor: 'pointer',
                 textAlign: 'left',
-                borderColor: pagamento === 'pix' ? 'var(--rust)' : 'var(--coal-3)',
-                background: pagamento === 'pix' ? 'rgba(181, 71, 27, 0.08)' : 'var(--coal)',
+                borderColor: state.pagamento === 'pix' ? 'var(--rust)' : 'var(--coal-3)',
+                background: state.pagamento === 'pix' ? 'rgba(181, 71, 27, 0.08)' : 'var(--coal)',
               }}
             >
               <div style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 4 }}>À vista no Pix</div>
@@ -147,18 +147,20 @@ export function Editor() {
             label={OPCIONAIS.entrada.label}
             descricao={OPCIONAIS.entrada.descricao}
             valor={OPCIONAIS.entrada.valor}
-            checked={adicionais.entrada}
-            onChange={(entrada) => setAdicionais({ ...adicionais, entrada })}
+            checked={state.adicionais.entrada}
+            onChange={(entrada) => setAdicionais({ entrada })}
           />
-          {adicionais.entrada && (
+          {state.adicionais.entrada && (
             <div className={styles.field}>
               <label className={styles.fieldLabel}>Cento de salgados adicional (R$ 75 cada)</label>
               <input
                 type="number"
                 min={0}
                 max={20}
-                value={adicionais.salgadosExtras}
-                onChange={(e) => setAdicionais({ ...adicionais, salgadosExtras: Math.max(0, Number(e.target.value) || 0) })}
+                value={state.adicionais.salgadosExtras}
+                onChange={(e) =>
+                  setAdicionais({ salgadosExtras: Math.max(0, Number(e.target.value) || 0) })
+                }
                 className={styles.fieldInput}
               />
             </div>
@@ -166,15 +168,8 @@ export function Editor() {
         </section>
       </div>
 
-      <aside style={{ position: 'sticky', top: 88, alignSelf: 'flex-start' }} aria-label="Resumo">
-        <div style={{ padding: 'var(--space-5)', background: 'var(--coal)', border: '1px solid var(--coal-3)', borderRadius: 'var(--radius-lg)' }}>
-          <h2 style={{ fontFamily: 'var(--font-body)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--ochre)', marginBottom: 'var(--space-3)' }}>
-            Resumo
-          </h2>
-          <p style={{ color: 'var(--cream-dim)', fontSize: 14, lineHeight: 1.5 }}>
-            Escolha o plano acima para ver o total calculado em tempo real.
-          </p>
-        </div>
+      <aside aria-label="Resumo">
+        <OrcamentoSummary />
       </aside>
     </div>
   )

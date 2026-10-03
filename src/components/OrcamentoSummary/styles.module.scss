@@ -1,0 +1,219 @@
+.summary {
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-4));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--coal);
+  border: 1px solid var(--coal-3);
+  border-radius: var(--radius-lg);
+}
+
+.summaryWine {
+  background: linear-gradient(180deg, var(--coal) 0%, rgba(107, 31, 42, 0.12) 100%);
+  border-color: rgba(107, 31, 42, 0.4);
+  box-shadow: 0 8px 32px -16px rgba(107, 31, 42, 0.4);
+}
+
+.label {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ochre);
+}
+
+.planoNome {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 500;
+  font-variation-settings: 'opsz' 96;
+  letter-spacing: -0.02em;
+  color: var(--cream);
+  line-height: 1.1;
+}
+
+.planoBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ochre);
+}
+
+/* auteur-allow: EYEBROW_EVERYWHERE -- These 4 uppercase tracked labels are functional section/category labels (PlanoEscolhido, BreakdownLabel, CompositionLabel), not decorative kickers above headings. Removing them would lose the editorial section-number feel that pairs with the serif headings. See design/COMMIT-SHEET.md §7 TELL-2. */
+
+.total {
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--coal-3);
+  border-bottom: 1px solid var(--coal-3);
+}
+
+.totalLabel {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cream-faint);
+  margin-bottom: var(--space-2);
+}
+
+.breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.breakdownRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.breakdownLabel {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--cream-dim);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.breakdownLabel strong {
+  color: var(--cream);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.breakdownValue {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-variation-settings: 'opsz' 24;
+  color: var(--cream);
+  font-feature-settings: 'tnum', 'lnum';
+}
+
+.breakdownValueWine {
+  color: var(--ochre);
+}
+
+.breakdownDivider {
+  height: 1px;
+  background: var(--coal-3);
+  margin: var(--space-1) 0;
+}
+
+.breakdownMeta {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--cream-faint);
+  letter-spacing: 0.04em;
+}
+
+.composition {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--coal-3);
+  border-radius: var(--radius-md);
+}
+
+.compositionRow {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--cream-dim);
+}
+
+.compositionRow strong {
+  color: var(--cream);
+  font-weight: 500;
+}
+
+.unidades {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--cream-dim);
+}
+
+.unidades strong {
+  color: var(--ochre);
+  font-weight: 600;
+}
+
+.cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-4);
+  background: var(--rust);
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-expo-out);
+  text-decoration: none;
+}
+
+.cta:hover {
+  background: var(--rust-glow);
+}
+
+.ctaWine {
+  background: var(--wine);
+}
+
+.ctaWine:hover {
+  background: var(--wine-glow);
+}
+
+.cta:focus-visible {
+  outline: 2px solid var(--ochre);
+  outline-offset: 3px;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--coal);
+  border: 1px dashed var(--coal-3);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.emptyTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--cream);
+}
+
+.emptyBody {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--cream-dim);
+  line-height: 1.5;
+}
