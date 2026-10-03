@@ -113,7 +113,7 @@ export const PLANOS: readonly Plano[] = [
     nome: 'Rodízio sem bebida',
     tagline: 'Rodízio completo, você leva as bebidas',
     descricao:
-      'Mesma experiência do rodízio livre, sem as bebidas — ideal quando o evento já tem open bar ou饮品 à parte.',
+      'Mesma experiência do rodízio livre, sem as bebidas. Ideal quando o evento já tem open bar ou饮品 à parte.',
     icone: IconStarFilled,
     iconeLabel: 'Estrela preenchida',
     cor: 'rust',
@@ -146,7 +146,7 @@ export const PLANOS: readonly Plano[] = [
     precoPizzaAvista: 66.67,
     pizzasPorPessoa: 0.6,
     inclusos: [
-      'Self service — mesa fixa',
+      'Self service: mesa fixa',
       'Luvas e guardanapos',
       '30 sabores tradicionais e especiais',
     ],
@@ -175,5 +175,10 @@ export const OPCIONAIS = {
   salgadoExtra: {
     label: 'Cento de salgados adicional',
     valor: ADICIONAL_SALGADO_EXTRA,
+  },
+  deslocamento: {
+    label: 'Deslocamento',
+    descricao: 'Para eventos acima de 25 km do centro de Fortaleza',
+    valor: '~R$ 150,00',
   },
 } as const;

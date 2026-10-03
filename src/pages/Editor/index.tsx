@@ -11,23 +11,13 @@ export function Editor() {
     setCliente,
     setEvento,
     setConvidados,
-    setAdicionais,
-    setPagamento,
     setDesconto,
+    setDeslocamento,
   } = useOrcamento()
 
   return (
     <div className={styles.editor}>
       <div className={styles.main}>
-        <section className={styles.hero}>
-          <span className={styles.heroLabel}>Orçamento</span>
-          <h1 className={styles.heroTitle}>Maná no seu evento.</h1>
-          <p className={styles.heroSub}>
-            Pizzaria artesanal italiana servida na sua casa. Massa maturada por 48h,
-            ingredientes selecionados, atendimento completo.
-          </p>
-        </section>
-
         <section className={styles.section} aria-label="Dados do cliente">
           <div className={styles.sectionHead}>
             <h2 className={styles.sectionTitle}>Cliente e evento</h2>
@@ -70,7 +60,7 @@ export function Editor() {
                 className={styles.fieldInput}
                 value={state.evento.cidadeBairro}
                 onChange={(e) => setEvento({ cidadeBairro: e.target.value })}
-                placeholder="Ex: Fortaleza — Aldeota"
+                placeholder="Ex: Fortaleza, Aldeota"
               />
             </div>
             <div className={`${styles.field} ${styles.fieldFull}`}>
@@ -94,58 +84,28 @@ export function Editor() {
           <GuestBreakdown value={state.convidados} onChange={setConvidados} />
         </section>
 
-        <section className={styles.section} aria-label="Pagamento">
+        <section className={styles.section} aria-label="Deslocamento">
           <div className={styles.sectionHead}>
-            <h2 className={styles.sectionTitle}>Forma de pagamento</h2>
-          </div>
-          <div className={styles.fieldGrid}>
-            <button
-              type="button"
-              onClick={() => setPagamento('parcelado')}
-              aria-pressed={state.pagamento === 'parcelado'}
-              className={`${styles.fieldInput} ${styles.pagamentoButton} ${
-                state.pagamento === 'parcelado' ? styles.pagamentoButtonActive : ''
-              }`}
-            >
-              <div className={styles.pagamentoLabel}>Parcelado</div>
-              <div className={styles.pagamentoValor}>10x no cartão</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => setPagamento('pix')}
-              aria-pressed={state.pagamento === 'pix'}
-              className={`${styles.fieldInput} ${styles.pagamentoButton} ${
-                state.pagamento === 'pix' ? styles.pagamentoButtonActive : ''
-              }`}
-            >
-              <div className={styles.pagamentoLabel}>À vista no Pix</div>
-              <div className={styles.pagamentoValor}>15% de desconto</div>
-            </button>
-          </div>
-        </section>
-
-        <section className={styles.section} aria-label="Adicionais">
-          <div className={styles.sectionHead}>
-            <h2 className={styles.sectionTitle}>Adicionais</h2>
+            <h2 className={styles.sectionTitle}>Deslocamento</h2>
           </div>
           <AddonToggle
-            label={OPCIONAIS.entrada.label}
-            descricao={OPCIONAIS.entrada.descricao}
-            valor={OPCIONAIS.entrada.valor}
-            checked={state.adicionais.entrada}
-            onChange={(entrada) => setAdicionais({ entrada })}
+            label={OPCIONAIS.deslocamento.label}
+            descricao={OPCIONAIS.deslocamento.descricao}
+            valor={OPCIONAIS.deslocamento.valor}
+            checked={state.deslocamento.ativo}
+            onChange={(ativo) => setDeslocamento({ ativo })}
           />
-          {state.adicionais.entrada && (
+          {state.deslocamento.ativo && (
             <div className={styles.field}>
-              <label className={styles.fieldLabel} htmlFor="salgados-extra">Cento de salgados adicional (R$ 75 cada)</label>
+              <label className={styles.fieldLabel} htmlFor="deslocamento-valor">Valor do deslocamento (R$)</label>
               <input
-                id="salgados-extra"
+                id="deslocamento-valor"
                 type="number"
                 min={0}
-                max={20}
-                value={state.adicionais.salgadosExtras}
+                step={1}
+                value={state.deslocamento.valor}
                 onChange={(e) =>
-                  setAdicionais({ salgadosExtras: Math.max(0, Number(e.target.value) || 0) })
+                  setDeslocamento({ valor: Math.max(0, Number(e.target.value) || 0) })
                 }
                 className={styles.fieldInput}
               />

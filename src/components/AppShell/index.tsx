@@ -21,7 +21,7 @@ export function AppShell({ showSavedBadge = false }: AppShellProps) {
   return (
     <div className={styles.shell}>
       <header className={styles.header}>
-        <Link to="/" className={styles.brand} aria-label="Maná Pizzas & Eventos — início">
+        <Link to="/" className={styles.brand} aria-label="Maná Pizzas & Eventos, início">
           <img src="/logo-mana.png" alt="" width={66} height={44} />
           <div>
             <div className={styles.brandName}>Maná Pizzas</div>

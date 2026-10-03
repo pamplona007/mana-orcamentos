@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
   page: {
     backgroundColor: PDF_COLORS.ink,
     paddingHorizontal: 48,
-    paddingVertical: 56,
+    paddingVertical: 48,
     fontFamily: 'Inter',
     fontSize: 10,
     color: PDF_COLORS.cream,
@@ -246,7 +246,7 @@ export function PageCapa({ orcamento, validadeISO }: PageCapaProps) {
             <View style={styles.promiseItem}>
               <Text style={styles.promiseItemTitle}>Chega 30 min antes</Text>
               <Text style={styles.promiseItemBody}>
-                Você encontra tudo pronto e quente — só curtir.
+                Você encontra tudo pronto e quente, é só curtir.
               </Text>
             </View>
             <View style={styles.promiseItem}>

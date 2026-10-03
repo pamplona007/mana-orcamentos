@@ -1,6 +1,7 @@
-import { Page, View, Text, StyleSheet, Image } from '@react-pdf/renderer'
+import { Page, View, Text, StyleSheet } from '@react-pdf/renderer'
 import { PDF_COLORS } from '../styles'
 import { pdfFormatBRL } from '../utils'
+import { PLANO_POR_ID } from '@/data/plans'
 import type { Orcamento, TotaisPorPlano } from '@/types/orcamento'
 
 const styles = StyleSheet.create({
@@ -32,12 +33,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: 'Fraunces',
-    fontSize: 40,
+    fontSize: 36,
     fontWeight: 500,
     color: PDF_COLORS.cream,
     letterSpacing: -0.8,
     lineHeight: 1.05,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   sub: {
     fontFamily: 'Fraunces',
@@ -72,9 +73,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: PDF_COLORS.cream,
   },
+  metaPixValue: {
+    fontFamily: 'Fraunces',
+    fontSize: 14,
+    color: PDF_COLORS.success,
+    marginBottom: 2,
+  },
+  metaCardValue: {
+    fontFamily: 'Inter',
+    fontSize: 8,
+    color: PDF_COLORS.creamDim,
+  },
   storyBlock: {
-    marginTop: 28,
-    marginBottom: 28,
+    marginTop: 20,
+    marginBottom: 20,
   },
   sectionKicker: {
     fontFamily: 'Inter',
@@ -125,6 +137,15 @@ const styles = StyleSheet.create({
     color: PDF_COLORS.creamDim,
     marginBottom: 14,
   },
+  calloutDiscount: {
+    fontFamily: 'Inter',
+    fontSize: 8,
+    fontWeight: 600,
+    color: PDF_COLORS.success,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginBottom: 4,
+  },
   calloutBody: {
     fontFamily: 'Inter',
     fontSize: 9.5,
@@ -149,14 +170,14 @@ export function PageUnidade(props: PageUnidadeProps) {
     props.orcamento.convidados.criancas0a4 +
     props.orcamento.convidados.criancas5a9
   const pizzasSugeridas = Math.ceil(totalPessoas * 0.6)
-  const fmt = pdfFormatBRL(total.totalParcelado)
-  const fmtPizza = pdfFormatBRL(total.precoPessoaUsado)
+  const fmt = pdfFormatBRL(total.totalAvista)
+  const fmtPizza = pdfFormatBRL(PLANO_POR_ID.unidade.precoPizzaAvista ?? total.precoPessoaUsado)
+  const fmtPizzaCard = pdfFormatBRL(total.precoPessoaUsado)
   const fmtParcela = pdfFormatBRL(total.parcela10x)
 
   return (
     <Page size="A4" style={styles.page}>
       <View style={styles.hero}>
-        <Image src="/images/pizza-hero.jpg" style={styles.heroImage} />
 
         <Text style={styles.kicker}>Plano 4 · Por unidade</Text>
         <Text style={styles.title}>
@@ -169,10 +190,13 @@ export function PageUnidade(props: PageUnidadeProps) {
 
         <View style={styles.metaRow}>
           <View style={styles.metaItem}>
-            <Text style={styles.metaLabel}>Preço por pizza</Text>
-            <Text style={styles.metaValue}>
-              {fmtPizza.cifrao} {fmtPizza.inteiro},{fmtPizza.centavos}
-            </Text>
+              <Text style={styles.metaLabel}>Preço por pizza</Text>
+              <Text style={styles.metaPixValue}>
+                Pix: {fmtPizza.cifrao} {fmtPizza.inteiro},{fmtPizza.centavos}
+              </Text>
+              <Text style={styles.metaCardValue}>
+                Cartão: {fmtPizzaCard.cifrao} {fmtPizzaCard.inteiro},{fmtPizzaCard.centavos}
+              </Text>
           </View>
           <View style={styles.metaItem}>
             <Text style={styles.metaLabel}>Pizzas sugeridas</Text>
@@ -199,7 +223,7 @@ export function PageUnidade(props: PageUnidadeProps) {
           sem fila, sem pressa.
         </Text>
         <Text style={styles.paragraph}>
-          Cobramos por pizza que sai do forno — não por convidado. A regra é simples:
+          Cobramos por pizza que sai do forno, não por convidado. A regra é simples:
           <Text style={styles.paragraphBold}> uma pizza a cada 1,6 pessoa </Text>
           garante fartura sem desperdício. Para {totalPessoas} pessoas, sugerimos
           <Text style={styles.paragraphBold}> {pizzasSugeridas} pizzas</Text>, mas você
@@ -207,7 +231,7 @@ export function PageUnidade(props: PageUnidadeProps) {
         </Text>
         <Text style={styles.paragraph}>
           Os 30 sabores do cardápio (veja na página anterior) ficam expostos com nome e
-          ingredientes — quem tem restrição vê antes de pegar. Reposição contínua durante
+          ingredientes. Quem tem restrição vê antes de pegar. Reposição contínua durante
           as 3 horas de serviço.
         </Text>
       </View>
@@ -219,15 +243,13 @@ export function PageUnidade(props: PageUnidadeProps) {
         <Text style={styles.calloutPrice}>
           {fmt.cifrao} {fmt.inteiro},{fmt.centavos}
         </Text>
+        <Text style={styles.calloutDiscount}>À vista no Pix, com 15% de desconto</Text>
         <Text style={styles.calloutPriceLabel}>
           ou 10x de {fmtParcela.cifrao} {fmtParcela.inteiro},{fmtParcela.centavos} no cartão
         </Text>
         <Text style={styles.calloutBody}>
           Calculado com {pizzasSugeridas} pizzas × {fmtPizza.cifrao} {fmtPizza.inteiro},
-          {fmtPizza.centavos}. Sem entrada, sem adicionais, sem gorjeta obrigatória.
-          {props.orcamento.adicionais.entrada && ' Com entrada inclusa.'}
-          {props.orcamento.adicionais.salgadosExtras > 0 &&
-            ` Com ${props.orcamento.adicionais.salgadosExtras} cento(s) de salgado extra.`}
+          {fmtPizza.centavos}. Adicionais opcionais não estão incluídos neste total.
         </Text>
       </View>
     </Page>

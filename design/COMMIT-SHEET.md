@@ -1,10 +1,10 @@
-# Commit Sheet — Maná Pizzas (Editor de Orçamentos)
+# Commit Sheet: Maná Pizzas (Editor de Orçamentos)
 
-> Required by the Auteur skill before any markup. Seven non-default decisions on paper. Companion to `.impeccable/surface-brief.md` (Impeccable direction contract — different format, same intent).
+> Required by the Auteur skill before any markup. Seven non-default decisions on paper. Companion to `.impeccable/surface-brief.md` (Impeccable direction contract: different format, same intent).
 
 ## 1. Peak
 
-**The single signature moment:** the instant an attendant clicks the Premium plan, the card *physically grows* — its border thickens from 1px coal to 2px wine over 240ms, the "RECOMENDADO" badge fades in with a 3s pulse loop, the card scales 1.00 → 1.02, the total in the sticky summary simultaneously tweens from old → new price in 300ms with a subtle wine glow. The other 3 plans go quiet. Hierarchy *is* the message: Premium is the protagonist, the others are the supporting cast.
+**The single signature moment:** the instant an attendant clicks the Premium plan, the card *physically grows*. Its border thickens from 1px coal to 2px wine over 240ms, the "RECOMENDADO" badge fades in with a 3s pulse loop, the card scales 1.00 → 1.02, and the total in the sticky summary simultaneously tweens from old → new price in 300ms with a subtle wine glow. The other 3 plans go quiet. Hierarchy *is* the message: Premium is the protagonist, the others are the supporting cast.
 
 ## 2. Color
 
@@ -14,17 +14,17 @@
 - **Background lightness target:** mean L = `0.08` (very dark). Measured, not mood.
 - **Tier:** Committed (wine takes 30-40% of the page through the Premium plan + selection states + summary shadow).
 
-**Why this is not lavender, not cream, and not the category reflex:** Brazilian food-services apps reflex to warm cream + serif + terracotta (the AI default 2024-2026). Maná Pizzas is a *premium* brand, dark-room mood, evening event. A dark base with wine as a single saturated role commits more than a creamy surface with terracotta accent — the wine says "premium occasion", the cream says "readable", the rust says "act". Not neutral, not a mood, a commitment.
+**Why this is not lavender, not cream, and not the category reflex:** Brazilian food-services apps reflex to warm cream + serif + terracotta (the AI default 2024-2026). Maná Pizzas is a *premium* brand, dark-room mood, evening event. A dark base with wine as a single saturated role commits more than a creamy surface with terracotta accent. The wine says "premium occasion", the cream says "readable", and the rust says "act". Not neutral, not a mood, a commitment.
 
 ## 3. Type
 
-- **Display:** Fraunces (variable, opsz 9-144, with italic). Editorial, optical-size aware, has both a high-contrast display voice and a small-text body voice. Chosen for the "cardápio manuscrito meets revista" feel — variable opsz lets us use the same family for 96px hero and 14px labels.
+- **Display:** Fraunces (variable, opsz 9-144, with italic). Editorial, optical-size aware, has both a high-contrast display voice and a small-text body voice. Chosen for the "cardápio manuscrito meets revista" feel. Variable opsz lets us use the same family for 96px hero and 14px labels.
 - **Body:** Inter (400, 500, 600, 700). Workhorse UI sans, tabular numerals for prices, no display use.
 - **Why not Inter as display:** we're not. Inter stays in the chrome. Display voice is Fraunces, always. `auteur-allow: BAN-8 -- Inter paired with Fraunces (variable opsz editorial) keeps Inter as the body sans that doesn't compete with display; the alternative was IBM Plex Sans which would steal the warm register Fraunces owns.`
 
 ## 4. Grid break
 
-The 4-up PlanCard grid is **asymmetric in height, not in width**. The Premium card is 1.4× the height of the other three (more space for the "Por que Premium" expanded list and the badge). All 4 cards align to a single shared top-baseline; Premium's bottom extends 40% further. The 3 secondary cards are identical in size. This breaks the "bento grid of equal cells" reflex (Auteur BAN-15) — the grid itself communicates the hierarchy before any color or weight does.
+The 4-up PlanCard grid is **asymmetric in height, not in width**. The Premium card is 1.4× the height of the other three (more space for the "Por que Premium" expanded list and the badge). All 4 cards align to a single shared top-baseline; Premium's bottom extends 40% further. The 3 secondary cards are identical in size. This breaks the "bento grid of equal cells" reflex (Auteur BAN-15). The grid itself communicates the hierarchy before any color or weight does.
 
 ## 5. Motion budget
 
@@ -33,7 +33,7 @@ The 4-up PlanCard grid is **asymmetric in height, not in width**. The Premium ca
 2. **Selection state (PEAK):** wine border thickening + scale 1.02 + shadow glow + badge pulse, 240ms ease-out. Tween library: CSS transitions on transform/opacity only.
 3. **Price change:** total in summary tweens from old → new with `requestAnimationFrame`, 300ms ease-out, count-up via JS. Uses a custom hook `useTweenedValue`.
 
-No scroll-scrub. No parallax. No "reveal on scroll" — this is an Operate-mode app, not a marketing site; the attendant is working, not reading a story.
+No scroll-scrub. No parallax. No "reveal on scroll". This is an Operate-mode app, not a marketing site; the attendant is working, not reading a story.
 
 ## 6. Reflex check
 

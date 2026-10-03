@@ -1,19 +1,16 @@
 import {
-  ADICIONAL_ENTRADA,
-  ADICIONAL_SALGADO_EXTRA,
   DESCONTO_AVISTA,
   PARCELAS,
   PLANO_POR_ID,
 } from '@/data/plans'
 import type {
-  Adicional,
   Convidado,
   Desconto,
-  Pagamento,
   PlanoId,
   Totais,
 } from '@/types/orcamento'
 import { applyDescontoAvista, roundParcela } from './money'
+import type { State } from '@/hooks/useOrcamento'
 
 const MULTIPLICADOR_CRIANCA_5A9 = 0.5
 const MULTIPLICADOR_CRIANCA_0A4 = 0
@@ -27,13 +24,6 @@ export function calcularConvidados(c: Convidado): number {
 
 export function calcularPizzasSugeridas(c: Convidado): number {
   return Math.ceil(calcularConvidados(c) * 0.6)
-}
-
-export function calcularAdicionais(a: Adicional): number {
-  return (
-    (a.entrada ? ADICIONAL_ENTRADA : 0) +
-    Math.max(0, a.salgadosExtras) * ADICIONAL_SALGADO_EXTRA
-  )
 }
 
 export function calcularSubtotal(
@@ -61,18 +51,19 @@ export function calcularSubtotal(
 
 export function calcularTotais(
   planoId: PlanoId,
-  convidados: Convidado,
-  adicionais: Adicional,
-  pagamento: Pagamento,
-  desconto: Desconto = { tipo: 'nenhum', valor: 0 },
+  state: State
 ): Totais {
-  void pagamento
+  const {
+    convidados,
+    desconto,
+    deslocamento
+  } = state
   const { subtotal, unidades, tipoUnidade } = calcularSubtotal(planoId, convidados)
-  const valorAdicionais = calcularAdicionais(adicionais)
-  const baseComAdicionais = subtotal + valorAdicionais
+  const valorDeslocamento = deslocamento.ativo ? Math.max(0, deslocamento.valor) : 0
+  const baseComDeslocamento = subtotal + valorDeslocamento
 
-  const descontoAplicado = calcularDesconto(baseComAdicionais, desconto)
-  const total = Math.max(0, baseComAdicionais - descontoAplicado)
+  const descontoAplicado = calcularDesconto(baseComDeslocamento, desconto)
+  const total = Math.max(0, baseComDeslocamento - descontoAplicado)
   const totalParcelado = total
   const totalAvista = applyDescontoAvista(total, DESCONTO_AVISTA)
   const parcela10x = roundParcela(totalParcelado, PARCELAS)
@@ -86,7 +77,7 @@ export function calcularTotais(
     adultosEquivalentes: tipoUnidade === 'pessoas' ? unidades : 0,
     pizzas: tipoUnidade === 'pizzas' ? unidades : 0,
     subtotal,
-    adicionais: valorAdicionais,
+    deslocamento: valorDeslocamento,
     descontoAplicado,
     total,
     totalParcelado,

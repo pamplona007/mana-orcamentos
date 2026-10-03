@@ -47,7 +47,7 @@ export function GuestBreakdown({ value, onChange }: GuestBreakdownProps) {
       <div className={styles.row}>
         <div className={styles.info}>
           <span className={styles.label}>5 a 9 anos</span>
-          <span className={styles.helper}>Contam como meia entrada — confirme com o cliente</span>
+          <span className={styles.helper}>Contam como meia entrada. Confirme com o cliente.</span>
         </div>
         <NumberStepper
           value={value.criancas5a9}

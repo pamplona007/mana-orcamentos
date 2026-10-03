@@ -1,6 +1,8 @@
-import { Page, View, Text, StyleSheet, Image } from '@react-pdf/renderer'
+import { Page, View, Text, StyleSheet } from '@react-pdf/renderer'
 import { PDF_COLORS } from '../styles'
+import { ADICIONAL_ENTRADA, ADICIONAL_SALGADO_EXTRA } from '@/data/plans'
 import type { Orcamento, TotaisPorPlano } from '@/types/orcamento'
+import { formatBRL } from '@/utils/money'
 
 type Sabor = {
   nome: string
@@ -52,7 +54,7 @@ const styles = StyleSheet.create({
   page: {
     backgroundColor: PDF_COLORS.ink,
     paddingHorizontal: 48,
-    paddingVertical: 52,
+    paddingVertical: 48,
     fontFamily: 'Inter',
     fontSize: 10,
     color: PDF_COLORS.cream,
@@ -224,10 +226,11 @@ const styles = StyleSheet.create({
   glutenRow: {
     marginTop: 10,
     paddingTop: 8,
+    paddingBottom: 8,
     borderTopWidth: 0.5,
-    borderTopColor: PDF_COLORS.wineGlow,
-    flexDirection: 'row',
-    gap: 10,
+    borderTopColor: PDF_COLORS.coal3,
+    gap: 4,
+    flexDirection: 'column',
     alignItems: 'flex-start',
   },
   glutenLabel: {
@@ -245,6 +248,53 @@ const styles = StyleSheet.create({
     fontSize: 8.5,
     color: PDF_COLORS.creamDim,
     lineHeight: 1.45,
+  },
+  optionalSection: {
+    backgroundColor: PDF_COLORS.coal,
+    borderRadius: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginTop: 18,
+  },
+  optionalTitle: {
+    fontFamily: 'Fraunces',
+    fontSize: 20,
+    fontWeight: 600,
+    color: PDF_COLORS.cream,
+  },
+  optionalHeroRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+  },
+  optionalDescription: {
+    fontFamily: 'Inter',
+    fontSize: 9,
+    color: PDF_COLORS.creamDim,
+    marginBottom: 6,
+  },
+  optionalHeroPrice: {
+    fontFamily: 'Fraunces',
+    fontSize: 20,
+    fontWeight: 600,
+    color: PDF_COLORS.success,
+    textAlign: 'right',
+  },
+  optionalAfterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+  },
+  optionalAfterDescription: {
+    fontFamily: 'Inter',
+    fontSize: 8,
+    color: PDF_COLORS.creamDim,
+  },
+  optionalAfterPrice: {
+    fontFamily: 'Fraunces',
+    fontSize: 16,
+    fontWeight: 600,
+    color: PDF_COLORS.cream,
   },
 })
 
@@ -265,10 +315,9 @@ export function PageCardapio(_props: PageCardapioProps) {
           <Text style={styles.kicker}>O que sai do forno · todos os planos</Text>
           <Text style={styles.title}>26 sabores no forno, massa maturada 12h</Text>
           <Text style={styles.sub}>
-            O mesmo cardápio roda em qualquer plano — você muda o serviço, não a pizza.
+            O mesmo cardápio roda em qualquer plano. Você muda o serviço, não a pizza.
           </Text>
         </View>
-        <Image src="/images/pizza-hero.jpg" style={styles.headerImage} />
       </View>
 
       <View style={styles.columns}>
@@ -311,13 +360,25 @@ export function PageCardapio(_props: PageCardapioProps) {
             <Text key={p} style={styles.premiumItem}>{p}</Text>
           ))}
         </View>
-        <View style={styles.glutenRow}>
-          <Text style={styles.glutenLabel}>Sem glúten</Text>
-          <Text style={styles.glutenBody}>
-            Disponível em todos os planos sob pedido. Informe restrições alimentares ao
-            atendente antes do evento.
-          </Text>
+      </View>
+
+      <View style={styles.optionalSection}>
+        <View style={styles.optionalHeroRow}>
+          <Text style={styles.optionalTitle}>Entrada</Text>
+          <Text style={styles.optionalHeroPrice}>R$ {ADICIONAL_ENTRADA.toFixed(2).replace('.', ',')}</Text>
         </View>
+        <Text style={styles.optionalDescription}>2 centos de salgados + 2 kg de batata</Text>
+        <View style={styles.optionalAfterRow}>
+          <Text style={styles.optionalAfterDescription}>Cada cento de salgados adicional: {formatBRL(ADICIONAL_SALGADO_EXTRA)}</Text>
+        </View>
+      </View>
+
+      <View style={styles.glutenRow}>
+        <Text style={styles.glutenLabel}>Sem glúten</Text>
+        <Text style={styles.glutenBody}>
+          Disponível em todos os planos sob pedido. Informe restrições alimentares ao
+          atendente antes do evento.
+        </Text>
       </View>
     </Page>
   )

@@ -1,4 +1,4 @@
-# Surface Brief — Editor de Orçamentos (Maná Pizzas)
+# Surface Brief: Editor de Orçamentos (Maná Pizzas)
 
 > Mantido como lembrete durável para agentes futuros. Atualizar quando a direção ou escopo mudar.
 
@@ -12,7 +12,7 @@
 
 **Action:** clicar "Selecionar" no plano escolhido, revisar o total ao vivo, abrir Preview, baixar PDF, abrir WhatsApp com texto pré-preenchido.
 
-**Memorable moment:** a primeira vez que o atendente clica no Premium e vê o card inteiro ganhar uma borda wine animada, o badge "RECOMENDADO" aparecer com fade-up, e o preço em 96px Fraunces deslizar pro canto com glow sutil. Os outros 3 planos ficam com 1px coal, em silêncio — a hierarquia é a mensagem.
+**Memorable moment:** a primeira vez que o atendente clica no Premium e vê o card inteiro ganhar uma borda wine animada, o badge "RECOMENDADO" aparecer com fade-up, e o preço em 96px Fraunces deslizar pro canto com glow sutil. Os outros 3 planos ficam com 1px coal, em silêncio. A hierarquia é a mensagem.
 
 **Constraints:**
 - Mobile-first (≥360px) e desktop (até 1440px)
@@ -21,18 +21,18 @@
 - PDF gerado no client (`@react-pdf/renderer`)
 
 **Unresolved:**
-- Multiplicadores infantis (0-4 = grátis, 5-9 = meia) — confirmar com Lucas antes da Fase 4
-- Persistência entre atendentes — v2
+- Multiplicadores infantis (0-4 = grátis, 5-9 = meia): confirmar com Lucas antes da Fase 4
+- Persistência entre atendentes: v2
 
 ---
 
 ## Direction contract
 
-**THESIS:** O PDF atual trata os 4 planos como linhas de texto equivalentes. O app reverte isso: o Premium é o produto principal, os outros 3 são alternativas. A calculadora aparece ao vivo na coluna direita enquanto o atendente digita — então o Premium deixa de ser "mais caro" e vira "quanto eu entrego a mais por R$ X/pessoa".
+**THESIS:** O PDF atual trata os 4 planos como linhas de texto equivalentes. O app reverte isso: o Premium é o produto principal, os outros 3 são alternativas. A calculadora aparece ao vivo na coluna direita enquanto o atendente digita. Assim, o Premium deixa de ser "mais caro" e vira "quanto eu entrego a mais por R$ X/pessoa".
 
-**OWN-WORLD:** Paleta `trattoria editorial` — tinta preta profunda (`#0E0B08`), espresso elevado (`#1A130D`), creme quente (`#F5E9D7`) como foreground, ferrugem (`#B5471B`) como CTA, vinho (`#6B1F2A`) carrega o Premium, ocre (`#D4A24A`) para inclusos. Tipografia: **Fraunces** (serif variável com italic editorial) nos displays e preços, **Inter** no corpo e chrome. Density: shell arejado (8px baseline), cards com surface coal `rgba(255,255,255,0.03)` sobre 1px hairline.
+**OWN-WORLD:** Paleta `trattoria editorial`: tinta preta profunda (`#0E0B08`), espresso elevado (`#1A130D`), creme quente (`#F5E9D7`) como foreground, ferrugem (`#B5471B`) como CTA, vinho (`#6B1F2A`) carrega o Premium, ocre (`#D4A24A`) para inclusos. Tipografia: **Fraunces** (serif variável com italic editorial) nos displays e preços, **Inter** no corpo e chrome. Density: shell arejado (8px baseline), cards com surface coal `rgba(255,255,255,0.03)` sobre 1px hairline.
 
-**STORY:** o atendente abre o app, vê o comparativo com o Premium destacado, escolhe rápido porque a hierarquia visual fez o trabalho, ajusta número de convidados com steppers grandes, vê o total respirar ao vivo, abre Preview, baixa o PDF. O PDF carrega a mesma marca no cliente — fechamento editorial, não orçamento de padaria.
+**STORY:** o atendente abre o app, vê o comparativo com o Premium destacado, escolhe rápido porque a hierarquia visual fez o trabalho, ajusta número de convidados com steppers grandes, vê o total respirar ao vivo, abre Preview, baixa o PDF. O PDF carrega a mesma marca no cliente. É um fechamento editorial, não um orçamento de padaria.
 
 **FIRST VIEWPORT (1366×900 desktop, 390×844 mobile):**
 - Header 64px: logo Maná à esquerda (placeholder text com Fraunces), ThemeToggle (dark/light) à direita, indicador discreto "Salvo automaticamente" no centro
@@ -49,4 +49,4 @@
 
 **FINISH:** unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
 
-**Seed key:** code-led-direct (no concept-seed binary available; direction written inline per `craft-floor.md` calibration guard — eschewed the "warm cream ground + serif + terracotta" training default by going full dark with rust+wine and committed density; face choice is Fraunces, not the default Lora/Playfair for "food"). Build path recorded in `.impeccable/config.json` as `code`.
+**Seed key:** code-led-direct (no concept-seed binary available; direction written inline per `craft-floor.md` calibration guard. The "warm cream ground + serif + terracotta" training default was replaced with full dark, rust and wine, plus committed density; face choice is Fraunces, not the default Lora/Playfair for "food"). Build path recorded in `.impeccable/config.json` as `code`.

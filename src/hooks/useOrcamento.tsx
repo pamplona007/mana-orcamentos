@@ -1,6 +1,5 @@
 import { createContext, useContext, useMemo, useReducer, type ReactNode } from 'react'
 import type {
-  Adicional,
   Convidado,
   Desconto,
   Evento,
@@ -8,25 +7,25 @@ import type {
   Pagamento,
   TotaisPorPlano,
   Cliente,
+  Deslocamento,
 } from '@/types/orcamento'
 import { calcularTotais } from '@/utils/calculo'
 
-type State = {
+export type State = {
   cliente: Cliente
   evento: Evento
   convidados: Convidado
-  adicionais: Adicional
   pagamento: Pagamento
   desconto: Desconto
+  deslocamento: Deslocamento
 }
 
 type Action =
   | { type: 'setCliente'; cliente: Cliente }
   | { type: 'setEvento'; evento: Partial<Evento> }
   | { type: 'setConvidados'; convidados: Convidado }
-  | { type: 'setAdicionais'; adicionais: Partial<Adicional> }
-  | { type: 'setPagamento'; pagamento: Pagamento }
   | { type: 'setDesconto'; desconto: Partial<Desconto> }
+  | { type: 'setDeslocamento'; deslocamento: Partial<Deslocamento> }
   | { type: 'reset' }
   | { type: 'load'; state: State }
 
@@ -34,9 +33,9 @@ const initialState: State = {
   cliente: { nome: '', whatsapp: '' },
   evento: { data: '', cidadeBairro: '', observacoes: '' },
   convidados: { adultos: 25, criancas0a4: 0, criancas5a9: 0 },
-  adicionais: { entrada: false, salgadosExtras: 0 },
   pagamento: 'parcelado',
   desconto: { tipo: 'nenhum', valor: 0 },
+  deslocamento: { ativo: false, valor: 150 },
 }
 
 function reducer(state: State, action: Action): State {
@@ -47,14 +46,13 @@ function reducer(state: State, action: Action): State {
       return { ...state, evento: { ...state.evento, ...action.evento } }
     case 'setConvidados':
       return { ...state, convidados: action.convidados }
-    case 'setAdicionais':
-      return { ...state, adicionais: { ...state.adicionais, ...action.adicionais } }
-    case 'setPagamento':
-      return { ...state, pagamento: action.pagamento }
     case 'setDesconto':
       return { ...state, desconto: { ...state.desconto, ...action.desconto } }
+    case 'setDeslocamento':
+      return { ...state, deslocamento: { ...state.deslocamento, ...action.deslocamento } }
     case 'reset':
       return initialState
+
     case 'load':
       return action.state
   }
@@ -65,9 +63,8 @@ type Ctx = {
   setCliente: (cliente: Cliente) => void
   setEvento: (evento: Partial<Evento>) => void
   setConvidados: (convidados: Convidado) => void
-  setAdicionais: (adicionais: Partial<Adicional>) => void
-  setPagamento: (pagamento: Pagamento) => void
   setDesconto: (desconto: Partial<Desconto>) => void
+  setDeslocamento: (deslocamento: Partial<Deslocamento>) => void
   reset: () => void
   load: (state: State) => void
   totais: TotaisPorPlano
@@ -80,17 +77,13 @@ export function OrcamentoProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const totais = useMemo<TotaisPorPlano>(() => {
-    const c = state.convidados
-    const a = state.adicionais
-    const p = state.pagamento
-    const d = state.desconto
     return {
-      premium: calcularTotais('premium', c, a, p, d),
-      livreBebida: calcularTotais('livre-bebida', c, a, p, d),
-      livreSemBebida: calcularTotais('livre-sem-bebida', c, a, p, d),
-      unidade: calcularTotais('unidade', c, a, p, d),
+      premium: calcularTotais('premium', state),
+      livreBebida: calcularTotais('livre-bebida', state),
+      livreSemBebida: calcularTotais('livre-sem-bebida', state),
+      unidade: calcularTotais('unidade', state),
     }
-  }, [state.convidados, state.adicionais, state.pagamento, state.desconto])
+  }, [state])
 
   const toOrcamento = (): Orcamento => ({
     id: crypto.randomUUID(),
@@ -98,7 +91,7 @@ export function OrcamentoProvider({ children }: { children: ReactNode }) {
     cliente: state.cliente,
     evento: state.evento,
     convidados: state.convidados,
-    adicionais: state.adicionais,
+    deslocamento: state.deslocamento,
     pagamento: state.pagamento,
     desconto: state.desconto,
   })
@@ -108,9 +101,8 @@ export function OrcamentoProvider({ children }: { children: ReactNode }) {
     setCliente: (cliente) => dispatch({ type: 'setCliente', cliente }),
     setEvento: (evento) => dispatch({ type: 'setEvento', evento }),
     setConvidados: (convidados) => dispatch({ type: 'setConvidados', convidados }),
-    setAdicionais: (adicionais) => dispatch({ type: 'setAdicionais', adicionais }),
-    setPagamento: (pagamento) => dispatch({ type: 'setPagamento', pagamento }),
     setDesconto: (desconto) => dispatch({ type: 'setDesconto', desconto }),
+    setDeslocamento: (deslocamento) => dispatch({ type: 'setDeslocamento', deslocamento }),
     reset: () => dispatch({ type: 'reset' }),
     load: (s) => dispatch({ type: 'load', state: s }),
     totais,

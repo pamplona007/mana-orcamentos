@@ -1,4 +1,4 @@
-/* auteur-allow: EM_DASH_COPY -- the WhatsApp message uses em dashes as line separators and a conversational pause ("o PDF traz os 3 planos lado a lado — escolhe o que combina mais"); the WhatsApp text is meant to read like a real attendant message, not copy. Substituting full sentences ("o PDF traz os 3 planos lado a lado, e o cliente escolhe o que combina mais") would break the conversational tone that makes WhatsApp messages feel human. */
+/* The WhatsApp message uses short sentences and a conversational tone so it reads like a real attendant message. */
 import { useMemo } from 'react'
 import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer'
 import {
@@ -34,7 +34,7 @@ const mensagemWhatsApp = ({
     '',
     `Segue o orçamento da Maná Pizzas para o evento${data ? ` de ${data}` : ''}${cidade ? ` (${cidade})` : ''}.`,
     '',
-    'O PDF traz os 3 planos lado a lado — escolhe o que combina mais com o seu evento.',
+    'O PDF traz os 3 planos lado a lado. Escolhe o que combina mais com o seu evento.',
     `Condição: ${condicao}`,
     '',
     'Válido por 48h. Qualquer dúvida, me chama aqui!',
@@ -52,7 +52,7 @@ export function Preview() {
       cliente: state.cliente,
       evento: state.evento,
       convidados: state.convidados,
-      adicionais: state.adicionais,
+      deslocamento: state.deslocamento,
       pagamento: state.pagamento,
       desconto: state.desconto,
     }),
@@ -95,7 +95,7 @@ export function Preview() {
   const adultos = state.convidados.adultos
   const criancas = state.convidados.criancas0a4 + state.convidados.criancas5a9
   const totalPessoas = adultos + criancas
-  const dataFormatada = state.evento.data ? pdfData(state.evento.data) : '—'
+  const dataFormatada = state.evento.data ? pdfData(state.evento.data) : '-'
 
   const planosResumo = (['premium', 'livre-bebida', 'livre-sem-bebida', 'unidade'] as const).map(id => ({
     id,
@@ -148,9 +148,9 @@ export function Preview() {
           <span className={styles.cardEyebrow}>Cliente</span>
           <h2 className={styles.cardTitle}>
             <IconUser size={20} aria-hidden="true" />
-            {state.cliente.nome || '—'}
+            {state.cliente.nome || '-'}
           </h2>
-          <p className={styles.cardMeta}>{state.cliente.whatsapp || '—'}</p>
+          <p className={styles.cardMeta}>{state.cliente.whatsapp || '-'}</p>
         </section>
 
         <section className={styles.card}>
@@ -159,7 +159,7 @@ export function Preview() {
             <IconCalendarEvent size={20} aria-hidden="true" />
             {dataFormatada}
           </h2>
-          <p className={styles.cardMeta}>{state.evento.cidadeBairro || '—'}</p>
+          <p className={styles.cardMeta}>{state.evento.cidadeBairro || '-'}</p>
           {state.evento.observacoes && (
             <p className={styles.cardNote}>{state.evento.observacoes}</p>
           )}
@@ -221,15 +221,12 @@ export function Preview() {
             {state.pagamento === 'pix' ? 'À vista no Pix' : 'Parcelado em 10x'}
           </h2>
           <p className={styles.cardMeta}>
-            {state.adicionais.entrada && 'Com entrada'}
-            {state.adicionais.entrada && state.adicionais.salgadosExtras > 0 && ' · '}
-            {state.adicionais.salgadosExtras > 0 && `${state.adicionais.salgadosExtras} cento(s) de salgado extra`}
-            {!state.adicionais.entrada && state.adicionais.salgadosExtras === 0 && 'Sem adicionais'}
+            Adicionais opcionais disponíveis no PDF
           </p>
         </section>
 
         <p className={styles.finalHint}>
-          O PDF gerado traz os 3 planos lado a lado — o cliente escolhe o que preferir.
+          O PDF gerado traz os 3 planos lado a lado. O cliente escolhe o que preferir.
         </p>
       </main>
     </div>

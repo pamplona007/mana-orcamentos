@@ -7,7 +7,8 @@ export function pdfFormatBRL(value: number): { cifrao: string; inteiro: string; 
 
 export function pdfData(dataISO: string): string {
   if (!dataISO) return 'A definir'
-  const d = new Date(dataISO + 'T12:00:00')
+  const d = new Date(dataISO.includes('T') ? dataISO : `${dataISO}T12:00:00`)
+  if (Number.isNaN(d.getTime())) return 'A definir'
   return d.toLocaleDateString('pt-BR', {
     weekday: 'long',
     day: '2-digit',

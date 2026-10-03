@@ -6,11 +6,6 @@ export type Convidado = {
   criancas5a9: number;
 };
 
-export type Adicional = {
-  entrada: boolean;
-  salgadosExtras: number;
-};
-
 export type Evento = {
   data: string;
   cidadeBairro: string;
@@ -24,6 +19,11 @@ export type Desconto = {
   valor: number
 }
 
+export type Deslocamento = {
+  ativo: boolean;
+  valor: number;
+};
+
 export type Cliente = {
   nome: string;
   whatsapp: string;
@@ -35,7 +35,7 @@ export type Orcamento = {
   cliente: Cliente;
   evento: Evento;
   convidados: Convidado;
-  adicionais: Adicional;
+  deslocamento: Deslocamento;
   pagamento: Pagamento;
   desconto: Desconto;
 };
@@ -44,7 +44,7 @@ export type Totais = {
   adultosEquivalentes: number;
   pizzas: number;
   subtotal: number;
-  adicionais: number;
+  deslocamento: number;
   descontoAplicado: number;
   total: number;
   totalParcelado: number;

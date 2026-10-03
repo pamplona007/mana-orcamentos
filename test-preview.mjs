@@ -32,7 +32,7 @@ try {
 } catch (e) {
   console.log('Download failed:', e.message)
 }
-console.log('OK — page loaded, screenshot saved')
+console.log('OK: page loaded, screenshot saved')
 console.log('pageerrors:', errors)
 console.log('console errors:', consoleErrors.slice(0, 3))
 console.log('iframes on page:', await page.locator('iframe').count())

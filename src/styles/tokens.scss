@@ -1,14 +1,14 @@
-// Design tokens — Maná Pizzas (Trattoria editorial)
+// Design tokens: Maná Pizzas (Trattoria editorial)
 // Single source of truth. Referenced by every component via CSS variables.
 
 :root {
   // ── Palette ──────────────────────────────────────────────────────────
-  --ink: #0E0B08;        // base background — preto profundo
+  --ink: #0E0B08;        // base background: preto profundo
   --espresso: #1A130D;   // elevated surface (header, summary)
   --coal: #221913;       // card surface
   --coal-2: #2B2018;     // hover state, input bg
   --coal-3: #382A1F;     // dividers on coal
-  --cream: #F5E9D7;      // foreground principal — quente, não branco
+  --cream: #F5E9D7;      // foreground principal: quente, não branco
   --cream-dim: #C9B89A;  // foreground secundário
   --cream-faint: #8A7B65; // foreground terciário (labels tracked)
 
@@ -18,7 +18,7 @@
   --wine-glow: #8B2A37;  // hover wine
   --ochre: #D4A24A;      // acentos secundários, "incluso", ícones
   --truffle: #3D2A1E;    // gradientes, sombras
-  --flame: #FF6B35;      // energia alta — uso parcimonioso
+  --flame: #FF6B35;      // energia alta: uso parcimonioso
   --success: #6B8E4E;    // autossave indicator
 
   // ── Spacing (4px baseline) ───────────────────────────────────────────

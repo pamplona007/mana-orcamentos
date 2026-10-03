@@ -50,6 +50,12 @@ const styles = StyleSheet.create({
     color: PDF_COLORS.creamDim,
     maxWidth: '85%',
   },
+  displacementNote: {
+    fontFamily: 'Inter',
+    fontSize: 8.5,
+    color: PDF_COLORS.ochre,
+    marginTop: 8,
+  },
   cards: {
     flexDirection: 'row',
     gap: 14,
@@ -252,14 +258,21 @@ export type PageComparativoProps = {
 }
 
 export function PageComparativo(props: PageComparativoProps) {
+  const deslocamentoAtivo = props.orcamento.deslocamento?.ativo
+  const deslocamento = pdfFormatBRL(props.totais.premium.deslocamento)
   return (
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
         <Text style={styles.kicker}>3 planos de serviço · mesma pizza</Text>
         <Text style={styles.title}>Compare e escolha como prefere pagar</Text>
         <Text style={styles.sub}>
-          Você não escolhe a pizza — escolhe como prefere o serviço rodar.
+          Você não escolhe a pizza. Escolhe como prefere o serviço rodar.
         </Text>
+        {deslocamentoAtivo && (
+          <Text style={styles.displacementNote}>
+            Deslocamento adicional: {deslocamento.cifrao} {deslocamento.inteiro},{deslocamento.centavos} já incluído nos valores acima.
+          </Text>
+        )}
       </View>
 
       <View style={styles.cards}>
@@ -269,7 +282,7 @@ export function PageComparativo(props: PageComparativoProps) {
           const isDestaque = plano.badge === 'RECOMENDADO'
           const cardStyle = isDestaque ? styles.cardDestaque : styles.card
           const dividerStyle = isDestaque ? styles.cardDividerDestaque : styles.cardDivider
-          const total = pdfFormatBRL(totaisPlano.totalParcelado)
+          const totalPix = pdfFormatBRL(totaisPlano.totalAvista)
           const parcela = pdfFormatBRL(totaisPlano.parcela10x)
           const features = isDestaque ? plano.inclusos.slice(0, 4) : plano.inclusos
           const destaqueItems = plano.destaquesPremium ?? []
@@ -287,10 +300,11 @@ export function PageComparativo(props: PageComparativoProps) {
                 <Text style={styles.cardTagline}>{plano.tagline}</Text>
 
                 <View style={styles.cardPrice}>
-                  <Text style={styles.cardCifrao}>{total.cifrao}</Text>
-                  <Text style={styles.cardInteiro}>{total.inteiro}</Text>
-                  <Text style={styles.cardCentavos}>,{total.centavos}</Text>
+                  <Text style={styles.cardCifrao}>{totalPix.cifrao}</Text>
+                  <Text style={styles.cardInteiro}>{totalPix.inteiro}</Text>
+                  <Text style={styles.cardCentavos}>,{totalPix.centavos}</Text>
                 </View>
+                <Text style={styles.cardAvistaLabel}>À vista, com 15% de desconto</Text>
                 <Text style={styles.cardParcela}>
                   ou 10x de {parcela.cifrao} {parcela.inteiro},{parcela.centavos}
                 </Text>
@@ -322,7 +336,7 @@ export function PageComparativo(props: PageComparativoProps) {
           )
         })}
       </View>
+
     </Page>
   )
 }
-

@@ -66,7 +66,7 @@ describe('calcularAdicionais', () => {
   })
 })
 
-describe('calcularSubtotal — Premium', () => {
+describe('calcularSubtotal: Premium', () => {
   const plano: PlanoId = 'premium'
 
   it('25 adultos parcelado = 2940', () => {
@@ -77,7 +77,7 @@ describe('calcularSubtotal — Premium', () => {
   })
 })
 
-describe('calcularSubtotal — Livre c/ bebida', () => {
+describe('calcularSubtotal: Livre c/ bebida', () => {
   it('25 adultos = 1650', () => {
     const r = calcularSubtotal('livre-bebida', {
       adultos: 25,
@@ -88,7 +88,7 @@ describe('calcularSubtotal — Livre c/ bebida', () => {
   })
 })
 
-describe('calcularSubtotal — Por unidade', () => {
+describe('calcularSubtotal: Por unidade', () => {
   it('25 adultos = 15 pizzas = 1177.50', () => {
     const r = calcularSubtotal('unidade', {
       adultos: 25,

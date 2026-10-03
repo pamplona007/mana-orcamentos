@@ -12,19 +12,19 @@ Vite + React 19 + TypeScript strict, conforme `~/Documents/projects/CLAUDE.md`. 
 
 ## Users
 
-**Primary:** atendentes da Maná Pizzas & Eventos, no balcão, durante o expediente (celular ou desktop). Geram um PDF por cliente. Não são designers, não são programadores — precisam terminar em 1-2 minutos.
+**Primary:** atendentes da Maná Pizzas & Eventos, no balcão, durante o expediente (celular ou desktop). Geram um PDF por cliente. Não são designers nem programadores. Precisam terminar em 1-2 minutos.
 
 **Secondary (futuro):** clientes finais, se o sistema evoluir para autoatendimento via link público. Fora de escopo agora.
 
 ## Product Purpose
 
-Substituir o PDF atual "Orçamento Maná Pizzas — 25 pessoas.pdf" (genérico, não destaca o Premium, exige edição manual de campos como adultos/0-4/5-9). A nova versão é uma ferramenta interna que produz um orçamento editorial pronto pra enviar no WhatsApp, com cálculo automático dos totais e destaque visual real entre os 4 planos.
+Substituir o PDF atual "Orçamento Maná Pizzas: 25 pessoas.pdf" (genérico, não destaca o Premium, exige edição manual de campos como adultos/0-4/5-9). A nova versão é uma ferramenta interna que produz um orçamento editorial pronto pra enviar no WhatsApp, com cálculo automático dos totais e destaque visual real entre os 4 planos.
 
-Sucesso = o atendente preenche os dados, escolhe o plano, gera o PDF, manda no WhatsApp, e o cliente responde "fechado" — sem idas e vindas pra ajustar números.
+Sucesso = o atendente preenche os dados, escolhe o plano, gera o PDF, manda no WhatsApp, e o cliente responde "fechado". Sem idas e vindas pra ajustar números.
 
 ## Positioning
 
-O PDF antigo trata os 4 planos como opções equivalentes em um único quadro de texto. O novo design **convence**: o Premium tem tratamento visual de produto principal (cor wine, badge animado, "Por que Premium" expandido), os 3 outros são alternativas claras. O cálculo aparece ao vivo enquanto o atendente digita, então o atendente **vê o Premium crescendo em valor agregado** enquanto o cliente escolhe — em vez de jogar 4 preços soltos no papel.
+O PDF antigo trata os 4 planos como opções equivalentes em um único quadro de texto. O novo design **convence**: o Premium tem tratamento visual de produto principal (cor wine, badge animado, "Por que Premium" expandido), os 3 outros são alternativas claras. O cálculo aparece ao vivo enquanto o atendente digita, então o atendente **vê o Premium crescendo em valor agregado** enquanto o cliente escolhe, em vez de jogar 4 preços soltos no papel.
 
 ## Operating Context
 
@@ -35,7 +35,7 @@ O PDF antigo trata os 4 planos como opções equivalentes em um único quadro de
 - Quitação: 1 dia antes do evento
 - Após 22h o valor pode sofrer alteração (hora extra)
 - Histórico de orçamentos fica na máquina (sem backend no MVP)
-- Não há login no MVP — qualquer atendente acessa e o histórico é local
+- Não há login no MVP. Qualquer atendente acessa e o histórico é local
 
 ## Capabilities and Constraints
 
@@ -49,7 +49,7 @@ O PDF antigo trata os 4 planos como opções equivalentes em um único quadro de
 - Multiplicador crianças 0-4 anos: grátis (inferido de padrão de mercado, **a confirmar com Lucas**)
 
 **Deliberately undecided:**
-- Multiplicadores infantis exatos (0-4 e 5-9) — vou perguntar no início da Fase 1
+- Multiplicadores infantis exatos (0-4 e 5-9): vou perguntar no início da Fase 1
 - Persistência entre atendentes (v1: localStorage da máquina, v2: backend)
 - Login (v1: sem, v2: por senha da pizzaria)
 
@@ -59,7 +59,7 @@ O PDF antigo trata os 4 planos como opções equivalentes em um único quadro de
 - Tagline do PDF: "Pizzas de longa maturação – fermentação à frio" (preservar)
 - Fotos reais das pizzas devem ser fornecidas pelo cliente; **até lá, placeholders locais**
 - WhatsApp é o canal de entrega final (texto gerado pelo app)
-- Vibe: "trattoria editorial" — pasta italiana moderna encontra revista de gastronomia, escuro, quente, gera fome. Conforme Lucas: "premium, com pizzas gerando fome, cores quentes, escuras, com cores vivas para destaque"
+- Vibe: "trattoria editorial": pasta italiana moderna encontra revista de gastronomia, escuro, quente, gera fome. Conforme Lucas: "premium, com pizzas gerando fome, cores quentes, escuras, com cores vivas para destaque"
 
 ## Evidence on Hand
 
@@ -72,10 +72,10 @@ O PDF antigo trata os 4 planos como opções equivalentes em um único quadro de
 
 ## Product Principles
 
-1. **O atendente termina em 2 minutos** — qualquer fricção é falha. Auto-save, defaults sensatos, validação silenciosa.
-2. **O Premium precisa parecer Premium** — o app convence, não apenas informa. Comparação lado-a-lado é obrigatória; o Premium tem tratamento diferenciado real.
-3. **PDF é o produto** — não é export de tela. Tipografia editorial, hierarquia clara, fechamento comercial com validade e condições.
-4. **Sem dependência de backend no MVP** — localStorage resolve. Adiar sync pra v2.
+1. **O atendente termina em 2 minutos**. Qualquer fricção é falha. Auto-save, defaults sensatos, validação silenciosa.
+2. **O Premium precisa parecer Premium**. O app convence, não apenas informa. Comparação lado-a-lado é obrigatória; o Premium tem tratamento diferenciado real.
+3. **PDF é o produto**. Não é export de tela. Tipografia editorial, hierarquia clara, fechamento comercial com validade e condições.
+4. **Sem dependência de backend no MVP**. localStorage resolve. Adiar sync pra v2.
 
 ## Accessibility & Inclusion
 
