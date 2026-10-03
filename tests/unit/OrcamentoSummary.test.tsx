@@ -114,7 +114,7 @@ describe('OrcamentoSummary', () => {
     expect(screen.getByText('10x de')).toBeInTheDocument()
     expect(screen.getByText('À vista no Pix')).toBeInTheDocument()
     expect(screen.getByText('no cartão')).toBeInTheDocument()
-    expect(screen.getByText('15% de desconto')).toBeInTheDocument()
+    expect(screen.getByText(/15% de desconto/)).toBeInTheDocument()
   })
 })
 
