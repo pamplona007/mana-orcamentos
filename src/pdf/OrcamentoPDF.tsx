@@ -1,51 +1,26 @@
 import { Document } from '@react-pdf/renderer'
-import type { Orcamento } from '@/types/orcamento'
+import './fonts'
+import type { Orcamento, TotaisPorPlano } from '@/types/orcamento'
 import { PageCapa } from './pages/PageCapa'
+import { PageCardapio } from './pages/PageCardapio'
 import { PageComparativo } from './pages/PageComparativo'
+import { PageUnidade } from './pages/PageUnidade'
 import { PageCondicoes } from './pages/PageCondicoes'
-import { VALIDADE_HORAS } from '@/data/plans'
-import { dataValidade, calcularTotais } from '@/utils/calculo'
 
-type OrcamentoPDFProps = {
-  orcamento: Omit<Orcamento, 'plano'>
-  validadeHoras?: number
+export type OrcamentoPDFProps = {
+  orcamento: Orcamento
+  totais: TotaisPorPlano
+  validadeISO: string
 }
 
-export function OrcamentoPDF({ orcamento, validadeHoras = VALIDADE_HORAS }: OrcamentoPDFProps) {
-  const validadeISO = dataValidade(orcamento.criadoEm, validadeHoras)
-
-  const totais = {
-    premium: calcularTotais('premium', orcamento.convidados, orcamento.adicionais, orcamento.pagamento, orcamento.desconto),
-    livreBebida: calcularTotais('livre-bebida', orcamento.convidados, orcamento.adicionais, orcamento.pagamento, orcamento.desconto),
-    livreSemBebida: calcularTotais('livre-sem-bebida', orcamento.convidados, orcamento.adicionais, orcamento.pagamento, orcamento.desconto),
-    unidade: calcularTotais('unidade', orcamento.convidados, orcamento.adicionais, orcamento.pagamento, orcamento.desconto),
-  }
-
-  const pagamentoLabel = orcamento.pagamento === 'pix' ? 'à vista no Pix' : 'parcelado em 10x'
-
+export function OrcamentoPDF({ orcamento, totais, validadeISO }: OrcamentoPDFProps) {
   return (
-    <Document
-      title={`Orçamento Maná Pizzas — ${orcamento.cliente.nome || 'sem nome'}`}
-      author="Maná Pizzas & Eventos"
-      subject="Orçamento de rodízio de pizzas para evento"
-      keywords="orçamento, pizza, rodízio, evento, Maná"
-    >
-      <PageCapa
-        clienteNome={orcamento.cliente.nome}
-        dataISO={orcamento.evento.data}
-        cidadeBairro={orcamento.evento.cidadeBairro}
-        totais={totais}
-        validadeISO={validadeISO}
-      />
-      <PageComparativo
-        totais={totais}
-        pagamento={orcamento.pagamento}
-        pagamentoLabel={pagamentoLabel}
-      />
-      <PageCondicoes
-        validadeISO={validadeISO}
-        clienteNome={orcamento.cliente.nome}
-      />
+    <Document title="Orçamento Maná Pizzas" author="Maná Pizzas & Eventos">
+      <PageCapa orcamento={orcamento} totais={totais} validadeISO={validadeISO} />
+      <PageCardapio orcamento={orcamento} totais={totais} validadeISO={validadeISO} />
+      <PageComparativo orcamento={orcamento} totais={totais} validadeISO={validadeISO} />
+      <PageUnidade orcamento={orcamento} totais={totais} validadeISO={validadeISO} />
+      <PageCondicoes orcamento={orcamento} totais={totais} validadeISO={validadeISO} />
     </Document>
   )
 }

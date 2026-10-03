@@ -1,338 +1,328 @@
-import { View, Text, StyleSheet } from '@react-pdf/renderer'
+import { Page, View, Text, StyleSheet, Image } from '@react-pdf/renderer'
 import { PDF_COLORS } from '../styles'
+import { PLANO_POR_ID } from '@/data/plans'
 import { pdfFormatBRL } from '../utils'
-import { PLANOS } from '@/data/plans'
-import type { TotaisPorPlano } from '@/types/orcamento'
+import type { Orcamento, TotaisPorPlano, PlanoId } from '@/types/orcamento'
+
+const PLANO_IDS: PlanoId[] = ['premium', 'livre-bebida', 'livre-sem-bebida']
+
+const PLANO_IMAGES: Record<PlanoId, string> = {
+  premium: '/images/pizza-premium.jpg',
+  'livre-bebida': '/images/pizza-queijo.jpg',
+  'livre-sem-bebida': '/images/pizza-queijo.jpg',
+  unidade: '/images/pizza-artesao.jpg',
+}
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 28,
-  },
-  brand: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  brandLogo: {
-    width: 44,
-    height: 28,
-    objectFit: 'contain',
-  },
-  brandText: {
-    fontFamily: 'Fraunces',
-    fontSize: 11,
-    color: PDF_COLORS.cream,
-    fontWeight: 500,
-  },
-  validade: {
+  page: {
+    backgroundColor: PDF_COLORS.ink,
+    paddingHorizontal: 40,
+    paddingVertical: 52,
     fontFamily: 'Inter',
-    fontSize: 7,
-    color: PDF_COLORS.creamFaint,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
+    fontSize: 9,
+    color: PDF_COLORS.cream,
+  },
+  header: {
+    marginBottom: 24,
   },
   kicker: {
     fontFamily: 'Inter',
     fontSize: 9,
-    color: PDF_COLORS.ochre,
-    letterSpacing: 3,
-    textTransform: 'uppercase',
     fontWeight: 700,
-    marginBottom: 8,
+    color: PDF_COLORS.ochre,
+    textTransform: 'uppercase',
+    letterSpacing: 2.5,
+    marginBottom: 10,
   },
   title: {
     fontFamily: 'Fraunces',
-    fontSize: 36,
+    fontSize: 38,
     fontWeight: 500,
     color: PDF_COLORS.cream,
     letterSpacing: -0.8,
-    marginBottom: 6,
+    lineHeight: 1.05,
+    marginBottom: 8,
   },
   sub: {
-    fontFamily: 'Inter',
-    fontSize: 10,
+    fontFamily: 'Fraunces',
+    fontSize: 12,
+    fontStyle: 'italic',
     color: PDF_COLORS.creamDim,
-    lineHeight: 1.5,
-    marginBottom: 24,
+    maxWidth: '85%',
   },
-  grid: {
+  cards: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 14,
   },
   card: {
     flex: 1,
     backgroundColor: PDF_COLORS.coal,
     borderRadius: 6,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: PDF_COLORS.coal3,
+    overflow: 'hidden',
+  },
+  cardDestaque: {
+    flex: 1.4,
+    backgroundColor: PDF_COLORS.wine,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  cardImageWrap: {
+    height: 100,
+    backgroundColor: PDF_COLORS.espresso,
     position: 'relative',
   },
-  cardPremium: {
-    backgroundColor: PDF_COLORS.espresso,
-    borderWidth: 1.5,
-    borderColor: PDF_COLORS.wine,
-    flex: 1.3,
+  cardImage: {
+    width: '100%',
+    height: '100%',
   },
-  cardSelected: {
-    borderWidth: 1.5,
-    borderColor: PDF_COLORS.rust,
-  },
-  badge: {
+  cardBadge: {
     position: 'absolute',
-    top: -8,
+    top: 10,
     right: 10,
-    backgroundColor: PDF_COLORS.wine,
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 9,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  badgeText: {
+    backgroundColor: PDF_COLORS.ochre,
+    color: PDF_COLORS.ink,
     fontFamily: 'Inter',
     fontSize: 7,
     fontWeight: 700,
-    color: PDF_COLORS.cream,
-    letterSpacing: 1.3,
-    textTransform: 'uppercase',
-  },
-  badgeIcon: {
-    fontFamily: 'Fraunces',
-    fontSize: 8,
-    color: PDF_COLORS.ochre,
-  },
-  cardNumero: {
-    fontFamily: 'Inter',
-    fontSize: 7.5,
-    color: PDF_COLORS.creamFaint,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 2,
+  },
+  cardBody: {
+    padding: 14,
+  },
+  cardNumber: {
+    fontFamily: 'Inter',
+    fontSize: 8,
+    fontWeight: 600,
+    color: PDF_COLORS.creamFaint,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
     marginBottom: 4,
   },
   cardNome: {
     fontFamily: 'Fraunces',
-    fontSize: 18,
+    fontSize: 20,
+    fontWeight: 600,
     color: PDF_COLORS.cream,
-    fontWeight: 500,
-    marginBottom: 4,
+    letterSpacing: -0.3,
+    marginBottom: 3,
   },
   cardTagline: {
     fontFamily: 'Fraunces',
     fontSize: 9.5,
     fontStyle: 'italic',
     color: PDF_COLORS.creamDim,
+    marginBottom: 10,
     lineHeight: 1.3,
-    marginBottom: 12,
   },
-  cardPriceLabel: {
-    fontFamily: 'Inter',
-    fontSize: 7,
-    color: PDF_COLORS.creamFaint,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    marginBottom: 2,
-  },
-  cardPriceRow: {
+  cardPrice: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: 2,
-    marginBottom: 12,
-    paddingBottom: 12,
-    borderBottomWidth: 0.5,
-    borderBottomColor: PDF_COLORS.coal3,
+    gap: 4,
+    marginBottom: 1,
   },
   cardCifrao: {
     fontFamily: 'Inter',
-    fontSize: 8,
-    color: PDF_COLORS.creamDim,
-    fontWeight: 500,
-  },
-  cardPrecoInteiro: {
-    fontFamily: 'Fraunces',
-    fontSize: 22,
-    color: PDF_COLORS.cream,
-    fontWeight: 500,
-    fontVariantNumeric: 'tabular-nums',
-    letterSpacing: -0.4,
-  },
-  cardPrecoCentavos: {
-    fontFamily: 'Inter',
     fontSize: 10,
+    fontWeight: 500,
     color: PDF_COLORS.creamDim,
   },
-  cardPrecoWine: {
-    color: PDF_COLORS.wine,
+  cardInteiro: {
+    fontFamily: 'Fraunces',
+    fontSize: 28,
+    fontWeight: 500,
+    color: PDF_COLORS.cream,
+    fontVariantNumeric: 'tabular-nums',
+    letterSpacing: -0.5,
   },
-  cardPagamento: {
+  cardCentavos: {
+    fontFamily: 'Inter',
+    fontSize: 12,
+    color: PDF_COLORS.creamDim,
+  },
+  cardParcela: {
+    fontFamily: 'Inter',
+    fontSize: 8.5,
+    color: PDF_COLORS.creamDim,
+    marginBottom: 6,
+  },
+  cardAvistaLabel: {
     fontFamily: 'Inter',
     fontSize: 7.5,
-    color: PDF_COLORS.creamDim,
-    marginBottom: 10,
+    fontWeight: 600,
+    color: PDF_COLORS.success,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginBottom: 2,
   },
-  inclusos: {
-    gap: 5,
+  cardAvistaPrice: {
+    fontFamily: 'Fraunces',
+    fontSize: 12,
+    fontWeight: 500,
+    color: PDF_COLORS.success,
+    fontVariantNumeric: 'tabular-nums',
+    letterSpacing: -0.2,
+    marginBottom: 8,
   },
-  incluso: {
+  cardDivider: {
+    height: 0.5,
+    backgroundColor: PDF_COLORS.coal3,
+    marginVertical: 8,
+  },
+  cardDividerDestaque: {
+    height: 0.5,
+    backgroundColor: PDF_COLORS.wineGlow,
+    marginVertical: 8,
+  },
+  cardFeature: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 5,
+    marginBottom: 4,
   },
-  check: {
-    fontFamily: 'Inter',
-    fontSize: 9,
-    color: PDF_COLORS.ochre,
-    fontWeight: 700,
-    marginTop: 0.5,
-  },
-  inclusoTexto: {
+  cardFeatureDot: {
     fontFamily: 'Inter',
     fontSize: 8,
-    color: PDF_COLORS.creamDim,
-    lineHeight: 1.4,
+    color: PDF_COLORS.ochre,
+    marginTop: 1,
+  },
+  cardFeatureText: {
     flex: 1,
-  },
-  bonus: {
-    marginTop: 10,
-    paddingTop: 8,
-    borderTopWidth: 0.5,
-    borderTopColor: PDF_COLORS.coal3,
-  },
-  bonusLabel: {
     fontFamily: 'Inter',
-    fontSize: 7,
-    color: PDF_COLORS.creamFaint,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
+    fontSize: 8.5,
+    color: PDF_COLORS.creamDim,
+    lineHeight: 1.35,
   },
-  bonusTexto: {
+  cardDuration: {
     fontFamily: 'Inter',
     fontSize: 8,
-    fontStyle: 'italic',
-    color: PDF_COLORS.ochre,
+    fontWeight: 600,
+    color: PDF_COLORS.creamFaint,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginTop: 8,
   },
-  footer: {
-    position: 'absolute',
-    bottom: 24,
-    left: 48,
-    right: 48,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  destaqueBox: {
+    backgroundColor: PDF_COLORS.wineGlow,
+    borderRadius: 4,
+    padding: 10,
+    marginTop: 4,
   },
-  footerText: {
+  destaqueKicker: {
     fontFamily: 'Inter',
     fontSize: 7,
-    color: PDF_COLORS.creamFaint,
-    letterSpacing: 1,
+    fontWeight: 700,
+    color: PDF_COLORS.ochre,
     textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    marginBottom: 6,
+  },
+  destaqueItem: {
+    marginBottom: 5,
+  },
+  destaqueTitulo: {
+    fontFamily: 'Fraunces',
+    fontSize: 9.5,
+    fontWeight: 600,
+    color: PDF_COLORS.cream,
+    marginBottom: 1,
+  },
+  destaqueCorpo: {
+    fontFamily: 'Inter',
+    fontSize: 7.5,
+    color: PDF_COLORS.creamDim,
+    lineHeight: 1.35,
   },
 })
 
-type Props = {
-  totais: TotaisPorPlano
-  pagamento: 'pix' | 'parcelado'
-  pagamentoLabel: string
+const PLANO_TOTAL_KEY: Record<PlanoId, keyof TotaisPorPlano> = {
+  premium: 'premium',
+  'livre-bebida': 'livreBebida',
+  'livre-sem-bebida': 'livreSemBebida',
+  unidade: 'premium',
 }
 
-export function PageComparativo({ totais, pagamento, pagamentoLabel }: Props) {
+export type PageComparativoProps = {
+  orcamento: Orcamento
+  totais: TotaisPorPlano
+  validadeISO: string
+}
+
+export function PageComparativo(props: PageComparativoProps) {
   return (
-    <View style={{ flex: 1, backgroundColor: PDF_COLORS.ink, padding: 48 }}>
+    <Page size="A4" style={styles.page}>
       <View style={styles.header}>
-        <View style={styles.brand}>
-          <Text style={styles.brandText}>Maná Pizzas</Text>
-        </View>
-        <Text style={styles.validade}>Rodízio em casa</Text>
+        <Text style={styles.kicker}>3 planos de serviço · mesma pizza</Text>
+        <Text style={styles.title}>Compare e escolha como prefere pagar</Text>
+        <Text style={styles.sub}>
+          Você não escolhe a pizza — escolhe como prefere o serviço rodar.
+        </Text>
       </View>
 
-      <Text style={styles.kicker}>Comparativo de planos</Text>
-      <Text style={styles.title}>Escolha o que combina com seu evento</Text>
-      <Text style={styles.sub}>
-        Todos os planos incluem 3 horas de evento, 1 pizzaiolo, garçons, copos e guardanapos.
-        O Premium se diferencia pelos ingredientes importados e sabores com búfala.
-      </Text>
-
-      <View style={styles.grid}>
-        {PLANOS.map((p) => {
-          const isPremium = p.id === 'premium'
-          const totaisPlano =
-            p.id === 'premium' ? totais.premium :
-            p.id === 'livre-bebida' ? totais.livreBebida :
-            p.id === 'livre-sem-bebida' ? totais.livreSemBebida :
-            totais.unidade
-          const preco = pagamento === 'pix' && p.precoPessoaAvista
-            ? p.precoPessoaAvista
-            : totaisPlano.precoPessoaUsado
-          const isUnidade = p.id === 'unidade'
-          const fmt = pdfFormatBRL(preco)
-          const cardStyle = [
-            styles.card,
-            isPremium ? styles.cardPremium : null,
-          ].filter((s): s is NonNullable<typeof s> => s !== null)
+      <View style={styles.cards}>
+        {PLANO_IDS.map((id) => {
+          const plano = PLANO_POR_ID[id]
+          const totaisPlano = props.totais[PLANO_TOTAL_KEY[id]]
+          const isDestaque = plano.badge === 'RECOMENDADO'
+          const cardStyle = isDestaque ? styles.cardDestaque : styles.card
+          const dividerStyle = isDestaque ? styles.cardDividerDestaque : styles.cardDivider
+          const total = pdfFormatBRL(totaisPlano.totalParcelado)
+          const parcela = pdfFormatBRL(totaisPlano.parcela10x)
+          const features = isDestaque ? plano.inclusos.slice(0, 4) : plano.inclusos
+          const destaqueItems = plano.destaquesPremium ?? []
 
           return (
-            <View key={p.id} style={cardStyle} wrap={false}>
-              {isPremium && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeIcon}>★</Text>
-                  <Text style={styles.badgeText}>Recomendado</Text>
-                </View>
-              )}
-
-              <Text style={styles.cardNumero}>Opção {p.numero}</Text>
-              <Text style={styles.cardNome}>{p.nome}</Text>
-              <Text style={styles.cardTagline}>{p.tagline}</Text>
-
-              <Text style={styles.cardPriceLabel}>
-                {isUnidade ? 'por pizza' : 'por pessoa'}
-              </Text>
-              <View style={styles.cardPriceRow}>
-                <Text
-                  style={[styles.cardCifrao, isPremium ? styles.cardPrecoWine : null].filter((s): s is NonNullable<typeof s> => s !== null)}
-                >
-                  {fmt.cifrao}
-                </Text>
-                <Text
-                  style={[styles.cardPrecoInteiro, isPremium ? styles.cardPrecoWine : null].filter((s): s is NonNullable<typeof s> => s !== null)}
-                >
-                  {fmt.inteiro}
-                </Text>
-                <Text
-                  style={[styles.cardPrecoCentavos, isPremium ? styles.cardPrecoWine : null].filter((s): s is NonNullable<typeof s> => s !== null)}
-                >
-                  ,{fmt.centavos}
-                </Text>
+            <View key={plano.id} style={cardStyle}>
+              <View style={styles.cardImageWrap}>
+                <Image src={PLANO_IMAGES[plano.id]} style={styles.cardImage} />
+                {isDestaque && <Text style={styles.cardBadge}>{plano.badge}</Text>}
               </View>
-              <Text style={styles.cardPagamento}>{pagamentoLabel}</Text>
 
-              <View style={styles.inclusos}>
-                {p.inclusos.slice(0, 5).map((item) => (
-                  <View key={item} style={styles.incluso}>
-                    <Text style={styles.check}>✓</Text>
-                    <Text style={styles.inclusoTexto}>{item}</Text>
+              <View style={styles.cardBody}>
+                <Text style={styles.cardNumber}>Plano {plano.numero}</Text>
+                <Text style={styles.cardNome}>{plano.nome}</Text>
+                <Text style={styles.cardTagline}>{plano.tagline}</Text>
+
+                <View style={styles.cardPrice}>
+                  <Text style={styles.cardCifrao}>{total.cifrao}</Text>
+                  <Text style={styles.cardInteiro}>{total.inteiro}</Text>
+                  <Text style={styles.cardCentavos}>,{total.centavos}</Text>
+                </View>
+                <Text style={styles.cardParcela}>
+                  ou 10x de {parcela.cifrao} {parcela.inteiro},{parcela.centavos}
+                </Text>
+
+                <View style={dividerStyle} />
+
+                {features.map((item) => (
+                  <View key={item} style={styles.cardFeature}>
+                    <Text style={styles.cardFeatureDot}>•</Text>
+                    <Text style={styles.cardFeatureText}>{item}</Text>
                   </View>
                 ))}
-              </View>
 
-              {p.bonus.length > 0 && (
-                <View style={styles.bonus}>
-                  <Text style={styles.bonusLabel}>Bônus</Text>
-                  <Text style={styles.bonusTexto}>{p.bonus.join(' · ')}</Text>
-                </View>
-              )}
+                {isDestaque && destaqueItems.length > 0 && (
+                  <View style={styles.destaqueBox}>
+                    <Text style={styles.destaqueKicker}>O que muda no Premium</Text>
+                    {destaqueItems.map((d) => (
+                      <View key={d.titulo} style={styles.destaqueItem}>
+                        <Text style={styles.destaqueTitulo}>{d.titulo}</Text>
+                        <Text style={styles.destaqueCorpo}>{d.corpo}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                <Text style={styles.cardDuration}>{plano.duracao}</Text>
+              </View>
             </View>
           )
         })}
       </View>
-
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>manarodizio · @manarodizio</Text>
-        <Text style={styles.footerText}>Página 2 de 3</Text>
-      </View>
-    </View>
+    </Page>
   )
 }
+
