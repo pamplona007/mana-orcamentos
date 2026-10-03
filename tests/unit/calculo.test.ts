@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest'
 import {
-  calcularAdicionais,
   calcularConvidados,
   calcularPizzasSugeridas,
   calcularSubtotal,
@@ -8,9 +7,22 @@ import {
   dataValidade,
   validarDeslocamento,
 } from '@/utils/calculo'
-import type { Adicional, Pagamento, PlanoId } from '@/types/orcamento'
+import type { PlanoId } from '@/types/orcamento'
+import type { State } from '@/hooks/useOrcamento'
 
-const semAdicional: Adicional = { entrada: false, salgadosExtras: 0 }
+const convidadosPadrao = { adultos: 25, criancas0a4: 0, criancas5a9: 0 }
+
+function makeState(overrides: Partial<State> = {}): State {
+  return {
+    cliente: { nome: '', whatsapp: '' },
+    evento: { data: '', cidadeBairro: '', observacoes: '' },
+    convidados: convidadosPadrao,
+    pagamento: 'parcelado',
+    desconto: { tipo: 'nenhum', valor: 0 },
+    deslocamento: { ativo: false, valor: 150 },
+    ...overrides,
+  }
+}
 
 describe('calcularConvidados', () => {
   it('soma apenas adultos', () => {
@@ -41,28 +53,6 @@ describe('calcularPizzasSugeridas', () => {
 
   it('considera crianças 5-9 com meia', () => {
     expect(calcularPizzasSugeridas({ adultos: 20, criancas0a4: 0, criancas5a9: 10 })).toBe(15)
-  })
-})
-
-describe('calcularAdicionais', () => {
-  it('zero sem opcionais', () => {
-    expect(calcularAdicionais(semAdicional)).toBe(0)
-  })
-
-  it('entrada = 350', () => {
-    expect(calcularAdicionais({ entrada: true, salgadosExtras: 0 })).toBe(350)
-  })
-
-  it('salgados extras', () => {
-    expect(calcularAdicionais({ entrada: false, salgadosExtras: 2 })).toBe(150)
-  })
-
-  it('combina entrada + extras', () => {
-    expect(calcularAdicionais({ entrada: true, salgadosExtras: 2 })).toBe(500)
-  })
-
-  it('ignora extras negativos', () => {
-    expect(calcularAdicionais({ entrada: false, salgadosExtras: -3 })).toBe(0)
   })
 })
 
@@ -102,52 +92,41 @@ describe('calcularSubtotal: Por unidade', () => {
 })
 
 describe('calcularTotais', () => {
-  const pix: Pagamento = 'pix'
-
-  it('Premium 25 adultos, sem adicionais, pix', () => {
-    const t = calcularTotais(
-      'premium',
-      { adultos: 25, criancas0a4: 0, criancas5a9: 0 },
-      semAdicional,
-      pix,
-    )
+  it('Premium 25 adultos, sem deslocamento', () => {
+    const t = calcularTotais('premium', makeState())
     expect(t.total).toBe(2940)
     expect(t.totalParcelado).toBe(2940)
     expect(t.totalAvista).toBe(2499)
     expect(t.parcela10x).toBe(294)
   })
 
-  it('Livre c/ bebida 25 adultos com entrada e 2 extras, pix', () => {
-    const t = calcularTotais(
-      'livre-bebida',
-      { adultos: 25, criancas0a4: 0, criancas5a9: 0 },
-      { entrada: true, salgadosExtras: 2 },
-      pix,
-    )
+  it('Livre c/ bebida não inclui adicionais opcionais', () => {
+    const t = calcularTotais('livre-bebida', makeState())
     expect(t.subtotal).toBe(1650)
-    expect(t.adicionais).toBe(500)
-    expect(t.total).toBe(2150)
-    expect(t.totalAvista).toBe(1827.5)
+    expect(t.total).toBe(1650)
+    expect(t.totalAvista).toBe(1402.5)
+  })
+
+  it('soma o deslocamento ao total do plano', () => {
+    const t = calcularTotais(
+      'premium',
+      makeState({ deslocamento: { ativo: true, valor: 150 } }),
+    )
+    expect(t.deslocamento).toBe(150)
+    expect(t.total).toBe(3090)
+    expect(t.totalAvista).toBe(2626.5)
   })
 
   it('20 adultos + 10 crianças 5-9 no Premium', () => {
-    const t = calcularTotais(
-      'premium',
-      { adultos: 20, criancas0a4: 0, criancas5a9: 10 },
-      semAdicional,
-      pix,
-    )
+    const t = calcularTotais('premium', makeState({
+      convidados: { adultos: 20, criancas0a4: 0, criancas5a9: 10 },
+    }))
     expect(t.adultosEquivalentes).toBe(25)
     expect(t.subtotal).toBe(2940)
   })
 
-  it('Por unidade: 15 pizzas parcelado, à vista 1000', () => {
-    const t = calcularTotais(
-      'unidade',
-      { adultos: 25, criancas0a4: 0, criancas5a9: 0 },
-      semAdicional,
-      'parcelado',
-    )
+  it('Por unidade: 15 pizzas parcelado', () => {
+    const t = calcularTotais('unidade', makeState())
     expect(t.pizzas).toBe(15)
     expect(t.subtotal).toBe(1177.5)
     expect(t.totalParcelado).toBe(1177.5)
@@ -177,34 +156,28 @@ describe('calcularDesconto (via calcularTotais)', () => {
   it('não aplica desconto quando tipo é "nenhum"', () => {
     const t = calcularTotais(
       'premium',
-      { adultos: 25, criancas0a4: 0, criancas5a9: 0 },
-      semAdicional,
-      'parcelado',
-      { tipo: 'nenhum', valor: 0 },
+      makeState({ desconto: { tipo: 'nenhum', valor: 0 } }),
     )
     expect(t.descontoAplicado).toBe(0)
     expect(t.total).toBe(2940)
   })
 
-  it('aplica desconto percentual sobre o subtotal+adicionais', () => {
+  it('aplica desconto percentual sobre o subtotal + deslocamento', () => {
     const t = calcularTotais(
       'premium',
-      { adultos: 25, criancas0a4: 0, criancas5a9: 0 },
-      semAdicional,
-      'parcelado',
-      { tipo: 'percentual', valor: 5 },
+      makeState({
+        desconto: { tipo: 'percentual', valor: 5 },
+        deslocamento: { ativo: true, valor: 150 },
+      }),
     )
-    expect(t.descontoAplicado).toBe(147) // 5% de 2940
-    expect(t.total).toBe(2793)
+    expect(t.descontoAplicado).toBe(154.5) // 5% de 3090
+    expect(t.total).toBe(2935.5)
   })
 
   it('aplica desconto absoluto limitado ao total', () => {
     const t = calcularTotais(
       'premium',
-      { adultos: 25, criancas0a4: 0, criancas5a9: 0 },
-      semAdicional,
-      'parcelado',
-      { tipo: 'absoluto', valor: 500 },
+      makeState({ desconto: { tipo: 'absoluto', valor: 500 } }),
     )
     expect(t.descontoAplicado).toBe(500)
     expect(t.total).toBe(2440)
@@ -213,10 +186,10 @@ describe('calcularDesconto (via calcularTotais)', () => {
   it('desconto absoluto maior que o total zera o total', () => {
     const t = calcularTotais(
       'livre-bebida',
-      { adultos: 1, criancas0a4: 0, criancas5a9: 0 },
-      semAdicional,
-      'parcelado',
-      { tipo: 'absoluto', valor: 9999 },
+      makeState({
+        convidados: { adultos: 1, criancas0a4: 0, criancas5a9: 0 },
+        desconto: { tipo: 'absoluto', valor: 9999 },
+      }),
     )
     expect(t.descontoAplicado).toBe(66) // limitado ao subtotal
     expect(t.total).toBe(0)
