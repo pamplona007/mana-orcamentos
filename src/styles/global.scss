@@ -1,0 +1,114 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--cream);
+  background-color: var(--ink);
+  background-image:
+    radial-gradient(at 20% 0%, rgba(181, 71, 27, 0.08) 0%, transparent 50%),
+    radial-gradient(at 80% 100%, rgba(107, 31, 42, 0.06) 0%, transparent 50%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'kern', 'liga', 'calt';
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0;
+  font-variation-settings: 'opsz' 96;
+  color: var(--cream);
+}
+
+p {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  letter-spacing: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--ochre);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+input, select, textarea {
+  font: inherit;
+  color: inherit;
+  background: var(--coal);
+  border: 1px solid var(--coal-3);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  width: 100%;
+  transition: border-color var(--duration-fast) var(--ease-expo-out);
+}
+
+input:hover, select:hover, textarea:hover {
+  border-color: var(--coal-3);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--cream-faint);
+}
+
+::selection {
+  background: var(--wine);
+  color: var(--cream);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--espresso);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--coal-3);
+  border-radius: 6px;
+  border: 2px solid var(--espresso);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--truffle);
+}
