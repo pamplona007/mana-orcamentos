@@ -46,7 +46,12 @@ export function OrcamentoSummary() {
             {pessoas} {pessoas === 1 ? 'pessoa' : 'pessoas'}
             <span aria-hidden="true">·</span>
             <span style={{ color: 'var(--cream-faint)' }}>
-              {formatBRL(planoSelecionado.precoPessoaAvista)}/pessoa
+              {formatBRL(
+                isPix
+                  ? planoSelecionado.precoPessoaAvista
+                  : planoSelecionado.precoPessoaParcelado,
+              )}
+              /pessoa
             </span>
             {pizzas > 0 && (
               <>

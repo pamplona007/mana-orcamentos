@@ -1,0 +1,118 @@
+import { StyleSheet } from '@react-pdf/renderer'
+
+export const PDF_COLORS = {
+  ink: '#0E0B08',
+  espresso: '#1A130D',
+  coal: '#221913',
+  coal2: '#2B2018',
+  coal3: '#382A1F',
+  cream: '#F5E9D7',
+  creamDim: '#C9B89A',
+  creamFaint: '#8A7B65',
+  rust: '#B5471B',
+  rustGlow: '#D85A22',
+  wine: '#6B1F2A',
+  wineGlow: '#8B2A37',
+  ochre: '#D4A24A',
+  truffle: '#3D2A1E',
+  success: '#6B8E4E',
+} as const
+
+export const pdfStyles = StyleSheet.create({
+  page: {
+    backgroundColor: PDF_COLORS.ink,
+    paddingHorizontal: 48,
+    paddingVertical: 56,
+    fontFamily: 'Inter',
+    fontSize: 10,
+    color: PDF_COLORS.cream,
+  },
+  h1: {
+    fontFamily: 'Fraunces',
+    fontSize: 64,
+    fontWeight: 500,
+    color: PDF_COLORS.cream,
+    letterSpacing: -1.5,
+    lineHeight: 1.05,
+  },
+  h2: {
+    fontFamily: 'Fraunces',
+    fontSize: 28,
+    fontWeight: 500,
+    color: PDF_COLORS.cream,
+    letterSpacing: -0.5,
+    marginBottom: 12,
+  },
+  h3: {
+    fontFamily: 'Fraunces',
+    fontSize: 18,
+    fontWeight: 500,
+    color: PDF_COLORS.cream,
+    letterSpacing: -0.2,
+  },
+  kicker: {
+    fontFamily: 'Inter',
+    fontSize: 9,
+    fontWeight: 700,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    color: PDF_COLORS.ochre,
+    marginBottom: 8,
+  },
+  body: {
+    fontFamily: 'Inter',
+    fontSize: 10,
+    color: PDF_COLORS.creamDim,
+    lineHeight: 1.5,
+  },
+  bodySmall: {
+    fontFamily: 'Inter',
+    fontSize: 8.5,
+    color: PDF_COLORS.creamFaint,
+    lineHeight: 1.4,
+  },
+  price: {
+    fontFamily: 'Fraunces',
+    fontSize: 32,
+    fontWeight: 500,
+    color: PDF_COLORS.cream,
+    fontVariantNumeric: 'tabular-nums',
+    letterSpacing: -0.5,
+  },
+  priceWine: {
+    color: PDF_COLORS.wine,
+  },
+  priceLarge: {
+    fontFamily: 'Fraunces',
+    fontSize: 48,
+    fontWeight: 500,
+    color: PDF_COLORS.cream,
+    fontVariantNumeric: 'tabular-nums',
+    letterSpacing: -1,
+  },
+  priceCifrao: {
+    fontFamily: 'Inter',
+    fontSize: 11,
+    color: PDF_COLORS.creamDim,
+    fontWeight: 500,
+  },
+  priceCentavos: {
+    fontFamily: 'Inter',
+    fontSize: 14,
+    color: PDF_COLORS.creamDim,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: PDF_COLORS.coal3,
+    marginVertical: 12,
+  },
+  hairline: {
+    height: 0.5,
+    backgroundColor: PDF_COLORS.coal2,
+    marginVertical: 6,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+})
