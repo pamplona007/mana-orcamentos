@@ -8,7 +8,7 @@ import {
   dataValidade,
   validarDeslocamento,
 } from '@/utils/calculo'
-import type { Adicional, Convidado, Pagamento, PlanoId } from '@/types/orcamento'
+import type { Adicional, Pagamento, PlanoId } from '@/types/orcamento'
 
 const semAdicional: Adicional = { entrada: false, salgadosExtras: 0 }
 

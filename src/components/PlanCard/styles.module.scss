@@ -1,0 +1,299 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--coal);
+  border: 1px solid var(--coal-3);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--duration-base) var(--ease-expo-out),
+    transform var(--duration-base) var(--ease-expo-out),
+    box-shadow var(--duration-base) var(--ease-expo-out),
+    background-color var(--duration-base) var(--ease-expo-out);
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  width: 100%;
+}
+
+.card:hover {
+  border-color: var(--cream-faint);
+  background: var(--coal-2);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--ochre);
+  outline-offset: 3px;
+}
+
+.cardPremium {
+  padding: var(--space-6);
+  background: linear-gradient(180deg, var(--coal) 0%, rgba(107, 31, 42, 0.08) 100%);
+  min-height: 540px;
+}
+
+.cardSelected {
+  border-color: var(--wine);
+  border-width: 2px;
+  padding: calc(var(--space-5) - 1px);
+  box-shadow: var(--shadow-wine-glow);
+  transform: translateY(-2px);
+}
+
+.cardPremium.cardSelected {
+  padding: calc(var(--space-6) - 1px);
+}
+
+.cardRecommended {
+  border-color: rgba(107, 31, 42, 0.4);
+}
+
+.cardRecommended::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--radius-lg);
+  padding: 1px;
+  background: linear-gradient(180deg, var(--wine) 0%, transparent 60%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.badgeSlot {
+  position: absolute;
+  top: -12px;
+  right: var(--space-4);
+  z-index: 2;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.numero {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--cream-faint);
+  text-transform: uppercase;
+}
+
+.iconBox {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: var(--coal-2);
+  color: var(--cream-dim);
+  flex-shrink: 0;
+}
+
+.iconBoxWine {
+  background: rgba(107, 31, 42, 0.18);
+  color: var(--wine);
+}
+
+.iconBoxOchre {
+  background: rgba(212, 162, 74, 0.18);
+  color: var(--ochre);
+}
+
+.iconBoxRust {
+  background: rgba(181, 71, 27, 0.18);
+  color: var(--rust-glow);
+}
+
+.iconBoxCream {
+  background: var(--coal-3);
+  color: var(--cream);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 500;
+  font-variation-settings: 'opsz' 96;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--cream);
+}
+
+.titleWine {
+  color: var(--cream);
+}
+
+.tagline {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-style: italic;
+  color: var(--cream-dim);
+  line-height: 1.3;
+  margin-top: var(--space-1);
+}
+
+.price {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--coal-3);
+  border-bottom: 1px solid var(--coal-3);
+}
+
+.priceLabel {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cream-faint);
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.priceUnit {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--cream-dim);
+  margin-left: var(--space-2);
+}
+
+.inclusos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+}
+
+.incluso {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--cream-dim);
+}
+
+.check {
+  width: 16px;
+  height: 16px;
+  color: var(--ochre);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.bonus {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--cream-faint);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--coal-3);
+}
+
+.bonus strong {
+  color: var(--ochre);
+  font-style: normal;
+  font-weight: 600;
+}
+
+.destaques {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  margin: 0 calc(-1 * var(--space-5));
+  background: rgba(107, 31, 42, 0.06);
+  border-top: 1px solid rgba(107, 31, 42, 0.2);
+  border-bottom: 1px solid rgba(107, 31, 42, 0.2);
+}
+
+.destaqueItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.destaqueTitulo {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  font-variation-settings: 'opsz' 24;
+  color: var(--ochre);
+  letter-spacing: -0.01em;
+}
+
+.destaqueCorpo {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--cream-dim);
+}
+
+.cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: transparent;
+  border: 1px solid var(--coal-3);
+  border-radius: var(--radius-md);
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: border-color var(--duration-fast) var(--ease-expo-out),
+    background-color var(--duration-fast) var(--ease-expo-out);
+  margin-top: auto;
+}
+
+.card:hover .cta {
+  border-color: var(--cream-faint);
+  background: var(--coal-2);
+}
+
+.ctaSelected {
+  background: var(--rust);
+  border-color: var(--rust);
+  color: var(--cream);
+}
+
+.ctaSelected:hover {
+  background: var(--rust-glow);
+  border-color: var(--rust-glow);
+}
+
+.cardPremium .ctaSelected {
+  background: var(--wine);
+  border-color: var(--wine);
+}
+
+.cardPremium .ctaSelected:hover {
+  background: var(--wine-glow);
+  border-color: var(--wine-glow);
+}

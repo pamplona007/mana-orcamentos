@@ -1,0 +1,77 @@
+.breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--coal);
+  border: 1px solid var(--coal-3);
+  border-radius: var(--radius-lg);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.row + .row {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--coal-3);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.label {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 500;
+  font-variation-settings: 'opsz' 48;
+  color: var(--cream);
+  letter-spacing: -0.01em;
+}
+
+.helper {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--cream-faint);
+  line-height: 1.4;
+}
+
+.total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--coal-3);
+  margin-top: var(--space-2);
+}
+
+.totalLabel {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ochre);
+}
+
+.totalValue {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 500;
+  font-variation-settings: 'opsz' 96;
+  color: var(--cream);
+  font-feature-settings: 'tnum', 'lnum';
+}
+
+.detail {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--cream-dim);
+}
