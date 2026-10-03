@@ -1,10 +1,8 @@
 import { useOrcamento } from '@/hooks/useOrcamento'
-import { PLANOS } from '@/data/plans'
-import { PlanCard } from '@/components/PlanCard'
 import { GuestBreakdown } from '@/components/GuestBreakdown'
 import { AddonToggle } from '@/components/AddonToggle'
-import { OrcamentoSummary } from '@/components/OrcamentoSummary'
 import { OPCIONAIS } from '@/data/plans'
+import { formatBRL } from '@/utils/money'
 import styles from './styles.module.scss'
 
 export function Editor() {
@@ -13,9 +11,9 @@ export function Editor() {
     setCliente,
     setEvento,
     setConvidados,
-    setPlano,
     setAdicionais,
     setPagamento,
+    setDesconto,
   } = useOrcamento()
 
   return (
@@ -33,7 +31,6 @@ export function Editor() {
         <section className={styles.section} aria-label="Dados do cliente">
           <div className={styles.sectionHead}>
             <h2 className={styles.sectionTitle}>Cliente e evento</h2>
-            <span className={styles.sectionStep}>Etapa 1 de 3</span>
           </div>
           <div className={styles.fieldGrid}>
             <div className={styles.field}>
@@ -76,65 +73,53 @@ export function Editor() {
                 placeholder="Ex: Fortaleza — Aldeota"
               />
             </div>
+            <div className={`${styles.field} ${styles.fieldFull}`}>
+              <label className={styles.fieldLabel} htmlFor="evento-obs">Observações</label>
+              <textarea
+                id="evento-obs"
+                className={styles.fieldTextarea}
+                value={state.evento.observacoes}
+                onChange={(e) => setEvento({ observacoes: e.target.value })}
+                placeholder="Ex: 2 vegetarianos, restrição a lactose, levar pimentas frescas"
+                rows={3}
+              />
+            </div>
           </div>
         </section>
 
         <section className={styles.section} aria-label="Convidados">
           <div className={styles.sectionHead}>
             <h2 className={styles.sectionTitle}>Convidados</h2>
-            <span className={styles.sectionStep}>Etapa 2 de 3</span>
           </div>
           <GuestBreakdown value={state.convidados} onChange={setConvidados} />
         </section>
 
-        <section className={styles.section} aria-label="Plano">
+        <section className={styles.section} aria-label="Pagamento">
           <div className={styles.sectionHead}>
-            <h2 className={styles.sectionTitle}>Escolha o plano</h2>
-            <span className={styles.sectionStep}>Etapa 3 de 3</span>
+            <h2 className={styles.sectionTitle}>Forma de pagamento</h2>
           </div>
-          <div className={styles.comparativoGrid}>
-            {PLANOS.map((p) => (
-              <PlanCard
-                key={p.id}
-                plano={p}
-                selected={state.plano === p.id}
-                onSelect={setPlano}
-                mode="editor"
-                pagamento={state.pagamento}
-              />
-            ))}
-          </div>
-
-          <div className={styles.fieldGrid} style={{ marginTop: 'var(--space-3)' }}>
+          <div className={styles.fieldGrid}>
             <button
               type="button"
               onClick={() => setPagamento('parcelado')}
               aria-pressed={state.pagamento === 'parcelado'}
-              className={styles.fieldInput}
-              style={{
-                cursor: 'pointer',
-                textAlign: 'left',
-                borderColor: state.pagamento === 'parcelado' ? 'var(--rust)' : 'var(--coal-3)',
-                background: state.pagamento === 'parcelado' ? 'rgba(181, 71, 27, 0.08)' : 'var(--coal)',
-              }}
+              className={`${styles.fieldInput} ${styles.pagamentoButton} ${
+                state.pagamento === 'parcelado' ? styles.pagamentoButtonActive : ''
+              }`}
             >
-              <div style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 4 }}>Parcelado</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--cream)' }}>10x no cartão</div>
+              <div className={styles.pagamentoLabel}>Parcelado</div>
+              <div className={styles.pagamentoValor}>10x no cartão</div>
             </button>
             <button
               type="button"
               onClick={() => setPagamento('pix')}
               aria-pressed={state.pagamento === 'pix'}
-              className={styles.fieldInput}
-              style={{
-                cursor: 'pointer',
-                textAlign: 'left',
-                borderColor: state.pagamento === 'pix' ? 'var(--rust)' : 'var(--coal-3)',
-                background: state.pagamento === 'pix' ? 'rgba(181, 71, 27, 0.08)' : 'var(--coal)',
-              }}
+              className={`${styles.fieldInput} ${styles.pagamentoButton} ${
+                state.pagamento === 'pix' ? styles.pagamentoButtonActive : ''
+              }`}
             >
-              <div style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 4 }}>À vista no Pix</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--cream)' }}>15% de desconto</div>
+              <div className={styles.pagamentoLabel}>À vista no Pix</div>
+              <div className={styles.pagamentoValor}>15% de desconto</div>
             </button>
           </div>
         </section>
@@ -152,8 +137,9 @@ export function Editor() {
           />
           {state.adicionais.entrada && (
             <div className={styles.field}>
-              <label className={styles.fieldLabel}>Cento de salgados adicional (R$ 75 cada)</label>
+              <label className={styles.fieldLabel} htmlFor="salgados-extra">Cento de salgados adicional (R$ 75 cada)</label>
               <input
+                id="salgados-extra"
                 type="number"
                 min={0}
                 max={20}
@@ -166,11 +152,60 @@ export function Editor() {
             </div>
           )}
         </section>
-      </div>
 
-      <aside aria-label="Resumo">
-        <OrcamentoSummary />
-      </aside>
+        <section className={styles.section} aria-label="Desconto">
+          <div className={styles.sectionHead}>
+            <h2 className={styles.sectionTitle}>Desconto</h2>
+          </div>
+          <p className={styles.helperText}>
+            Aplique um desconto manual quando o cliente pedir negociação no WhatsApp.
+            O desconto é aplicado sobre o total do plano Premium (referência) e aparece
+            no PDF.
+          </p>
+          <div className={styles.fieldGrid}>
+            <div className={styles.field}>
+              <label className={styles.fieldLabel} htmlFor="desconto-tipo">Tipo</label>
+              <select
+                id="desconto-tipo"
+                className={styles.fieldInput}
+                value={state.desconto.tipo}
+                onChange={(e) => setDesconto({ tipo: e.target.value as 'nenhum' | 'percentual' | 'absoluto' })}
+              >
+                <option value="nenhum">Sem desconto</option>
+                <option value="percentual">Percentual (%)</option>
+                <option value="absoluto">Valor absoluto (R$)</option>
+              </select>
+            </div>
+            {state.desconto.tipo !== 'nenhum' && (
+              <div className={styles.field}>
+                <label className={styles.fieldLabel} htmlFor="desconto-valor">
+                  {state.desconto.tipo === 'percentual' ? 'Percentual' : 'Valor em R$'}
+                </label>
+                <input
+                  id="desconto-valor"
+                  type="number"
+                  min={0}
+                  step={state.desconto.tipo === 'percentual' ? 0.5 : 1}
+                  max={state.desconto.tipo === 'percentual' ? 100 : undefined}
+                  value={state.desconto.valor}
+                  onChange={(e) => setDesconto({ valor: Math.max(0, Number(e.target.value) || 0) })}
+                  className={styles.fieldInput}
+                />
+              </div>
+            )}
+          </div>
+          {state.desconto.tipo !== 'nenhum' && state.desconto.valor > 0 && (
+            <div className={styles.descontoPreview}>
+              <span className={styles.descontoPreviewLabel}>Desconto aplicado</span>
+              <span className={styles.descontoPreviewValor}>
+                {state.desconto.tipo === 'percentual'
+                  ? `${state.desconto.valor}%`
+                  : formatBRL(state.desconto.valor)}
+              </span>
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   )
 }

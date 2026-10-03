@@ -19,6 +19,11 @@ export type Evento = {
 
 export type Pagamento = 'pix' | 'parcelado';
 
+export type Desconto = {
+  tipo: 'nenhum' | 'percentual' | 'absoluto'
+  valor: number
+}
+
 export type Cliente = {
   nome: string;
   whatsapp: string;
@@ -30,9 +35,9 @@ export type Orcamento = {
   cliente: Cliente;
   evento: Evento;
   convidados: Convidado;
-  plano: PlanoId;
   adicionais: Adicional;
   pagamento: Pagamento;
+  desconto: Desconto;
 };
 
 export type Totais = {
@@ -40,10 +45,19 @@ export type Totais = {
   pizzas: number;
   subtotal: number;
   adicionais: number;
+  descontoAplicado: number;
   total: number;
   totalParcelado: number;
   totalAvista: number;
   parcela10x: number;
+  precoPessoaUsado: number;
+};
+
+export type TotaisPorPlano = {
+  premium: Totais;
+  livreBebida: Totais;
+  livreSemBebida: Totais;
+  unidade: Totais;
 };
 
 export type MensagemWhatsApp = {

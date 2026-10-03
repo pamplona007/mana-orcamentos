@@ -1,8 +1,7 @@
 import { View, Text, Image, StyleSheet } from '@react-pdf/renderer'
 import { PDF_COLORS, pdfStyles } from '../styles'
-import { pdfData, pdfFormatBRL } from '../utils'
-import type { Totais } from '@/types/orcamento'
-import type { Plano } from '@/data/plans'
+import { pdfFormatBRL, pdfData } from '../utils'
+import type { TotaisPorPlano } from '@/types/orcamento'
 
 const styles = StyleSheet.create({
   hero: {
@@ -177,15 +176,87 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: PDF_COLORS.wine,
   },
+  planosHeroGrid: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 6,
+  },
+  planoHeroCard: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: PDF_COLORS.coal,
+    borderWidth: 1,
+    borderColor: PDF_COLORS.coal3,
+    borderRadius: 4,
+    position: 'relative',
+  },
+  planoHeroCardDestaque: {
+    backgroundColor: 'rgba(107, 31, 42, 0.18)',
+    borderColor: PDF_COLORS.wine,
+    borderWidth: 1.5,
+  },
+  planoHeroBadge: {
+    position: 'absolute',
+    top: -8,
+    right: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    backgroundColor: PDF_COLORS.wine,
+    color: PDF_COLORS.cream,
+    fontSize: 6,
+    fontFamily: 'Inter',
+    fontWeight: 700,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    borderRadius: 999,
+  },
+  planoHeroLabel: {
+    fontFamily: 'Inter',
+    fontSize: 8,
+    color: PDF_COLORS.creamDim,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    marginBottom: 6,
+  },
+  planoHeroPriceRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 2,
+  },
+  planoHeroCifrao: {
+    fontFamily: 'Inter',
+    fontSize: 9,
+    color: PDF_COLORS.creamFaint,
+    fontWeight: 500,
+  },
+  planoHeroInteiro: {
+    fontFamily: 'Fraunces',
+    fontSize: 22,
+    color: PDF_COLORS.cream,
+    fontWeight: 500,
+    fontVariantNumeric: 'tabular-nums',
+    letterSpacing: -0.4,
+  },
+  planoHeroCentavos: {
+    fontFamily: 'Inter',
+    fontSize: 10,
+    color: PDF_COLORS.creamDim,
+  },
+  planoHeroPorPessoa: {
+    fontFamily: 'Inter',
+    fontSize: 7,
+    color: PDF_COLORS.creamFaint,
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+    marginTop: 4,
+  },
 })
 
 type Props = {
   clienteNome: string
   dataISO: string
   cidadeBairro: string
-  plano: Plano
-  totais: Totais
-  pagamento: 'pix' | 'parcelado'
+  totais: TotaisPorPlano
   validadeISO: string
 }
 
@@ -193,15 +264,17 @@ export function PageCapa({
   clienteNome,
   dataISO,
   cidadeBairro,
-  plano,
   totais,
-  pagamento,
   validadeISO,
 }: Props) {
-  const total = pagamento === 'pix' ? totais.totalAvista : totais.total
-  const totalFmt = pdfFormatBRL(total)
   const dataFmt = pdfData(dataISO)
   const validadeFmt = pdfData(validadeISO)
+
+  const planosResumo = [
+    { id: 'premium' as const, label: 'Premium', preco: totais.premium.precoPessoaUsado, destaque: true },
+    { id: 'livre' as const, label: 'Rodízio Livre', preco: totais.livreBebida.precoPessoaUsado, destaque: false },
+    { id: 'sembebida' as const, label: 'Sem bebida', preco: totais.livreSemBebida.precoPessoaUsado, destaque: false },
+  ]
 
   return (
     <View style={styles.hero}>
@@ -234,26 +307,44 @@ export function PageCapa({
             <Text style={styles.metaValue}>{cidadeBairro || 'A definir'}</Text>
           </View>
           <View style={styles.metaItem}>
-            <Text style={styles.metaLabel}>Plano</Text>
-            <Text style={styles.metaValue}>{plano.nome}</Text>
+            <Text style={styles.metaLabel}>Convidados</Text>
+            <Text style={styles.metaValue}>{totais.premium.adultosEquivalentes} pessoas</Text>
           </View>
         </View>
 
         <View style={styles.totalBox}>
-          <Text style={styles.totalLabel}>
-            {pagamento === 'pix' ? 'Total à vista' : 'Total · 10x de R$ ' + totais.parcela10x.toFixed(2)}
-          </Text>
-          <View style={styles.totalPriceRow}>
-            <Text style={styles.totalCifrao}>{totalFmt.cifrao}</Text>
-            <Text style={styles.totalInteiro}>{totalFmt.inteiro}</Text>
-            <Text style={styles.totalCentavos}>,{totalFmt.centavos}</Text>
+          <Text style={styles.totalLabel}>Escolha o plano ideal para o seu evento</Text>
+          <View style={styles.planosHeroGrid}>
+            {planosResumo.map((p) => {
+              const fmt = pdfFormatBRL(p.preco)
+              return (
+                <View
+                  key={p.id}
+                  style={[
+                    styles.planoHeroCard,
+                    p.destaque ? styles.planoHeroCardDestaque : null,
+                  ].filter((s): s is NonNullable<typeof s> => s !== null)}
+                >
+                  {p.destaque && (
+                    <Text style={styles.planoHeroBadge}>★ Recomendado</Text>
+                  )}
+                  <Text style={styles.planoHeroLabel}>{p.label}</Text>
+                  <View style={styles.planoHeroPriceRow}>
+                    <Text style={styles.planoHeroCifrao}>{fmt.cifrao}</Text>
+                    <Text style={styles.planoHeroInteiro}>{fmt.inteiro}</Text>
+                    <Text style={styles.planoHeroCentavos}>,{fmt.centavos}</Text>
+                  </View>
+                  <Text style={styles.planoHeroPorPessoa}>por pessoa</Text>
+                </View>
+              )
+            })}
           </View>
         </View>
       </View>
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>manarodizio · @manarodizio</Text>
-        <Text style={styles.footerText}>Página 1 de 4</Text>
+        <Text style={styles.footerText}>Página 1 de 3</Text>
       </View>
     </View>
   )

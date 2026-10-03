@@ -8,6 +8,7 @@ import {
 import type {
   Adicional,
   Convidado,
+  Desconto,
   Pagamento,
   PlanoId,
   Totais,
@@ -63,25 +64,45 @@ export function calcularTotais(
   convidados: Convidado,
   adicionais: Adicional,
   pagamento: Pagamento,
+  desconto: Desconto = { tipo: 'nenhum', valor: 0 },
 ): Totais {
   void pagamento
   const { subtotal, unidades, tipoUnidade } = calcularSubtotal(planoId, convidados)
   const valorAdicionais = calcularAdicionais(adicionais)
-  const total = subtotal + valorAdicionais
+  const baseComAdicionais = subtotal + valorAdicionais
+
+  const descontoAplicado = calcularDesconto(baseComAdicionais, desconto)
+  const total = Math.max(0, baseComAdicionais - descontoAplicado)
   const totalParcelado = total
   const totalAvista = applyDescontoAvista(total, DESCONTO_AVISTA)
   const parcela10x = roundParcela(totalParcelado, PARCELAS)
+  const plano = PLANO_POR_ID[planoId]
+  const precoPessoaUsado =
+    planoId === 'unidade' && plano.precoPizzaParcelado !== undefined
+      ? plano.precoPizzaParcelado
+      : plano.precoPessoaParcelado
 
   return {
     adultosEquivalentes: tipoUnidade === 'pessoas' ? unidades : 0,
     pizzas: tipoUnidade === 'pizzas' ? unidades : 0,
     subtotal,
     adicionais: valorAdicionais,
+    descontoAplicado,
     total,
     totalParcelado,
     totalAvista,
     parcela10x,
+    precoPessoaUsado,
   }
+}
+
+function calcularDesconto(base: number, desconto: Desconto): number {
+  if (desconto.tipo === 'nenhum' || desconto.valor <= 0) return 0
+  if (desconto.tipo === 'percentual') {
+    const pct = Math.min(100, Math.max(0, desconto.valor))
+    return Math.round(base * (pct / 100) * 100) / 100
+  }
+  return Math.min(base, Math.max(0, desconto.valor))
 }
 
 export function validarDeslocamento(cidadeBairro: string): boolean {

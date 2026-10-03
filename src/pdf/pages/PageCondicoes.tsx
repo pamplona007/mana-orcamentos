@@ -234,7 +234,7 @@ export function PageCondicoes({ validadeISO, clienteNome }: Props) {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>manarodizio · @manarodizio</Text>
-        <Text style={styles.footerText}>Página 4 de 4</Text>
+        <Text style={styles.footerText}>Página 3 de 3</Text>
       </View>
     </View>
   )

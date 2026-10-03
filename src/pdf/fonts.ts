@@ -20,5 +20,6 @@ Font.register({
     { src: `${fontBase}/inter-500-normal.woff2`, fontWeight: 500 },
     { src: `${fontBase}/inter-600-normal.woff2`, fontWeight: 600 },
     { src: `${fontBase}/inter-700-normal.woff2`, fontWeight: 700 },
+    { src: `${fontBase}/inter-400-normal.woff2`, fontWeight: 400, fontStyle: 'italic' },
   ],
 })

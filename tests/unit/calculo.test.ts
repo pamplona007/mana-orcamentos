@@ -173,6 +173,56 @@ describe('validarDeslocamento', () => {
   })
 })
 
+describe('calcularDesconto (via calcularTotais)', () => {
+  it('não aplica desconto quando tipo é "nenhum"', () => {
+    const t = calcularTotais(
+      'premium',
+      { adultos: 25, criancas0a4: 0, criancas5a9: 0 },
+      semAdicional,
+      'parcelado',
+      { tipo: 'nenhum', valor: 0 },
+    )
+    expect(t.descontoAplicado).toBe(0)
+    expect(t.total).toBe(2940)
+  })
+
+  it('aplica desconto percentual sobre o subtotal+adicionais', () => {
+    const t = calcularTotais(
+      'premium',
+      { adultos: 25, criancas0a4: 0, criancas5a9: 0 },
+      semAdicional,
+      'parcelado',
+      { tipo: 'percentual', valor: 5 },
+    )
+    expect(t.descontoAplicado).toBe(147) // 5% de 2940
+    expect(t.total).toBe(2793)
+  })
+
+  it('aplica desconto absoluto limitado ao total', () => {
+    const t = calcularTotais(
+      'premium',
+      { adultos: 25, criancas0a4: 0, criancas5a9: 0 },
+      semAdicional,
+      'parcelado',
+      { tipo: 'absoluto', valor: 500 },
+    )
+    expect(t.descontoAplicado).toBe(500)
+    expect(t.total).toBe(2440)
+  })
+
+  it('desconto absoluto maior que o total zera o total', () => {
+    const t = calcularTotais(
+      'livre-bebida',
+      { adultos: 1, criancas0a4: 0, criancas5a9: 0 },
+      semAdicional,
+      'parcelado',
+      { tipo: 'absoluto', valor: 9999 },
+    )
+    expect(t.descontoAplicado).toBe(66) // limitado ao subtotal
+    expect(t.total).toBe(0)
+  })
+})
+
 describe('dataValidade', () => {
   it('soma 48h', () => {
     const antes = '2026-10-03T12:00:00.000Z'

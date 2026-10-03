@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet } from '@react-pdf/renderer'
 import { PDF_COLORS } from '../styles'
 import { pdfFormatBRL } from '../utils'
-import { PLANOS, type Plano } from '@/data/plans'
-import type { Totais } from '@/types/orcamento'
+import { PLANOS } from '@/data/plans'
+import type { TotaisPorPlano } from '@/types/orcamento'
 
 const styles = StyleSheet.create({
   header: {
@@ -234,12 +234,12 @@ const styles = StyleSheet.create({
 })
 
 type Props = {
-  planoSelecionado: Plano
-  totais: Totais
+  totais: TotaisPorPlano
   pagamento: 'pix' | 'parcelado'
+  pagamentoLabel: string
 }
 
-export function PageComparativo({ planoSelecionado, pagamento }: Props) {
+export function PageComparativo({ totais, pagamento, pagamentoLabel }: Props) {
   return (
     <View style={{ flex: 1, backgroundColor: PDF_COLORS.ink, padding: 48 }}>
       <View style={styles.header}>
@@ -259,14 +259,19 @@ export function PageComparativo({ planoSelecionado, pagamento }: Props) {
       <View style={styles.grid}>
         {PLANOS.map((p) => {
           const isPremium = p.id === 'premium'
-          const isSelected = p.id === planoSelecionado.id
-          const preco = pagamento === 'pix' ? p.precoPessoaAvista : p.precoPessoaParcelado
+          const totaisPlano =
+            p.id === 'premium' ? totais.premium :
+            p.id === 'livre-bebida' ? totais.livreBebida :
+            p.id === 'livre-sem-bebida' ? totais.livreSemBebida :
+            totais.unidade
+          const preco = pagamento === 'pix' && p.precoPessoaAvista
+            ? p.precoPessoaAvista
+            : totaisPlano.precoPessoaUsado
           const isUnidade = p.id === 'unidade'
           const fmt = pdfFormatBRL(preco)
           const cardStyle = [
             styles.card,
             isPremium ? styles.cardPremium : null,
-            isSelected && !isPremium ? styles.cardSelected : null,
           ].filter((s): s is NonNullable<typeof s> => s !== null)
 
           return (
@@ -302,9 +307,7 @@ export function PageComparativo({ planoSelecionado, pagamento }: Props) {
                   ,{fmt.centavos}
                 </Text>
               </View>
-              <Text style={styles.cardPagamento}>
-                {pagamento === 'pix' ? 'à vista no Pix' : 'parcelado em 10x'}
-              </Text>
+              <Text style={styles.cardPagamento}>{pagamentoLabel}</Text>
 
               <View style={styles.inclusos}>
                 {p.inclusos.slice(0, 5).map((item) => (
@@ -328,7 +331,7 @@ export function PageComparativo({ planoSelecionado, pagamento }: Props) {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>manarodizio · @manarodizio</Text>
-        <Text style={styles.footerText}>Página 2 de 4</Text>
+        <Text style={styles.footerText}>Página 2 de 3</Text>
       </View>
     </View>
   )
