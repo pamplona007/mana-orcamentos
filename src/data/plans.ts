@@ -163,7 +163,6 @@ export const ADICIONAL_ENTRADA = 350;
 export const ADICIONAL_SALGADO_EXTRA = 75;
 export const DESCONTO_AVISTA = 0.15;
 export const PARCELAS = 10;
-export const VALIDADE_HORAS = 48;
 export const BATE_LIMITE_HORAS = 22;
 
 export const OPCIONAIS = {

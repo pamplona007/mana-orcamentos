@@ -16,6 +16,7 @@ import { Link, useOutletContext } from 'react-router-dom'
 import { OrcamentoPDF } from '@/pdf/OrcamentoPDF'
 import { OrcamentoPDFPrint } from '@/pdf/OrcamentoPDFPrint'
 import { useOrcamento } from '@/hooks/useOrcamento'
+import { useConfig } from '@/hooks/useConfig'
 import { PLANOS } from '@/data/plans'
 import { formatBRL } from '@/utils/money'
 import { pdfData } from '@/pdf/utils'
@@ -49,8 +50,14 @@ const mensagemWhatsApp = ({
 
 export function Preview() {
   const { state, totais, toOrcamento } = useOrcamento()
+  const { config } = useConfig()
   const shellCtx = useOutletContext<AppShellCtx | null>()
   const [salvo, setSalvo] = useState<OrcamentoSalvo | null>(null)
+
+  const validadeISO = useMemo(
+    () => new Date(Date.now() + config.validade.horas * 60 * 60 * 1000).toISOString(),
+    [config.validade.horas],
+  )
 
   const orcamento = useMemo(
     () => toOrcamento(salvo?.id),
@@ -131,7 +138,7 @@ export function Preview() {
             {salvo ? 'Salvo' : 'Salvar'}
           </button>
           <PDFDownloadLink
-            document={<OrcamentoPDF orcamento={orcamento} totais={totaisPorPlano} validadeISO={new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()} />}
+            document={<OrcamentoPDF orcamento={orcamento} totais={totaisPorPlano} validadeISO={validadeISO} />}
             fileName={fileName}
             className={styles.btnDownload}
           >
@@ -150,7 +157,7 @@ export function Preview() {
             }
           </PDFDownloadLink>
           <PDFDownloadLink
-            document={<OrcamentoPDFPrint orcamento={orcamento} totais={totaisPorPlano} validadeISO={new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()} />}
+            document={<OrcamentoPDFPrint orcamento={orcamento} totais={totaisPorPlano} validadeISO={validadeISO} />}
             fileName={fileName.replace('.pdf', '-pb.pdf')}
             className={styles.btnPrint}
           >
@@ -218,7 +225,7 @@ export function Preview() {
         <section className={styles.cardWide}>
           <span className={styles.cardEyebrow}>Pré-visualização do PDF</span>
           <PDFViewer style={{ width: '100%', height: '70vh', border: 'none' }} showToolbar={false}>
-            <OrcamentoPDF orcamento={orcamento} totais={totaisPorPlano} validadeISO={new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()} />
+            <OrcamentoPDF orcamento={orcamento} totais={totaisPorPlano} validadeISO={validadeISO} />
           </PDFViewer>
         </section>
       </main>

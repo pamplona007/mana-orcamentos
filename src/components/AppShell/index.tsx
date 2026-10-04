@@ -68,6 +68,14 @@ export function AppShell(_props: AppShellProps = {}) {
             >
               Histórico
             </NavLink>
+            <NavLink
+              to="/settings"
+              className={({ isActive }) =>
+                isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
+              }
+            >
+              Configurações
+            </NavLink>
           </nav>
           <button
             type="button"

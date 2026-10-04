@@ -13,6 +13,7 @@ import {
 } from '@tabler/icons-react'
 import { listarOrcamentos, duplicarOrcamento, removerOrcamento, type OrcamentoSalvo } from '@/storage/orcamentos'
 import { useOrcamento } from '@/hooks/useOrcamento'
+import { useConfig } from '@/hooks/useConfig'
 import { formatBRL } from '@/utils/money'
 import { pdfData } from '@/pdf/utils'
 import { PLANOS } from '@/data/plans'
@@ -44,6 +45,7 @@ function statusDoOrcamento(o: OrcamentoSalvo, validadeISO: string): {
 export function History() {
   const navigate = useNavigate()
   const { load } = useOrcamento()
+  const { config } = useConfig()
   const [busca, setBusca] = useState('')
   const [lista, setLista] = useState<OrcamentoSalvo[]>(() => listarOrcamentos())
 
@@ -151,7 +153,7 @@ export function History() {
               const totalPessoas = adultos + criancas
               const totalAvista = o.totais.livreSemBebida.totalAvista
               const validadeISO = new Date(
-                new Date(o.criadoEm).getTime() + 48 * 60 * 60 * 1000,
+                new Date(o.criadoEm).getTime() + config.validade.horas * 60 * 60 * 1000,
               ).toISOString()
               const status = statusDoOrcamento(o, validadeISO)
 
