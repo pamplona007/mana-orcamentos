@@ -44,7 +44,8 @@
 
 .btnDownload,
 .btnWhatsapp,
-.btnPrint {
+.btnPrint,
+.btnSave {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -57,6 +58,17 @@
   cursor: pointer;
   text-decoration: none;
   transition: background-color var(--duration-fast) var(--ease-expo-out);
+}
+
+.btnSave {
+  background: var(--success);
+  color: var(--ink);
+  border: 1px solid var(--success);
+
+  &:hover {
+    background: transparent;
+    color: var(--success);
+  }
 }
 
 .btnDownload {
@@ -280,7 +292,8 @@
   }
   .btnDownload,
   .btnWhatsapp,
-  .btnPrint {
+  .btnPrint,
+  .btnSave {
     flex: 1;
     justify-content: center;
   }

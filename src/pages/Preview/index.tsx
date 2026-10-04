@@ -1,5 +1,5 @@
 /* The WhatsApp message uses short sentences and a conversational tone so it reads like a real attendant message. */
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer'
 import {
   IconDownload,
@@ -10,14 +10,17 @@ import {
   IconUsers,
   IconReceipt,
   IconPrinter,
+  IconDeviceFloppy,
 } from '@tabler/icons-react'
-import { Link } from 'react-router-dom'
+import { Link, useOutletContext } from 'react-router-dom'
 import { OrcamentoPDF } from '@/pdf/OrcamentoPDF'
 import { OrcamentoPDFPrint } from '@/pdf/OrcamentoPDFPrint'
 import { useOrcamento } from '@/hooks/useOrcamento'
 import { PLANOS } from '@/data/plans'
 import { formatBRL } from '@/utils/money'
 import { pdfData } from '@/pdf/utils'
+import { salvarOrcamento, type OrcamentoSalvo } from '@/storage/orcamentos'
+import type { AppShellCtx } from '@/components/AppShell'
 import styles from './styles.module.scss'
 
 const mensagemWhatsApp = ({
@@ -45,30 +48,28 @@ const mensagemWhatsApp = ({
 }
 
 export function Preview() {
-  const { state, totais } = useOrcamento()
+  const { state, totais, toOrcamento } = useOrcamento()
+  const shellCtx = useOutletContext<AppShellCtx | null>()
+  const [salvo, setSalvo] = useState<OrcamentoSalvo | null>(null)
 
   const orcamento = useMemo(
-    () => ({
-      id: crypto.randomUUID(),
-      criadoEm: new Date().toISOString(),
-      cliente: state.cliente,
-      evento: state.evento,
-      convidados: state.convidados,
-      deslocamento: state.deslocamento,
-      pagamento: state.pagamento,
-      desconto: state.desconto,
-    }),
-    [state],
+    () => toOrcamento(salvo?.id),
+    [toOrcamento, salvo?.id],
   )
 
-  // Build TotaisPorPlano from useOrcamento
+  useEffect(() => {
+    if (!salvo) return
+    const mesmoCliente = salvo.cliente.nome === state.cliente.nome
+    const mesmaData = salvo.evento.data === state.evento.data
+    if (!mesmoCliente || !mesmaData) setSalvo(null)
+  }, [state.cliente.nome, state.evento.data, salvo])
+
   const totaisPorPlano = {
     premium: totais.premium,
     livreBebida: totais.livreBebida,
     livreSemBebida: totais.livreSemBebida,
     unidade: totais.unidade,
   }
-  void totaisPorPlano
 
   const condicaoPagamento = state.pagamento === 'pix'
     ? 'à vista no Pix com 15% de desconto'
@@ -94,6 +95,12 @@ export function Preview() {
 
   const fileName = `orcamento-mana-${(state.cliente.nome || 'sem-nome').toLowerCase().replace(/\s+/g, '-')}.pdf`
 
+  const handleSalvar = () => {
+    const novo = salvarOrcamento(toOrcamento(salvo?.id), totaisPorPlano)
+    setSalvo(novo)
+    shellCtx?.showSavedBadge()
+  }
+
   const adultos = state.convidados.adultos
   const criancas = state.convidados.criancas0a4 + state.convidados.criancas5a9
   const totalPessoas = adultos + criancas
@@ -114,6 +121,15 @@ export function Preview() {
         </Link>
 
         <div className={styles.actions}>
+          <button
+            type="button"
+            onClick={handleSalvar}
+            className={styles.btnSave}
+            aria-label="Salvar orçamento no histórico"
+          >
+            <IconDeviceFloppy size={16} aria-hidden="true" />
+            {salvo ? 'Salvo' : 'Salvar'}
+          </button>
           <PDFDownloadLink
             document={<OrcamentoPDF orcamento={orcamento} totais={totaisPorPlano} validadeISO={new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()} />}
             fileName={fileName}
@@ -205,50 +221,6 @@ export function Preview() {
             <OrcamentoPDF orcamento={orcamento} totais={totaisPorPlano} validadeISO={new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()} />
           </PDFViewer>
         </section>
-
-        <section className={styles.cardWide}>
-          <span className={styles.cardEyebrow}>Planos no PDF</span>
-          <div className={styles.planosGrid}>
-            {planosResumo.map(({ id, plano, total }) => (
-              <div
-                key={id}
-                className={`${styles.planoMini} ${id === 'premium' ? styles.planoMiniPremium : ''}`}
-              >
-                <span className={styles.planoMiniLabel}>
-                  {id === 'premium' && '★ '}
-                  {plano.nome}
-                </span>
-                <span className={styles.planoMiniPreco}>{formatBRL(total.total)}</span>
-                <span className={styles.planoMiniParcela}>
-                  ou 10x de {formatBRL(total.parcela10x)}
-                </span>
-              </div>
-            ))}
-          </div>
-          {state.desconto.tipo !== 'nenhum' && (
-            <p className={styles.descontoAplicado}>
-              Desconto aplicado:{' '}
-              {state.desconto.tipo === 'percentual'
-                ? `${state.desconto.valor}%`
-                : formatBRL(state.desconto.valor)}
-            </p>
-          )}
-        </section>
-
-        <section className={styles.card}>
-          <span className={styles.cardEyebrow}>Pagamento</span>
-          <h2 className={styles.cardTitle}>
-            <IconReceipt size={20} aria-hidden="true" />
-            {state.pagamento === 'pix' ? 'À vista no Pix' : 'Parcelado em 10x'}
-          </h2>
-          <p className={styles.cardMeta}>
-            Adicionais opcionais disponíveis no PDF
-          </p>
-        </section>
-
-        <p className={styles.finalHint}>
-          O PDF gerado traz os 3 planos lado a lado. O cliente escolhe o que preferir.
-        </p>
       </main>
     </div>
   )

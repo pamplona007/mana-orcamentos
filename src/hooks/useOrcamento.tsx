@@ -11,7 +11,7 @@ import type {
 } from '@/types/orcamento'
 import { calcularTotais } from '@/utils/calculo'
 
-export type State = {
+export type LoadableState = {
   cliente: Cliente
   evento: Evento
   convidados: Convidado
@@ -20,6 +20,8 @@ export type State = {
   deslocamento: Deslocamento
 }
 
+export type State = LoadableState
+
 type Action =
   | { type: 'setCliente'; cliente: Cliente }
   | { type: 'setEvento'; evento: Partial<Evento> }
@@ -27,7 +29,7 @@ type Action =
   | { type: 'setDesconto'; desconto: Partial<Desconto> }
   | { type: 'setDeslocamento'; deslocamento: Partial<Deslocamento> }
   | { type: 'reset' }
-  | { type: 'load'; state: State }
+  | { type: 'load'; state: LoadableState }
 
 const initialState: State = {
   cliente: { nome: '', whatsapp: '' },
@@ -66,9 +68,9 @@ type Ctx = {
   setDesconto: (desconto: Partial<Desconto>) => void
   setDeslocamento: (deslocamento: Partial<Deslocamento>) => void
   reset: () => void
-  load: (state: State) => void
+  load: (state: LoadableState) => void
   totais: TotaisPorPlano
-  toOrcamento: () => Orcamento
+  toOrcamento: (id?: string) => Orcamento
 }
 
 const OrcamentoContext = createContext<Ctx | null>(null)
@@ -85,8 +87,8 @@ export function OrcamentoProvider({ children }: { children: ReactNode }) {
     }
   }, [state])
 
-  const toOrcamento = (): Orcamento => ({
-    id: crypto.randomUUID(),
+  const toOrcamento = (id?: string): Orcamento => ({
+    id: id ?? crypto.randomUUID(),
     criadoEm: new Date().toISOString(),
     cliente: state.cliente,
     evento: state.evento,

@@ -1,22 +1,25 @@
 import { Outlet, NavLink, Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import styles from './styles.module.scss'
 import { useTheme } from '@/hooks/useTheme'
 
-type AppShellProps = {
-  showSavedBadge?: boolean
-}
+type AppShellProps = Record<string, never>
 
-export function AppShell({ showSavedBadge = false }: AppShellProps) {
+export type AppShellCtx = { showSavedBadge: () => void }
+
+export function AppShell(_props: AppShellProps = {}) {
   const { theme, toggle } = useTheme()
   const [savedVisible, setSavedVisible] = useState(false)
 
-  useEffect(() => {
-    if (!showSavedBadge) return
+  const showSavedBadge = useCallback(() => {
     setSavedVisible(true)
+  }, [])
+
+  useEffect(() => {
+    if (!savedVisible) return
     const t = setTimeout(() => setSavedVisible(false), 1600)
     return () => clearTimeout(t)
-  }, [showSavedBadge])
+  }, [savedVisible])
 
   return (
     <div className={styles.shell}>
@@ -78,7 +81,7 @@ export function AppShell({ showSavedBadge = false }: AppShellProps) {
       </header>
 
       <main className={styles.main}>
-        <Outlet />
+        <Outlet context={{ showSavedBadge }} />
       </main>
     </div>
   )
