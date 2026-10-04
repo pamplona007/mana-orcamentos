@@ -1,26 +1,18 @@
-import { Page, View, Text, StyleSheet, Image } from '@react-pdf/renderer'
-import { PDF_COLORS } from '../styles'
-import { PLANO_POR_ID } from '@/data/plans'
+import { Page, View, Text, StyleSheet } from '@react-pdf/renderer'
+import { PLANO_POR_ID } from '../../data/plans'
 import { pdfFormatBRL } from '../utils'
-import type { Orcamento, TotaisPorPlano, PlanoId } from '@/types/orcamento'
+import type { Orcamento, TotaisPorPlano, PlanoId } from '../../types/orcamento'
 
 const PLANO_IDS: PlanoId[] = ['premium', 'livre-bebida', 'livre-sem-bebida']
 
-const PLANO_IMAGES: Record<PlanoId, string> = {
-  premium: '/images/pizza-premium.jpg',
-  'livre-bebida': '/images/pizza-queijo.jpg',
-  'livre-sem-bebida': '/images/pizza-queijo.jpg',
-  unidade: '/images/pizza-artesao.jpg',
-}
-
 const styles = StyleSheet.create({
   page: {
-    backgroundColor: PDF_COLORS.ink,
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 40,
     paddingVertical: 52,
     fontFamily: 'Inter',
     fontSize: 9,
-    color: PDF_COLORS.cream,
+    color: '#000000',
   },
   header: {
     marginBottom: 24,
@@ -29,7 +21,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
     fontSize: 9,
     fontWeight: 700,
-    color: PDF_COLORS.ochre,
+    color: '#000000',
     textTransform: 'uppercase',
     letterSpacing: 2.5,
     marginBottom: 10,
@@ -38,7 +30,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Fraunces',
     fontSize: 38,
     fontWeight: 500,
-    color: PDF_COLORS.cream,
+    color: '#000000',
     letterSpacing: -0.8,
     lineHeight: 1.05,
     marginBottom: 8,
@@ -47,13 +39,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Fraunces',
     fontSize: 12,
     fontStyle: 'italic',
-    color: PDF_COLORS.creamDim,
+    color: '#333333',
     maxWidth: '85%',
   },
   displacementNote: {
     fontFamily: 'Inter',
     fontSize: 8.5,
-    color: PDF_COLORS.ochre,
+    color: '#000000',
     marginTop: 8,
   },
   cards: {
@@ -62,31 +54,44 @@ const styles = StyleSheet.create({
   },
   card: {
     flex: 1,
-    backgroundColor: PDF_COLORS.coal,
+    borderWidth: 0.5,
+    borderColor: '#000000',
     borderRadius: 6,
     overflow: 'hidden',
   },
   cardDestaque: {
     flex: 1.4,
-    backgroundColor: PDF_COLORS.wine,
+    borderWidth: 1.5,
+    borderColor: '#000000',
     borderRadius: 6,
     overflow: 'hidden',
   },
   cardImageWrap: {
     height: 100,
-    backgroundColor: PDF_COLORS.espresso,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#000000',
     position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardImagePlaceholder: {
+    fontFamily: 'Inter',
+    fontSize: 11,
+    fontWeight: 700,
+    color: '#999999',
+    letterSpacing: 2.5,
   },
   cardImage: {
-    width: '100%',
-    height: '100%',
+    display: 'none',
   },
   cardBadge: {
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: PDF_COLORS.ochre,
-    color: PDF_COLORS.ink,
+    backgroundColor: '#000000',
+    color: '#FFFFFF',
     fontFamily: 'Inter',
     fontSize: 7,
     fontWeight: 700,
@@ -103,7 +108,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
     fontSize: 8,
     fontWeight: 600,
-    color: PDF_COLORS.creamFaint,
+    color: '#666666',
     textTransform: 'uppercase',
     letterSpacing: 1.5,
     marginBottom: 4,
@@ -112,7 +117,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Fraunces',
     fontSize: 20,
     fontWeight: 600,
-    color: PDF_COLORS.cream,
+    color: '#000000',
     letterSpacing: -0.3,
     marginBottom: 3,
   },
@@ -120,7 +125,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Fraunces',
     fontSize: 9.5,
     fontStyle: 'italic',
-    color: PDF_COLORS.creamDim,
+    color: '#333333',
     marginBottom: 10,
     lineHeight: 1.3,
   },
@@ -134,44 +139,39 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
     fontSize: 10,
     fontWeight: 500,
-    color: PDF_COLORS.creamDim,
+    color: '#333333',
   },
   cardInteiro: {
     fontFamily: 'Fraunces',
     fontSize: 28,
     fontWeight: 500,
-    color: PDF_COLORS.cream,
+    color: '#000000',
     fontVariantNumeric: 'tabular-nums',
     letterSpacing: -0.5,
   },
   cardCentavos: {
     fontFamily: 'Inter',
     fontSize: 12,
-    color: PDF_COLORS.creamDim,
+    color: '#333333',
   },
   cardParcela: {
     fontFamily: 'Inter',
     fontSize: 8.5,
-    color: PDF_COLORS.creamDim,
+    color: '#333333',
     marginBottom: 10,
   },
   cardPixLabel: {
     fontFamily: 'Inter',
     fontSize: 7.5,
-    fontWeight: 600,
-    color: PDF_COLORS.success,
+    fontWeight: 700,
+    color: '#000000',
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     marginBottom: 2,
   },
   cardDivider: {
     height: 0.5,
-    backgroundColor: PDF_COLORS.coal3,
-    marginVertical: 8,
-  },
-  cardDividerDestaque: {
-    height: 0.5,
-    backgroundColor: PDF_COLORS.wineGlow,
+    backgroundColor: '#000000',
     marginVertical: 8,
   },
   cardFeature: {
@@ -183,27 +183,29 @@ const styles = StyleSheet.create({
   cardFeatureDot: {
     fontFamily: 'Inter',
     fontSize: 8,
-    color: PDF_COLORS.ochre,
+    color: '#000000',
     marginTop: 1,
   },
   cardFeatureText: {
     flex: 1,
     fontFamily: 'Inter',
     fontSize: 8.5,
-    color: PDF_COLORS.creamDim,
+    color: '#333333',
     lineHeight: 1.35,
   },
   cardDuration: {
     fontFamily: 'Inter',
     fontSize: 8,
     fontWeight: 600,
-    color: PDF_COLORS.creamFaint,
+    color: '#666666',
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     marginTop: 8,
   },
   destaqueBox: {
-    backgroundColor: PDF_COLORS.wineGlow,
+    borderWidth: 0.5,
+    borderColor: '#000000',
+    borderStyle: 'dashed',
     borderRadius: 4,
     padding: 10,
     marginTop: 4,
@@ -212,7 +214,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
     fontSize: 7,
     fontWeight: 700,
-    color: PDF_COLORS.ochre,
+    color: '#000000',
     textTransform: 'uppercase',
     letterSpacing: 1.5,
     marginBottom: 6,
@@ -224,13 +226,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Fraunces',
     fontSize: 9.5,
     fontWeight: 600,
-    color: PDF_COLORS.cream,
+    color: '#000000',
     marginBottom: 1,
   },
   destaqueCorpo: {
     fontFamily: 'Inter',
     fontSize: 7.5,
-    color: PDF_COLORS.creamDim,
+    color: '#333333',
     lineHeight: 1.35,
   },
 })
@@ -242,13 +244,13 @@ const PLANO_TOTAL_KEY: Record<PlanoId, keyof TotaisPorPlano> = {
   unidade: 'premium',
 }
 
-export type PageComparativoProps = {
+export type PageComparativoPrintProps = {
   orcamento: Orcamento
   totais: TotaisPorPlano
   validadeISO: string
 }
 
-export function PageComparativo(props: PageComparativoProps) {
+export function PageComparativoPrint(props: PageComparativoPrintProps) {
   const deslocamentoAtivo = props.orcamento.deslocamento?.ativo
   const deslocamento = pdfFormatBRL(props.totais.premium.deslocamento)
   return (
@@ -279,11 +281,6 @@ export function PageComparativo(props: PageComparativoProps) {
 
           return (
             <View key={plano.id} style={cardStyle}>
-              <View style={styles.cardImageWrap}>
-                <Image src={PLANO_IMAGES[plano.id]} style={styles.cardImage} />
-                {isDestaque && <Text style={styles.cardBadge}>{plano.badge}</Text>}
-              </View>
-
               <View style={styles.cardBody}>
                 <Text style={styles.cardNumber}>Plano {plano.numero}</Text>
                 <Text style={styles.cardNome}>{plano.nome}</Text>

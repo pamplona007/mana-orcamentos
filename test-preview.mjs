@@ -32,6 +32,16 @@ try {
 } catch (e) {
   console.log('Download failed:', e.message)
 }
+
+try {
+  const dl2 = page.waitForEvent('download', { timeout: 8000 })
+  await page.click('text="PDF preto e branco"')
+  const download = await dl2
+  await download.saveAs('/tmp/hbqa/orcamento-pb.pdf')
+  console.log('P&B download saved.')
+} catch (e) {
+  console.log('P&B download failed:', e.message)
+}
 console.log('OK: page loaded, screenshot saved')
 console.log('pageerrors:', errors)
 console.log('console errors:', consoleErrors.slice(0, 3))

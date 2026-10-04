@@ -43,7 +43,8 @@
 }
 
 .btnDownload,
-.btnWhatsapp {
+.btnWhatsapp,
+.btnPrint {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -54,27 +55,37 @@
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-md);
   cursor: pointer;
+  text-decoration: none;
   transition: background-color var(--duration-fast) var(--ease-expo-out);
 }
 
 .btnDownload {
   background: var(--rust);
   color: var(--cream);
-  text-decoration: none;
-}
 
-.btnDownload:hover {
-  background: var(--rust-glow);
+  &:hover {
+    background: var(--rust-glow);
+  }
 }
 
 .btnWhatsapp {
   background: #25D366;
   color: #0E0B08;
-  text-decoration: none;
+
+  &:hover {
+    background: #1DA851;
+  }
 }
 
-.btnWhatsapp:hover {
-  background: #1DA851;
+.btnPrint {
+  background: transparent;
+  color: var(--cream);
+  border: 1px solid var(--cream-dim);
+
+  &:hover {
+    background: var(--cream);
+    color: var(--ink);
+  }
 }
 
 .erroBar {
@@ -268,7 +279,8 @@
     width: 100%;
   }
   .btnDownload,
-  .btnWhatsapp {
+  .btnWhatsapp,
+  .btnPrint {
     flex: 1;
     justify-content: center;
   }

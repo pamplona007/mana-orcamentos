@@ -9,9 +9,11 @@ import {
   IconCalendarEvent,
   IconUsers,
   IconReceipt,
+  IconPrinter,
 } from '@tabler/icons-react'
 import { Link } from 'react-router-dom'
 import { OrcamentoPDF } from '@/pdf/OrcamentoPDF'
+import { OrcamentoPDFPrint } from '@/pdf/OrcamentoPDFPrint'
 import { useOrcamento } from '@/hooks/useOrcamento'
 import { PLANOS } from '@/data/plans'
 import { formatBRL } from '@/utils/money'
@@ -127,6 +129,25 @@ export function Preview() {
                 <>
                   <IconDownload size={16} aria-hidden="true" />
                   Baixar PDF
+                </>
+              )
+            }
+          </PDFDownloadLink>
+          <PDFDownloadLink
+            document={<OrcamentoPDFPrint orcamento={orcamento} totais={totaisPorPlano} validadeISO={new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()} />}
+            fileName={fileName.replace('.pdf', '-pb.pdf')}
+            className={styles.btnPrint}
+          >
+            {({ loading }) =>
+              loading ? (
+                <>
+                  <IconPrinter size={16} aria-hidden="true" />
+                  Gerando…
+                </>
+              ) : (
+                <>
+                  <IconPrinter size={16} aria-hidden="true" />
+                  PDF preto e branco
                 </>
               )
             }
