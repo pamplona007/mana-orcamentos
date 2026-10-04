@@ -153,9 +153,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
     fontSize: 8.5,
     color: PDF_COLORS.creamDim,
-    marginBottom: 6,
+    marginBottom: 10,
   },
-  cardAvistaLabel: {
+  cardPixLabel: {
     fontFamily: 'Inter',
     fontSize: 7.5,
     fontWeight: 600,
@@ -163,15 +163,6 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     marginBottom: 2,
-  },
-  cardAvistaPrice: {
-    fontFamily: 'Fraunces',
-    fontSize: 12,
-    fontWeight: 500,
-    color: PDF_COLORS.success,
-    fontVariantNumeric: 'tabular-nums',
-    letterSpacing: -0.2,
-    marginBottom: 8,
   },
   cardDivider: {
     height: 0.5,
@@ -281,7 +272,6 @@ export function PageComparativo(props: PageComparativoProps) {
           const totaisPlano = props.totais[PLANO_TOTAL_KEY[id]]
           const isDestaque = plano.badge === 'RECOMENDADO'
           const cardStyle = isDestaque ? styles.cardDestaque : styles.card
-          const dividerStyle = isDestaque ? styles.cardDividerDestaque : styles.cardDivider
           const totalPix = pdfFormatBRL(totaisPlano.totalAvista)
           const parcela = pdfFormatBRL(totaisPlano.parcela10x)
           const features = isDestaque ? plano.inclusos.slice(0, 4) : plano.inclusos
@@ -304,12 +294,12 @@ export function PageComparativo(props: PageComparativoProps) {
                   <Text style={styles.cardInteiro}>{totalPix.inteiro}</Text>
                   <Text style={styles.cardCentavos}>,{totalPix.centavos}</Text>
                 </View>
-                <Text style={styles.cardAvistaLabel}>À vista, com 15% de desconto</Text>
+                <Text style={styles.cardPixLabel}>À vista, com 15% de desconto</Text>
                 <Text style={styles.cardParcela}>
                   ou 10x de {parcela.cifrao} {parcela.inteiro},{parcela.centavos}
                 </Text>
 
-                <View style={dividerStyle} />
+                <View style={styles.cardDivider} />
 
                 {features.map((item) => (
                   <View key={item} style={styles.cardFeature}>

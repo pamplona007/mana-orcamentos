@@ -16,12 +16,6 @@ const styles = StyleSheet.create({
   hero: {
     marginBottom: 28,
   },
-  heroImage: {
-    width: '100%',
-    height: 220,
-    marginBottom: 22,
-    borderRadius: 4,
-  },
   kicker: {
     fontFamily: 'Inter',
     fontSize: 9,
@@ -184,7 +178,7 @@ export function PageUnidade(props: PageUnidadeProps) {
           Você controla a quantidade, a gente mantém o forno aceso
         </Text>
         <Text style={styles.sub}>
-          Mesa fixa de self service com 30 sabores girando. Ideal pra listas abertas,
+          Mesa fixa de self service, ideal pra listas abertas,
           eventos com outras comidas ou quando você quer pagar só pelo que sai do forno.
         </Text>
 
