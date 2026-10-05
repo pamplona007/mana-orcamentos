@@ -3,17 +3,25 @@ import { useCallback, useEffect, useState } from 'react'
 import styles from './styles.module.scss'
 import { useTheme } from '@/hooks/useTheme'
 
-type AppShellProps = Record<string, never>
+type AppShellProps = {
+  showSavedBadge?: boolean
+}
 
 export type AppShellCtx = { showSavedBadge: () => void }
 
-export function AppShell(_props: AppShellProps = {}) {
+export function AppShell({ showSavedBadge: initialShowSavedBadge = false }: AppShellProps = {}) {
   const { theme, toggle } = useTheme()
   const [savedVisible, setSavedVisible] = useState(false)
 
   const showSavedBadge = useCallback(() => {
     setSavedVisible(true)
   }, [])
+
+  useEffect(() => {
+    if (savedVisible || initialShowSavedBadge) {
+      setSavedVisible(true)
+    }
+  }, [savedVisible, initialShowSavedBadge])
 
   useEffect(() => {
     if (!savedVisible) return

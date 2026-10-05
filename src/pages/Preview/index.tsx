@@ -8,7 +8,6 @@ import {
   IconUser,
   IconCalendarEvent,
   IconUsers,
-  IconReceipt,
   IconPrinter,
   IconDeviceFloppy,
 } from '@tabler/icons-react'
@@ -17,8 +16,6 @@ import { OrcamentoPDF } from '@/pdf/OrcamentoPDF'
 import { OrcamentoPDFPrint } from '@/pdf/OrcamentoPDFPrint'
 import { useOrcamento } from '@/hooks/useOrcamento'
 import { useConfig } from '@/hooks/useConfig'
-import { PLANOS } from '@/data/plans'
-import { formatBRL } from '@/utils/money'
 import { pdfData } from '@/pdf/utils'
 import { salvarOrcamento, type OrcamentoSalvo } from '@/storage/orcamentos'
 import type { AppShellCtx } from '@/components/AppShell'
@@ -125,12 +122,6 @@ export function Preview() {
   const criancas = state.convidados.criancas0a4 + state.convidados.criancas5a9
   const totalPessoas = adultos + criancas
   const dataFormatada = state.evento.data ? pdfData(state.evento.data) : '-'
-
-  const planosResumo = (['premium', 'livre-bebida', 'livre-sem-bebida', 'unidade'] as const).map(id => ({
-    id,
-    plano: PLANOS.find(p => p.id === id)!,
-    total: totais[id === 'livre-bebida' ? 'livreBebida' : id === 'livre-sem-bebida' ? 'livreSemBebida' : id],
-  }))
 
   return (
     <div className={styles.wrap}>

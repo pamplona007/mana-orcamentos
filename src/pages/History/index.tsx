@@ -16,7 +16,6 @@ import { useOrcamento } from '@/hooks/useOrcamento'
 import { useConfig } from '@/hooks/useConfig'
 import { formatBRL } from '@/utils/money'
 import { pdfData } from '@/pdf/utils'
-import { PLANOS } from '@/data/plans'
 import styles from './styles.module.scss'
 
 const MESES = [

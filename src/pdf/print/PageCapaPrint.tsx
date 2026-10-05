@@ -7,7 +7,6 @@ const PRINT_TEXT = '#000000'
 const PRINT_TEXT_MID = '#333333'
 const PRINT_TEXT_MUTED = '#666666'
 const PRINT_BORDER = '#000000'
-const PRINT_SURFACE = '#F5F5F5'
 
 const styles = StyleSheet.create({
   page: {
