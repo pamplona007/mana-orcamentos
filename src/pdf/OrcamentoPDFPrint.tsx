@@ -1,6 +1,7 @@
 import { Document } from '@react-pdf/renderer'
 import './fonts'
 import type { Orcamento, TotaisPorPlano } from '../types/orcamento'
+import type { Config } from '../types/config'
 import { PageCapaPrint } from './print/PageCapaPrint'
 import { PageCardapioPrint } from './print/PageCardapioPrint'
 import { PageComparativoPrint } from './print/PageComparativoPrint'
@@ -11,16 +12,17 @@ export type OrcamentoPDFPrintProps = {
   orcamento: Orcamento
   totais: TotaisPorPlano
   validadeISO: string
+  config: Config
 }
 
-export function OrcamentoPDFPrint({ orcamento, totais, validadeISO }: OrcamentoPDFPrintProps) {
+export function OrcamentoPDFPrint({ orcamento, totais, validadeISO, config }: OrcamentoPDFPrintProps) {
   return (
     <Document title="Orçamento Maná Pizzas (P&B)" author="Maná Pizzas & Eventos">
-      <PageCapaPrint orcamento={orcamento} totais={totais} validadeISO={validadeISO} />
-      <PageCardapioPrint orcamento={orcamento} totais={totais} validadeISO={validadeISO} />
-      <PageComparativoPrint orcamento={orcamento} totais={totais} validadeISO={validadeISO} />
-      <PageUnidadePrint orcamento={orcamento} totais={totais} validadeISO={validadeISO} />
-      <PageCondicoesPrint orcamento={orcamento} totais={totais} validadeISO={validadeISO} />
+      <PageCapaPrint orcamento={orcamento} totais={totais} validadeISO={validadeISO} config={config} />
+      <PageCardapioPrint orcamento={orcamento} totais={totais} validadeISO={validadeISO} config={config} />
+      <PageComparativoPrint orcamento={orcamento} totais={totais} validadeISO={validadeISO} config={config} />
+      <PageUnidadePrint orcamento={orcamento} totais={totais} validadeISO={validadeISO} config={config} />
+      <PageCondicoesPrint orcamento={orcamento} totais={totais} validadeISO={validadeISO} config={config} />
     </Document>
   )
 }

@@ -3,6 +3,7 @@ import { PDF_COLORS } from '../styles'
 import { PLANO_POR_ID } from '@/data/plans'
 import { pdfFormatBRL } from '../utils'
 import type { Orcamento, TotaisPorPlano, PlanoId } from '@/types/orcamento'
+import type { Config } from '@/types/config'
 
 const PLANO_IDS: PlanoId[] = ['premium', 'livre-bebida', 'livre-sem-bebida']
 
@@ -246,11 +247,14 @@ export type PageComparativoProps = {
   orcamento: Orcamento
   totais: TotaisPorPlano
   validadeISO: string
+  config: Config
 }
 
 export function PageComparativo(props: PageComparativoProps) {
   const deslocamentoAtivo = props.orcamento.deslocamento?.ativo
   const deslocamento = pdfFormatBRL(props.totais.premium.deslocamento)
+  const numParcelas = props.config.pdf.adicionais.parcelas
+  const pctDesconto = Math.round(props.config.pdf.adicionais.descontoAvista * 100)
   return (
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
@@ -294,9 +298,9 @@ export function PageComparativo(props: PageComparativoProps) {
                   <Text style={styles.cardInteiro}>{totalPix.inteiro}</Text>
                   <Text style={styles.cardCentavos}>,{totalPix.centavos}</Text>
                 </View>
-                <Text style={styles.cardPixLabel}>À vista, com 15% de desconto</Text>
+                <Text style={styles.cardPixLabel}>À vista, com {pctDesconto}% de desconto</Text>
                 <Text style={styles.cardParcela}>
-                  ou 10x de {parcela.cifrao} {parcela.inteiro},{parcela.centavos}
+                  ou {numParcelas}x de {parcela.cifrao} {parcela.inteiro},{parcela.centavos}
                 </Text>
 
                 <View style={styles.cardDivider} />

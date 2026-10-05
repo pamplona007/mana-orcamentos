@@ -32,11 +32,47 @@ export type ConfigWhatsApp = {
   template: string
 }
 
+export type ConfigPdfPrecos = {
+  premium: { parcelado: number; avista: number }
+  livreBebida: { parcelado: number; avista: number }
+  livreSemBebida: { parcelado: number; avista: number }
+  unidade: { parcelado: number; avista: number }
+}
+
+export type ConfigPdfAdicionais = {
+  entrada: number
+  salgadoExtra: number
+  descontoAvista: number
+  parcelas: number
+  limiteKmDeslocamento: number
+}
+
+export type ConfigPdfCapa = {
+  sobreKicker: string
+  sobreTitulo: string
+  sobreCorpo: string
+  promessas: { titulo: string; corpo: string }[]
+  contatoRodape: string
+}
+
+export type ConfigPdfCardapio = {
+  salgadosCustomizados: string[]
+  docesCustomizados: string[]
+}
+
+export type ConfigPdf = {
+  precos: ConfigPdfPrecos
+  adicionais: ConfigPdfAdicionais
+  capa: ConfigPdfCapa
+  cardapio: ConfigPdfCardapio
+}
+
 export type Config = {
   empresa: ConfigEmpresa
   validade: ConfigValidade
   editor: ConfigEditor
   whatsapp: ConfigWhatsApp
+  pdf: ConfigPdf
 }
 
 export const CONFIG_DEFAULT: Config = {
@@ -79,5 +115,44 @@ export const CONFIG_DEFAULT: Config = {
       'Válido por {validadeHoras}h. Qualquer dúvida, me chama aqui!',
     ].join('\n'),
   },
+  pdf: {
+    precos: {
+      premium: { parcelado: 117.6, avista: 99.9 },
+      livreBebida: { parcelado: 66.0, avista: 55.92 },
+      livreSemBebida: { parcelado: 58.8, avista: 49.92 },
+      unidade: { parcelado: 78.5, avista: 66.67 },
+    },
+    adicionais: {
+      entrada: 350,
+      salgadoExtra: 75,
+      descontoAvista: 0.15,
+      parcelas: 10,
+      limiteKmDeslocamento: 25,
+    },
+    capa: {
+      sobreKicker: 'Sobre a Maná',
+      sobreTitulo: 'Pizzaria napolitana de bairro',
+      sobreCorpo:
+        'Massa maturada por 12 horas em fermentação natural, ingredientes selecionados e o cuidado de quem entende que pizza boa começa muito antes do forno.',
+      promessas: [
+        {
+          titulo: 'Massa maturada 12h',
+          corpo: 'Fermentação natural lenta, digestiva e crocante na medida.',
+        },
+        {
+          titulo: 'Chega 30 min antes',
+          corpo: 'Tudo pronto e quente na sua casa quando o primeiro convidado chegar.',
+        },
+        {
+          titulo: 'Cozinha limpa no final',
+          corpo: 'A gente monta, serve, desmonta e deixa a cozinha como encontrou.',
+        },
+      ],
+      contatoRodape: 'manarodizio.com.br',
+    },
+    cardapio: {
+      salgadosCustomizados: [],
+      docesCustomizados: [],
+    },
+  },
 }
-

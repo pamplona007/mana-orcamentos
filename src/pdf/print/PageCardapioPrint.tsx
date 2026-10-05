@@ -1,6 +1,6 @@
 import { Page, View, Text, StyleSheet } from '@react-pdf/renderer'
-import { ADICIONAL_ENTRADA, ADICIONAL_SALGADO_EXTRA } from '../../data/plans'
 import type { Orcamento, TotaisPorPlano } from '../../types/orcamento'
+import type { Config } from '../../types/config'
 import { formatBRL } from '../../utils/money'
 
 type Sabor = {
@@ -301,11 +301,14 @@ export type PageCardapioPrintProps = {
   orcamento: Orcamento
   totais: TotaisPorPlano
   validadeISO: string
+  config: Config
 }
 
-export function PageCardapioPrint(_props: PageCardapioPrintProps) {
+export function PageCardapioPrint({ config }: PageCardapioPrintProps) {
   const salgados = SABORES.filter((s) => s.categoria === 'clássica')
   const doces = SABORES.filter((s) => s.categoria === 'doce')
+  const entrada = config.pdf.adicionais.entrada
+  const salgadoExtra = config.pdf.adicionais.salgadoExtra
 
   return (
     <Page size="A4" style={styles.page}>
@@ -364,11 +367,11 @@ export function PageCardapioPrint(_props: PageCardapioPrintProps) {
       <View style={styles.optionalSection}>
         <View style={styles.optionalHeroRow}>
           <Text style={styles.optionalTitle}>Entrada</Text>
-          <Text style={styles.optionalHeroPrice}>R$ {ADICIONAL_ENTRADA.toFixed(2).replace('.', ',')}</Text>
+          <Text style={styles.optionalHeroPrice}>R$ {entrada.toFixed(2).replace('.', ',')}</Text>
         </View>
         <Text style={styles.optionalDescription}>2 centos de salgados + 2 kg de batata</Text>
         <View style={styles.optionalAfterRow}>
-          <Text style={styles.optionalAfterDescription}>Cada cento de salgados adicional: {formatBRL(ADICIONAL_SALGADO_EXTRA)}</Text>
+          <Text style={styles.optionalAfterDescription}>Cada cento de salgados adicional: {formatBRL(salgadoExtra)}</Text>
         </View>
       </View>
 

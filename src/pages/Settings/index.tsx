@@ -1,10 +1,22 @@
 import { useState } from 'react'
-import { IconBuilding, IconClock, IconUsers, IconMessageDots, IconDownload, IconUpload, IconRestore, IconCheck } from '@tabler/icons-react'
+import {
+  IconBuilding,
+  IconClock,
+  IconUsers,
+  IconMessageDots,
+  IconReceipt,
+  IconBook2,
+  IconPalette,
+  IconDownload,
+  IconUpload,
+  IconRestore,
+  IconCheck,
+} from '@tabler/icons-react'
 import { useConfig } from '@/hooks/useConfig'
 import styles from './styles.module.scss'
 
 export function Settings() {
-  const { config, setEmpresa, setValidade, setEditor, setWhatsApp, reset, importar, exportar } = useConfig()
+  const { config, setEmpresa, setValidade, setEditor, setWhatsApp, setPdf, reset, importar, exportar } = useConfig()
   const [importStatus, setImportStatus] = useState<'idle' | 'ok' | 'error'>('idle')
 
   const handleExportar = () => {
@@ -349,6 +361,271 @@ export function Settings() {
           </div>
         </div>
       </section>
+
+      <section className={styles.section}>
+        <div className={styles.sectionHead}>
+          <IconReceipt size={18} aria-hidden="true" />
+          <h2 className={styles.sectionTitle}>Preços dos planos</h2>
+        </div>
+        <p className={styles.helperText}>
+          Valor por pessoa (ou por pizza no plano por unidade). Parcelado é o preço cheio
+          no cartão; à vista é o valor com o desconto Pix aplicado.
+        </p>
+        <div className={styles.fieldGrid}>
+          <PriceField
+            label="Premium · parcelado"
+            value={config.pdf.precos.premium.parcelado}
+            onChange={(v) => setPdf({ precos: { ...config.pdf.precos, premium: { ...config.pdf.precos.premium, parcelado: v } } })}
+          />
+          <PriceField
+            label="Premium · à vista"
+            value={config.pdf.precos.premium.avista}
+            onChange={(v) => setPdf({ precos: { ...config.pdf.precos, premium: { ...config.pdf.precos.premium, avista: v } } })}
+          />
+          <PriceField
+            label="Rodízio livre · parcelado"
+            value={config.pdf.precos.livreBebida.parcelado}
+            onChange={(v) => setPdf({ precos: { ...config.pdf.precos, livreBebida: { ...config.pdf.precos.livreBebida, parcelado: v } } })}
+          />
+          <PriceField
+            label="Rodízio livre · à vista"
+            value={config.pdf.precos.livreBebida.avista}
+            onChange={(v) => setPdf({ precos: { ...config.pdf.precos, livreBebida: { ...config.pdf.precos.livreBebida, avista: v } } })}
+          />
+          <PriceField
+            label="Sem bebida · parcelado"
+            value={config.pdf.precos.livreSemBebida.parcelado}
+            onChange={(v) => setPdf({ precos: { ...config.pdf.precos, livreSemBebida: { ...config.pdf.precos.livreSemBebida, parcelado: v } } })}
+          />
+          <PriceField
+            label="Sem bebida · à vista"
+            value={config.pdf.precos.livreSemBebida.avista}
+            onChange={(v) => setPdf({ precos: { ...config.pdf.precos, livreSemBebida: { ...config.pdf.precos.livreSemBebida, avista: v } } })}
+          />
+          <PriceField
+            label="Por unidade · parcelado"
+            value={config.pdf.precos.unidade.parcelado}
+            onChange={(v) => setPdf({ precos: { ...config.pdf.precos, unidade: { ...config.pdf.precos.unidade, parcelado: v } } })}
+          />
+          <PriceField
+            label="Por unidade · à vista"
+            value={config.pdf.precos.unidade.avista}
+            onChange={(v) => setPdf({ precos: { ...config.pdf.precos, unidade: { ...config.pdf.precos.unidade, avista: v } } })}
+          />
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <div className={styles.sectionHead}>
+          <IconClock size={18} aria-hidden="true" />
+          <h2 className={styles.sectionTitle}>Adicionais e pagamento</h2>
+        </div>
+        <p className={styles.helperText}>
+          Adicionais do cardápio, percentual de desconto à vista no Pix e número de parcelas.
+        </p>
+        <div className={styles.fieldGrid}>
+          <PriceField
+            label="Entrada (R$)"
+            value={config.pdf.adicionais.entrada}
+            onChange={(v) => setPdf({ adicionais: { ...config.pdf.adicionais, entrada: v } })}
+            step={1}
+          />
+          <PriceField
+            label="Cento extra (R$)"
+            value={config.pdf.adicionais.salgadoExtra}
+            onChange={(v) => setPdf({ adicionais: { ...config.pdf.adicionais, salgadoExtra: v } })}
+            step={1}
+          />
+          <div className={styles.field}>
+            <label className={styles.fieldLabel} htmlFor="adi-desc">Desconto à vista (0–1)</label>
+            <input
+              id="adi-desc"
+              type="number"
+              min={0}
+              max={1}
+              step={0.01}
+              className={styles.fieldInput}
+              value={config.pdf.adicionais.descontoAvista}
+              onChange={(e) => setPdf({ adicionais: { ...config.pdf.adicionais, descontoAvista: Math.min(1, Math.max(0, Number(e.target.value) || 0)) } })}
+            />
+          </div>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel} htmlFor="adi-parc">Parcelas</label>
+            <input
+              id="adi-parc"
+              type="number"
+              min={1}
+              max={24}
+              step={1}
+              className={styles.fieldInput}
+              value={config.pdf.adicionais.parcelas}
+              onChange={(e) => setPdf({ adicionais: { ...config.pdf.adicionais, parcelas: Math.max(1, Number(e.target.value) || 1) } })}
+            />
+          </div>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel} htmlFor="adi-km">Limite de km (deslocamento)</label>
+            <input
+              id="adi-km"
+              type="number"
+              min={0}
+              step={1}
+              className={styles.fieldInput}
+              value={config.pdf.adicionais.limiteKmDeslocamento}
+              onChange={(e) => setPdf({ adicionais: { ...config.pdf.adicionais, limiteKmDeslocamento: Math.max(0, Number(e.target.value) || 0) } })}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <div className={styles.sectionHead}>
+          <IconBook2 size={18} aria-hidden="true" />
+          <h2 className={styles.sectionTitle}>Textos da Capa</h2>
+        </div>
+        <p className={styles.helperText}>
+          O bloco "Sobre a Maná" e as 3 promessas exibidas no rodapé da primeira página do PDF.
+          Use 3 promessas no máximo.
+        </p>
+        <div className={styles.fieldGrid}>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel} htmlFor="capa-kicker">Kicker do sobre</label>
+            <input
+              id="capa-kicker"
+              type="text"
+              className={styles.fieldInput}
+              value={config.pdf.capa.sobreKicker}
+              onChange={(e) => setPdf({ capa: { ...config.pdf.capa, sobreKicker: e.target.value } })}
+            />
+          </div>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel} htmlFor="capa-titulo">Título do sobre</label>
+            <input
+              id="capa-titulo"
+              type="text"
+              className={styles.fieldInput}
+              value={config.pdf.capa.sobreTitulo}
+              onChange={(e) => setPdf({ capa: { ...config.pdf.capa, sobreTitulo: e.target.value } })}
+            />
+          </div>
+          <div className={`${styles.field} ${styles.fieldFull}`}>
+            <label className={styles.fieldLabel} htmlFor="capa-corpo">Corpo do sobre</label>
+            <textarea
+              id="capa-corpo"
+              className={styles.fieldTextarea}
+              style={{ minHeight: 80 }}
+              value={config.pdf.capa.sobreCorpo}
+              onChange={(e) => setPdf({ capa: { ...config.pdf.capa, sobreCorpo: e.target.value } })}
+            />
+          </div>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel} htmlFor="capa-rodape">Texto do rodapé</label>
+            <input
+              id="capa-rodape"
+              type="text"
+              className={styles.fieldInput}
+              value={config.pdf.capa.contatoRodape}
+              onChange={(e) => setPdf({ capa: { ...config.pdf.capa, contatoRodape: e.target.value } })}
+            />
+          </div>
+        </div>
+        <div className={styles.promessas}>
+          <span className={styles.fieldLabel}>Promessas (até 3)</span>
+          {config.pdf.capa.promessas.slice(0, 3).map((p, i) => (
+            <div key={i} className={styles.promessaRow}>
+              <input
+                type="text"
+                className={styles.fieldInput}
+                placeholder={`Título da promessa ${i + 1}`}
+                value={p.titulo}
+                onChange={(e) => {
+                  const promessas: { titulo: string; corpo: string }[] = [...config.pdf.capa.promessas]
+                  promessas[i] = { titulo: e.target.value, corpo: p.corpo }
+                  setPdf({ capa: { ...config.pdf.capa, promessas } })
+                }}
+              />
+              <textarea
+                className={styles.fieldTextarea}
+                placeholder={`Corpo da promessa ${i + 1}`}
+                style={{ minHeight: 50 }}
+                value={p.corpo}
+                onChange={(e) => {
+                  const promessas: { titulo: string; corpo: string }[] = [...config.pdf.capa.promessas]
+                  promessas[i] = { titulo: p.titulo, corpo: e.target.value }
+                  setPdf({ capa: { ...config.pdf.capa, promessas } })
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <div className={styles.sectionHead}>
+          <IconPalette size={18} aria-hidden="true" />
+          <h2 className={styles.sectionTitle}>Cardápio do PDF</h2>
+        </div>
+        <p className={styles.helperText}>
+          Deixe em branco para usar a lista padrão. Se preencher, sua lista substitui a padrão.
+          Um sabor por linha.
+        </p>
+        <div className={styles.fieldGrid}>
+          <div className={`${styles.field} ${styles.fieldFull}`}>
+            <label className={styles.fieldLabel} htmlFor="card-salgados">Salgados customizados</label>
+            <textarea
+              id="card-salgados"
+              className={styles.fieldTextarea}
+              placeholder="Um por linha. Vazio = lista padrão (21 sabores)."
+              value={config.pdf.cardapio.salgadosCustomizados.join('\n')}
+              onChange={(e) => setPdf({
+                cardapio: {
+                  ...config.pdf.cardapio,
+                  salgadosCustomizados: e.target.value.split('\n').map((s) => s.trim()).filter(Boolean),
+                },
+              })}
+            />
+          </div>
+          <div className={`${styles.field} ${styles.fieldFull}`}>
+            <label className={styles.fieldLabel} htmlFor="card-doces">Doces customizados</label>
+            <textarea
+              id="card-doces"
+              className={styles.fieldTextarea}
+              placeholder="Um por linha. Vazio = lista padrão (6 sabores)."
+              value={config.pdf.cardapio.docesCustomizados.join('\n')}
+              onChange={(e) => setPdf({
+                cardapio: {
+                  ...config.pdf.cardapio,
+                  docesCustomizados: e.target.value.split('\n').map((s) => s.trim()).filter(Boolean),
+                },
+              })}
+            />
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
+
+type PriceFieldProps = {
+  label: string
+  value: number
+  onChange: (v: number) => void
+  step?: number
+}
+
+function PriceField({ label, value, onChange, step = 0.01 }: PriceFieldProps) {
+  const id = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+  return (
+    <div className={styles.field}>
+      <label className={styles.fieldLabel} htmlFor={id}>{label}</label>
+      <input
+        id={id}
+        type="number"
+        min={0}
+        step={step}
+        className={styles.fieldInput}
+        value={value}
+        onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
+      />
     </div>
   )
 }

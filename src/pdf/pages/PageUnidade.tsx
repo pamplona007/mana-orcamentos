@@ -3,6 +3,7 @@ import { PDF_COLORS } from '../styles'
 import { pdfFormatBRL } from '../utils'
 import { PLANO_POR_ID } from '@/data/plans'
 import type { Orcamento, TotaisPorPlano } from '@/types/orcamento'
+import type { Config } from '@/types/config'
 
 const styles = StyleSheet.create({
   page: {
@@ -155,10 +156,12 @@ export type PageUnidadeProps = {
   orcamento: Orcamento
   totais: TotaisPorPlano
   validadeISO: string
+  config: Config
 }
 
 export function PageUnidade(props: PageUnidadeProps) {
   const total = props.totais.unidade
+  const numParcelas = props.config.pdf.adicionais.parcelas
   const totalPessoas =
     props.orcamento.convidados.adultos +
     props.orcamento.convidados.criancas0a4 +
@@ -239,7 +242,7 @@ export function PageUnidade(props: PageUnidadeProps) {
         </Text>
         <Text style={styles.calloutDiscount}>À vista no Pix, com 15% de desconto</Text>
         <Text style={styles.calloutPriceLabel}>
-          ou 10x de {fmtParcela.cifrao} {fmtParcela.inteiro},{fmtParcela.centavos} no cartão
+          ou {numParcelas}x de {fmtParcela.cifrao} {fmtParcela.inteiro},{fmtParcela.centavos} no cartão
         </Text>
         <Text style={styles.calloutBody}>
           Calculado com {pizzasSugeridas} pizzas × {fmtPizza.cifrao} {fmtPizza.inteiro},

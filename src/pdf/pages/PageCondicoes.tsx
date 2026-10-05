@@ -2,6 +2,7 @@ import { Page, View, Text, StyleSheet } from '@react-pdf/renderer'
 import { PDF_COLORS } from '../styles'
 import { pdfData } from '../utils'
 import type { Orcamento, TotaisPorPlano } from '@/types/orcamento'
+import type { Config } from '@/types/config'
 
 const styles = StyleSheet.create({
   page: {
@@ -185,9 +186,10 @@ export type PageCondicoesProps = {
   orcamento: Orcamento
   totais: TotaisPorPlano
   validadeISO: string
+  config: Config
 }
 
-export function PageCondicoes({ orcamento, validadeISO }: PageCondicoesProps) {
+export function PageCondicoes({ orcamento, validadeISO, config }: PageCondicoesProps) {
   const dataEvento = pdfData(orcamento.evento.data)
   const validade = pdfData(validadeISO)
 
@@ -251,7 +253,9 @@ export function PageCondicoes({ orcamento, validadeISO }: PageCondicoesProps) {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>Maná Pizzas & Eventos</Text>
-        <Text style={styles.footerText}>Condições válidas com a reserva confirmada</Text>
+        <Text style={styles.footerText}>
+          WhatsApp: {config.empresa.whatsapp} · Válido com reserva confirmada
+        </Text>
       </View>
     </Page>
   )

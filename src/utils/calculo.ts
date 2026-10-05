@@ -9,6 +9,7 @@ import type {
   PlanoId,
   Totais,
 } from '@/types/orcamento'
+import type { ConfigPdfAdicionais, ConfigPdfPrecos } from '@/types/config'
 import { applyDescontoAvista, roundParcela } from './money'
 import type { State } from '@/hooks/useOrcamento'
 
@@ -26,16 +27,41 @@ export function calcularPizzasSugeridas(c: Convidado): number {
   return Math.ceil(calcularConvidados(c) * 0.6)
 }
 
+type PrecoEntry = { parcelado: number; avista: number }
+
+function precoPlano(planoId: PlanoId, precos?: ConfigPdfPrecos): PrecoEntry {
+  if (precos) {
+    if (planoId === 'premium') return precos.premium
+    if (planoId === 'livre-bebida') return precos.livreBebida
+    if (planoId === 'livre-sem-bebida') return precos.livreSemBebida
+    if (planoId === 'unidade') return precos.unidade
+  }
+  const plano = PLANO_POR_ID[planoId]
+  return {
+    parcelado: plano.precoPessoaParcelado,
+    avista: plano.precoPessoaAvista,
+  }
+}
+
+function descontoAvista(adicionais?: ConfigPdfAdicionais): number {
+  return adicionais?.descontoAvista ?? DESCONTO_AVISTA
+}
+
+function parcelas(adicionais?: ConfigPdfAdicionais): number {
+  return adicionais?.parcelas ?? PARCELAS
+}
+
 export function calcularSubtotal(
   planoId: PlanoId,
   convidados: Convidado,
+  precos?: ConfigPdfPrecos,
 ): { subtotal: number; unidades: number; tipoUnidade: 'pessoas' | 'pizzas' } {
-  const plano = PLANO_POR_ID[planoId]
+  const { parcelado } = precoPlano(planoId, precos)
 
-  if (plano.id === 'unidade' && plano.precoPizzaParcelado !== undefined) {
+  if (planoId === 'unidade') {
     const pizzas = calcularPizzasSugeridas(convidados)
     return {
-      subtotal: pizzas * plano.precoPizzaParcelado,
+      subtotal: pizzas * parcelado,
       unidades: pizzas,
       tipoUnidade: 'pizzas',
     }
@@ -43,7 +69,7 @@ export function calcularSubtotal(
 
   const pessoas = calcularConvidados(convidados)
   return {
-    subtotal: pessoas * plano.precoPessoaParcelado,
+    subtotal: pessoas * parcelado,
     unidades: pessoas,
     tipoUnidade: 'pessoas',
   }
@@ -51,27 +77,23 @@ export function calcularSubtotal(
 
 export function calcularTotais(
   planoId: PlanoId,
-  state: State
+  state: State,
+  opts?: { precos?: ConfigPdfPrecos; adicionais?: ConfigPdfAdicionais },
 ): Totais {
-  const {
-    convidados,
-    desconto,
-    deslocamento
-  } = state
-  const { subtotal, unidades, tipoUnidade } = calcularSubtotal(planoId, convidados)
+  const { convidados, desconto, deslocamento } = state
+  const precos = opts?.precos
+  const adicionais = opts?.adicionais
+  const { subtotal, unidades, tipoUnidade } = calcularSubtotal(planoId, convidados, precos)
   const valorDeslocamento = deslocamento.ativo ? Math.max(0, deslocamento.valor) : 0
   const baseComDeslocamento = subtotal + valorDeslocamento
 
   const descontoAplicado = calcularDesconto(baseComDeslocamento, desconto)
   const total = Math.max(0, baseComDeslocamento - descontoAplicado)
   const totalParcelado = total
-  const totalAvista = applyDescontoAvista(total, DESCONTO_AVISTA)
-  const parcela10x = roundParcela(totalParcelado, PARCELAS)
-  const plano = PLANO_POR_ID[planoId]
-  const precoPessoaUsado =
-    planoId === 'unidade' && plano.precoPizzaParcelado !== undefined
-      ? plano.precoPizzaParcelado
-      : plano.precoPessoaParcelado
+  const totalAvista = applyDescontoAvista(total, descontoAvista(adicionais))
+  const numParcelas = parcelas(adicionais)
+  const parcela10x = roundParcela(totalParcelado, numParcelas)
+  const { parcelado } = precoPlano(planoId, precos)
 
   return {
     adultosEquivalentes: tipoUnidade === 'pessoas' ? unidades : 0,
@@ -83,7 +105,7 @@ export function calcularTotais(
     totalParcelado,
     totalAvista,
     parcela10x,
-    precoPessoaUsado,
+    precoPessoaUsado: parcelado,
   }
 }
 

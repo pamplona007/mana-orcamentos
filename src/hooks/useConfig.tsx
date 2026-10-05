@@ -4,6 +4,7 @@ import {
   type Config,
   type ConfigEditor,
   type ConfigEmpresa,
+  type ConfigPdf,
   type ConfigValidade,
   type ConfigWhatsApp,
 } from '@/types/config'
@@ -21,6 +22,7 @@ type Ctx = {
   setValidade: (validade: Partial<ConfigValidade>) => void
   setEditor: (editor: Partial<ConfigEditor>) => void
   setWhatsApp: (whatsapp: Partial<ConfigWhatsApp>) => void
+  setPdf: (pdf: Partial<ConfigPdf>) => void
   reset: () => void
   importar: (json: string) => Config
   exportar: () => string
@@ -43,10 +45,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 
   const setEmpresa = useCallback((empresa: Partial<ConfigEmpresa>) => {
     setConfig((prev) => {
-      const next: Config = {
-        ...prev,
-        empresa: { ...prev.empresa, ...empresa },
-      }
+      const next: Config = { ...prev, empresa: { ...prev.empresa, ...empresa } }
       salvarConfig(next)
       return next
     })
@@ -54,10 +53,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 
   const setValidade = useCallback((validade: Partial<ConfigValidade>) => {
     setConfig((prev) => {
-      const next: Config = {
-        ...prev,
-        validade: { ...prev.validade, ...validade },
-      }
+      const next: Config = { ...prev, validade: { ...prev.validade, ...validade } }
       salvarConfig(next)
       return next
     })
@@ -65,10 +61,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 
   const setEditor = useCallback((editor: Partial<ConfigEditor>) => {
     setConfig((prev) => {
-      const next: Config = {
-        ...prev,
-        editor: { ...prev.editor, ...editor },
-      }
+      const next: Config = { ...prev, editor: { ...prev.editor, ...editor } }
       salvarConfig(next)
       return next
     })
@@ -76,10 +69,15 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 
   const setWhatsApp = useCallback((whatsapp: Partial<ConfigWhatsApp>) => {
     setConfig((prev) => {
-      const next: Config = {
-        ...prev,
-        whatsapp: { ...prev.whatsapp, ...whatsapp },
-      }
+      const next: Config = { ...prev, whatsapp: { ...prev.whatsapp, ...whatsapp } }
+      salvarConfig(next)
+      return next
+    })
+  }, [])
+
+  const setPdf = useCallback((pdf: Partial<ConfigPdf>) => {
+    setConfig((prev) => {
+      const next: Config = { ...prev, pdf: { ...prev.pdf, ...pdf } }
       salvarConfig(next)
       return next
     })
@@ -99,8 +97,8 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
   const exportarFn = useCallback(() => exportar(), [config])
 
   const value = useMemo<Ctx>(
-    () => ({ config, setEmpresa, setValidade, setEditor, setWhatsApp, reset, importar: importarFn, exportar: exportarFn }),
-    [config, setEmpresa, setValidade, setEditor, setWhatsApp, reset, importarFn, exportarFn],
+    () => ({ config, setEmpresa, setValidade, setEditor, setWhatsApp, setPdf, reset, importar: importarFn, exportar: exportarFn }),
+    [config, setEmpresa, setValidade, setEditor, setWhatsApp, setPdf, reset, importarFn, exportarFn],
   )
 
   return <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>

@@ -100,13 +100,14 @@ export function OrcamentoProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, null, () => buildInitialState(config))
 
   const totais = useMemo<TotaisPorPlano>(() => {
+    const opts = { precos: config.pdf.precos, adicionais: config.pdf.adicionais }
     return {
-      premium: calcularTotais('premium', state),
-      livreBebida: calcularTotais('livre-bebida', state),
-      livreSemBebida: calcularTotais('livre-sem-bebida', state),
-      unidade: calcularTotais('unidade', state),
+      premium: calcularTotais('premium', state, opts),
+      livreBebida: calcularTotais('livre-bebida', state, opts),
+      livreSemBebida: calcularTotais('livre-sem-bebida', state, opts),
+      unidade: calcularTotais('unidade', state, opts),
     }
-  }, [state])
+  }, [state, config.pdf.precos, config.pdf.adicionais])
 
   const toOrcamento = (id?: string): Orcamento => ({
     id: id ?? crypto.randomUUID(),

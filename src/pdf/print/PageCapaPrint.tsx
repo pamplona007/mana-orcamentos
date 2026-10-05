@@ -1,6 +1,7 @@
 import { Page, View, Text, StyleSheet } from '@react-pdf/renderer'
 import { pdfData } from '../utils'
 import type { Orcamento, TotaisPorPlano } from '@/types/orcamento'
+import type { Config } from '@/types/config'
 
 const PRINT_PAGE = '#FFFFFF'
 const PRINT_TEXT = '#000000'
@@ -234,9 +235,10 @@ export type PageCapaPrintProps = {
   orcamento: Orcamento
   totais: TotaisPorPlano
   validadeISO: string
+  config: Config
 }
 
-export function PageCapaPrint({ orcamento, validadeISO, totais }: PageCapaPrintProps) {
+export function PageCapaPrint({ orcamento, validadeISO, totais, config }: PageCapaPrintProps) {
   const clienteNome = orcamento.cliente.nome || 'Cliente'
   const totalPessoas =
     orcamento.convidados.adultos +
@@ -315,11 +317,10 @@ export function PageCapaPrint({ orcamento, validadeISO, totais }: PageCapaPrintP
 
       <View style={styles.storyBlock}>
         <View style={styles.storyColWide}>
-          <Text style={styles.storyKicker}>Sobre a Maná</Text>
-          <Text style={styles.storyTitle}>Pizzaria napolitana de bairro</Text>
+          <Text style={styles.storyKicker}>{config.pdf.capa.sobreKicker}</Text>
+          <Text style={styles.storyTitle}>{config.pdf.capa.sobreTitulo}</Text>
           <Text style={styles.storyBody}>
-            Massa maturada por 12 horas em fermentação natural, ingredientes selecionados e
-            o cuidado de quem entende que pizza boa começa muito antes do forno.
+            {config.pdf.capa.sobreCorpo}
           </Text>
         </View>
         <View style={styles.storyCol}>
@@ -335,32 +336,20 @@ export function PageCapaPrint({ orcamento, validadeISO, totais }: PageCapaPrintP
       <View style={styles.promiseBlock}>
         <Text style={styles.promiseKicker}>O que está incluso em qualquer plano</Text>
         <View style={styles.promiseRow}>
-          <View style={styles.promiseItem}>
-            <Text style={styles.promiseItemTitle}>Massa maturada 12h</Text>
-            <Text style={styles.promiseItemBody}>
-              Fermentação natural lenta, digestiva e crocante na medida.
-            </Text>
-          </View>
-          <View style={styles.promiseItem}>
-            <Text style={styles.promiseItemTitle}>Chega 30 min antes</Text>
-            <Text style={styles.promiseItemBody}>
-              Tudo pronto e quente na sua casa quando o primeiro convidado chegar.
-            </Text>
-          </View>
-          <View style={styles.promiseItem}>
-            <Text style={styles.promiseItemTitle}>Cozinha limpa no final</Text>
-            <Text style={styles.promiseItemBody}>
-              A gente monta, serve, desmonta e deixa a cozinha como encontrou.
-            </Text>
-          </View>
+          {config.pdf.capa.promessas.slice(0, 3).map((p, i) => (
+            <View key={i} style={styles.promiseItem}>
+              <Text style={styles.promiseItemTitle}>{p.titulo}</Text>
+              <Text style={styles.promiseItemBody}>{p.corpo}</Text>
+            </View>
+          ))}
         </View>
       </View>
 
       <View style={styles.footer}>
         <View>
-          <Text style={styles.footerText}>manarodizio.com.br</Text>
+          <Text style={styles.footerText}>{config.pdf.capa.contatoRodape}</Text>
         </View>
-        <Text style={styles.footerPhone}>(85) 99280-3884</Text>
+        <Text style={styles.footerPhone}>{config.empresa.telefone}</Text>
       </View>
     </Page>
   )

@@ -1,42 +1,20 @@
 import { Page, View, Text, StyleSheet } from '@react-pdf/renderer'
 import { PDF_COLORS } from '../styles'
-import { ADICIONAL_ENTRADA, ADICIONAL_SALGADO_EXTRA } from '@/data/plans'
 import type { Orcamento, TotaisPorPlano } from '@/types/orcamento'
+import type { Config } from '@/types/config'
 import { formatBRL } from '@/utils/money'
 
-type Sabor = {
-  nome: string
-  categoria: 'clássica' | 'especial' | 'doce'
-}
+const SABORES_SALGADOS: readonly string[] = [
+  'Calabresa', 'Marguerita', 'Mussarela', 'Dois queijos', 'Três queijos',
+  'Portuguesa', 'Carne de sol', 'Frango', 'Frango c/ catupiry', 'Frango c/ bacon',
+  'Bacon c/ alho frito', 'Bacon c/ alho poró', 'Bacon c/ catupiry', 'Lombinho canadense',
+  'Lombo c/ catupiry', 'Lombo c/ geleia de pimenta', 'Carne seca c/ catupiry',
+  'Pepperoni c/ catupiry', 'Pepperoni', 'Hot pepperoni', 'Napolitana',
+]
 
-const SABORES: Sabor[] = [
-  { nome: 'Calabresa', categoria: 'clássica' },
-  { nome: 'Marguerita', categoria: 'clássica' },
-  { nome: 'Mussarela', categoria: 'clássica' },
-  { nome: 'Dois queijos', categoria: 'clássica' },
-  { nome: 'Três queijos', categoria: 'clássica' },
-  { nome: 'Portuguesa', categoria: 'clássica' },
-  { nome: 'Carne de sol', categoria: 'clássica' },
-  { nome: 'Frango', categoria: 'clássica' },
-  { nome: 'Frango c/ catupiry', categoria: 'clássica' },
-  { nome: 'Frango c/ bacon', categoria: 'clássica' },
-  { nome: 'Bacon c/ alho frito', categoria: 'clássica' },
-  { nome: 'Bacon c/ alho poró', categoria: 'clássica' },
-  { nome: 'Bacon c/ catupiry', categoria: 'clássica' },
-  { nome: 'Lombinho canadense', categoria: 'clássica' },
-  { nome: 'Lombo c/ catupiry', categoria: 'clássica' },
-  { nome: 'Lombo c/ geleia de pimenta', categoria: 'clássica' },
-  { nome: 'Carne seca c/ catupiry', categoria: 'clássica' },
-  { nome: 'Pepperoni c/ catupiry', categoria: 'clássica' },
-  { nome: 'Pepperoni', categoria: 'clássica' },
-  { nome: 'Hot pepperoni', categoria: 'clássica' },
-  { nome: 'Napolitana', categoria: 'clássica' },
-  { nome: 'Chocolate c/ avelã', categoria: 'doce' },
-  { nome: 'Chocolate c/ M&Ms', categoria: 'doce' },
-  { nome: 'Banana c/ canela', categoria: 'doce' },
-  { nome: 'Banana caramelizada', categoria: 'doce' },
-  { nome: 'Banoffe', categoria: 'doce' },
-  { nome: 'Dueto', categoria: 'doce' },
+const SABORES_DOCES: readonly string[] = [
+  'Chocolate c/ avelã', 'Chocolate c/ M&Ms', 'Banana c/ canela',
+  'Banana caramelizada', 'Banoffe', 'Dueto',
 ]
 
 const SABORES_PREMIUM: string[] = [
@@ -302,11 +280,16 @@ export type PageCardapioProps = {
   orcamento: Orcamento
   totais: TotaisPorPlano
   validadeISO: string
+  config: Config
 }
 
-export function PageCardapio(_props: PageCardapioProps) {
-  const salgados = SABORES.filter((s) => s.categoria === 'clássica')
-  const doces = SABORES.filter((s) => s.categoria === 'doce')
+export function PageCardapio({ config }: PageCardapioProps) {
+  const salgadosCustom = config.pdf.cardapio.salgadosCustomizados.filter(Boolean)
+  const docesCustom = config.pdf.cardapio.docesCustomizados.filter(Boolean)
+  const salgados = salgadosCustom.length > 0 ? salgadosCustom : SABORES_SALGADOS
+  const doces = docesCustom.length > 0 ? docesCustom : SABORES_DOCES
+  const entrada = config.pdf.adicionais.entrada
+  const salgadoExtra = config.pdf.adicionais.salgadoExtra
 
   return (
     <Page size="A4" style={styles.page}>
@@ -323,14 +306,14 @@ export function PageCardapio(_props: PageCardapioProps) {
       <View style={styles.columns}>
         <View style={styles.columnWide}>
           <Text style={styles.columnKicker}>Salgados</Text>
-          <Text style={styles.columnTitle}>20 sabores</Text>
+          <Text style={styles.columnTitle}>{salgados.length} sabores</Text>
           <Text style={styles.columnLinha}>Os clássicos da casa.</Text>
           <View style={styles.columnDivider} />
           <View style={styles.salgadosList}>
-            {salgados.map((s) => (
-              <Text key={s.nome} style={styles.salgadoItem}>
+            {salgados.map((nome) => (
+              <Text key={nome} style={styles.salgadoItem}>
                 <Text style={styles.saborDot}>•</Text>
-                {s.nome}
+                {nome}
               </Text>
             ))}
           </View>
@@ -338,13 +321,13 @@ export function PageCardapio(_props: PageCardapioProps) {
 
         <View style={styles.columnNarrow}>
           <Text style={styles.columnKicker}>Doces</Text>
-          <Text style={styles.columnTitle}>6 sabores</Text>
+          <Text style={styles.columnTitle}>{doces.length} sabores</Text>
           <Text style={styles.columnLinha}>Pra fechar o rodízio.</Text>
           <View style={styles.columnDivider} />
-          {doces.map((s) => (
-            <Text key={s.nome} style={styles.saborItem}>
+          {doces.map((nome) => (
+            <Text key={nome} style={styles.saborItem}>
               <Text style={styles.saborDot}>•</Text>
-              {s.nome}
+              {nome}
             </Text>
           ))}
         </View>
@@ -365,11 +348,11 @@ export function PageCardapio(_props: PageCardapioProps) {
       <View style={styles.optionalSection}>
         <View style={styles.optionalHeroRow}>
           <Text style={styles.optionalTitle}>Entrada</Text>
-          <Text style={styles.optionalHeroPrice}>R$ {ADICIONAL_ENTRADA.toFixed(2).replace('.', ',')}</Text>
+          <Text style={styles.optionalHeroPrice}>R$ {entrada.toFixed(2).replace('.', ',')}</Text>
         </View>
         <Text style={styles.optionalDescription}>2 centos de salgados + 2 kg de batata</Text>
         <View style={styles.optionalAfterRow}>
-          <Text style={styles.optionalAfterDescription}>Cada cento de salgados adicional: {formatBRL(ADICIONAL_SALGADO_EXTRA)}</Text>
+          <Text style={styles.optionalAfterDescription}>Cada cento de salgados adicional: {formatBRL(salgadoExtra)}</Text>
         </View>
       </View>
 

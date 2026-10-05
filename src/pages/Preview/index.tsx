@@ -142,7 +142,7 @@ export function Preview() {
             {salvo ? 'Salvo' : 'Salvar'}
           </button>
           <PDFDownloadLink
-            document={<OrcamentoPDF orcamento={orcamento} totais={totaisPorPlano} validadeISO={validadeISO} />}
+            document={<OrcamentoPDF orcamento={orcamento} totais={totaisPorPlano} validadeISO={validadeISO} config={config} />}
             fileName={fileName}
             className={styles.btnDownload}
           >
@@ -161,7 +161,7 @@ export function Preview() {
             }
           </PDFDownloadLink>
           <PDFDownloadLink
-            document={<OrcamentoPDFPrint orcamento={orcamento} totais={totaisPorPlano} validadeISO={validadeISO} />}
+            document={<OrcamentoPDFPrint orcamento={orcamento} totais={totaisPorPlano} validadeISO={validadeISO} config={config} />}
             fileName={fileName.replace('.pdf', '-pb.pdf')}
             className={styles.btnPrint}
           >
@@ -229,7 +229,7 @@ export function Preview() {
         <section className={styles.cardWide}>
           <span className={styles.cardEyebrow}>Pré-visualização do PDF</span>
           <PDFViewer style={{ width: '100%', height: '70vh', border: 'none' }} showToolbar={false}>
-            <OrcamentoPDF orcamento={orcamento} totais={totaisPorPlano} validadeISO={validadeISO} />
+            <OrcamentoPDF orcamento={orcamento} totais={totaisPorPlano} validadeISO={validadeISO} config={config} />
           </PDFViewer>
         </section>
       </main>
