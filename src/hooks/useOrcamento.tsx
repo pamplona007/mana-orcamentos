@@ -9,7 +9,14 @@ import type {
   Cliente,
   Deslocamento,
 } from '@/types/orcamento'
+import { CONFIG_DEFAULT, type Config } from '@/types/config'
 import { calcularTotais } from '@/utils/calculo'
+import { ConfigContext } from './useConfig'
+
+const useContextConfig = (): Config => {
+  const ctx = useContext(ConfigContext)
+  return ctx?.config ?? CONFIG_DEFAULT
+}
 
 export type LoadableState = {
   cliente: Cliente
@@ -26,18 +33,28 @@ type Action =
   | { type: 'setCliente'; cliente: Cliente }
   | { type: 'setEvento'; evento: Partial<Evento> }
   | { type: 'setConvidados'; convidados: Convidado }
+  | { type: 'setPagamento'; pagamento: Pagamento }
   | { type: 'setDesconto'; desconto: Partial<Desconto> }
   | { type: 'setDeslocamento'; deslocamento: Partial<Deslocamento> }
-  | { type: 'reset' }
+  | { type: 'reset'; config: Config }
   | { type: 'load'; state: LoadableState }
 
-const initialState: State = {
-  cliente: { nome: '', whatsapp: '' },
-  evento: { data: '', cidadeBairro: '', observacoes: '' },
-  convidados: { adultos: 25, criancas0a4: 0, criancas5a9: 0 },
-  pagamento: 'parcelado',
-  desconto: { tipo: 'nenhum', valor: 0 },
-  deslocamento: { ativo: false, valor: 150 },
+function buildInitialState(config: Config): State {
+  return {
+    cliente: { nome: '', whatsapp: '' },
+    evento: { data: '', cidadeBairro: '', observacoes: '' },
+    convidados: {
+      adultos: config.editor.convidadosPadrao.adultos,
+      criancas0a4: config.editor.convidadosPadrao.criancas0a4,
+      criancas5a9: config.editor.convidadosPadrao.criancas5a9,
+    },
+    pagamento: config.editor.pagamentoPadrao,
+    desconto: { tipo: 'nenhum', valor: 0 },
+    deslocamento: {
+      ativo: config.editor.deslocamentoPadrao.ativo,
+      valor: config.editor.deslocamentoPadrao.valor,
+    },
+  }
 }
 
 function reducer(state: State, action: Action): State {
@@ -48,12 +65,14 @@ function reducer(state: State, action: Action): State {
       return { ...state, evento: { ...state.evento, ...action.evento } }
     case 'setConvidados':
       return { ...state, convidados: action.convidados }
+    case 'setPagamento':
+      return { ...state, pagamento: action.pagamento }
     case 'setDesconto':
       return { ...state, desconto: { ...state.desconto, ...action.desconto } }
     case 'setDeslocamento':
       return { ...state, deslocamento: { ...state.deslocamento, ...action.deslocamento } }
     case 'reset':
-      return initialState
+      return buildInitialState(action.config)
 
     case 'load':
       return action.state
@@ -65,6 +84,7 @@ type Ctx = {
   setCliente: (cliente: Cliente) => void
   setEvento: (evento: Partial<Evento>) => void
   setConvidados: (convidados: Convidado) => void
+  setPagamento: (pagamento: Pagamento) => void
   setDesconto: (desconto: Partial<Desconto>) => void
   setDeslocamento: (deslocamento: Partial<Deslocamento>) => void
   reset: () => void
@@ -76,7 +96,8 @@ type Ctx = {
 const OrcamentoContext = createContext<Ctx | null>(null)
 
 export function OrcamentoProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, initialState)
+  const config = useContextConfig()
+  const [state, dispatch] = useReducer(reducer, null, () => buildInitialState(config))
 
   const totais = useMemo<TotaisPorPlano>(() => {
     return {
@@ -103,9 +124,10 @@ export function OrcamentoProvider({ children }: { children: ReactNode }) {
     setCliente: (cliente) => dispatch({ type: 'setCliente', cliente }),
     setEvento: (evento) => dispatch({ type: 'setEvento', evento }),
     setConvidados: (convidados) => dispatch({ type: 'setConvidados', convidados }),
+    setPagamento: (pagamento) => dispatch({ type: 'setPagamento', pagamento }),
     setDesconto: (desconto) => dispatch({ type: 'setDesconto', desconto }),
     setDeslocamento: (deslocamento) => dispatch({ type: 'setDeslocamento', deslocamento }),
-    reset: () => dispatch({ type: 'reset' }),
+    reset: () => dispatch({ type: 'reset', config }),
     load: (s) => dispatch({ type: 'load', state: s }),
     totais,
     toOrcamento,

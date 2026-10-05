@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { IconBuilding, IconClock, IconDownload, IconUpload, IconRestore, IconCheck } from '@tabler/icons-react'
+import { IconBuilding, IconClock, IconUsers, IconMessageDots, IconDownload, IconUpload, IconRestore, IconCheck } from '@tabler/icons-react'
 import { useConfig } from '@/hooks/useConfig'
 import styles from './styles.module.scss'
 
 export function Settings() {
-  const { config, setEmpresa, setValidade, reset, importar, exportar } = useConfig()
+  const { config, setEmpresa, setValidade, setEditor, setWhatsApp, reset, importar, exportar } = useConfig()
   const [importStatus, setImportStatus] = useState<'idle' | 'ok' | 'error'>('idle')
 
   const handleExportar = () => {
@@ -217,6 +217,135 @@ export function Settings() {
               value={config.validade.horas}
               onChange={(e) => setValidade({ horas: Math.max(1, Number(e.target.value) || 1) })}
             />
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <div className={styles.sectionHead}>
+          <IconUsers size={18} aria-hidden="true" />
+          <h2 className={styles.sectionTitle}>Padrões do editor</h2>
+        </div>
+        <p className={styles.helperText}>
+          Esses valores preenchem o editor toda vez que ele é aberto (ou quando o atendente clica em "limpar").
+        </p>
+        <div className={styles.fieldGrid}>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel} htmlFor="ed-adultos">Adultos</label>
+            <input
+              id="ed-adultos"
+              type="number"
+              min={0}
+              step={1}
+              className={styles.fieldInput}
+              value={config.editor.convidadosPadrao.adultos}
+              onChange={(e) => setEditor({ convidadosPadrao: { ...config.editor.convidadosPadrao, adultos: Math.max(0, Number(e.target.value) || 0) } })}
+            />
+          </div>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel} htmlFor="ed-c0a4">Crianças 0–4</label>
+            <input
+              id="ed-c0a4"
+              type="number"
+              min={0}
+              step={1}
+              className={styles.fieldInput}
+              value={config.editor.convidadosPadrao.criancas0a4}
+              onChange={(e) => setEditor({ convidadosPadrao: { ...config.editor.convidadosPadrao, criancas0a4: Math.max(0, Number(e.target.value) || 0) } })}
+            />
+          </div>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel} htmlFor="ed-c5a9">Crianças 5–9</label>
+            <input
+              id="ed-c5a9"
+              type="number"
+              min={0}
+              step={1}
+              className={styles.fieldInput}
+              value={config.editor.convidadosPadrao.criancas5a9}
+              onChange={(e) => setEditor({ convidadosPadrao: { ...config.editor.convidadosPadrao, criancas5a9: Math.max(0, Number(e.target.value) || 0) } })}
+            />
+          </div>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel} htmlFor="ed-pag">Pagamento padrão</label>
+            <select
+              id="ed-pag"
+              className={styles.fieldInput}
+              value={config.editor.pagamentoPadrao}
+              onChange={(e) => setEditor({ pagamentoPadrao: e.target.value as 'pix' | 'parcelado' })}
+            >
+              <option value="parcelado">Parcelado em 10x</option>
+              <option value="pix">À vista no Pix</option>
+            </select>
+          </div>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel} htmlFor="ed-desloc-check">Deslocamento por padrão</label>
+            <label className={styles.checkboxRow}>
+              <input
+                id="ed-desloc-check"
+                type="checkbox"
+                checked={config.editor.deslocamentoPadrao.ativo}
+                onChange={(e) => setEditor({ deslocamentoPadrao: { ...config.editor.deslocamentoPadrao, ativo: e.target.checked } })}
+              />
+              <span>Ativar por padrão</span>
+            </label>
+          </div>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel} htmlFor="ed-desloc-valor">Valor do deslocamento (R$)</label>
+            <input
+              id="ed-desloc-valor"
+              type="number"
+              min={0}
+              step={1}
+              className={styles.fieldInput}
+              value={config.editor.deslocamentoPadrao.valor}
+              onChange={(e) => setEditor({ deslocamentoPadrao: { ...config.editor.deslocamentoPadrao, valor: Math.max(0, Number(e.target.value) || 0) } })}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <div className={styles.sectionHead}>
+          <IconMessageDots size={18} aria-hidden="true" />
+          <h2 className={styles.sectionTitle}>Mensagem do WhatsApp</h2>
+        </div>
+        <p className={styles.helperText}>
+          Template enviado junto com o PDF. Use as variáveis abaixo. O preview à direita mostra como a mensagem
+          fica com os dados atuais do editor.
+        </p>
+        <div className={styles.whatsappLayout}>
+          <div className={styles.whatsappField}>
+            <label className={styles.fieldLabel} htmlFor="wa-template">Template</label>
+            <textarea
+              id="wa-template"
+              className={styles.fieldTextarea}
+              value={config.whatsapp.template}
+              onChange={(e) => setWhatsApp({ template: e.target.value })}
+              rows={12}
+            />
+            <div className={styles.variaveis}>
+              <span className={styles.variaveisLabel}>Variáveis:</span>
+              <code>{'{nome}'}</code>
+              <code>{'{empresa}'}</code>
+              <code>{'{deData}'}</code>
+              <code>{'{emCidade}'}</code>
+              <code>{'{condicao}'}</code>
+              <code>{'{validadeHoras}'}</code>
+            </div>
+          </div>
+          <div className={styles.whatsappPreview}>
+            <span className={styles.whatsappPreviewLabel}>Preview</span>
+            <pre className={styles.whatsappPreviewText}>{(() => {
+              const condicao = 'à vista no Pix com 15% de desconto'
+              return config.whatsapp.template
+                .replace(/\{nome\}/g, ', Maria Silva')
+                .replace(/\{empresa\}/g, config.empresa.nomeFantasia)
+                .replace(/\{deData\}/g, ' de 15/11/2026')
+                .replace(/\{emCidade\}/g, ' (Fortaleza, Aldeota)')
+                .replace(/\{condicao\}/g, condicao)
+                .replace(/\{validadeHoras\}/g, String(config.validade.horas))
+            })()}</pre>
           </div>
         </div>
       </section>

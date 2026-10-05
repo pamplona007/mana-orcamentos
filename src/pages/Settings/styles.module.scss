@@ -198,3 +198,113 @@
     align-items: flex-start;
   }
 }
+
+.checkboxRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--cream);
+  cursor: pointer;
+
+  input[type='checkbox'] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--ochre);
+    cursor: pointer;
+  }
+}
+
+.fieldTextarea {
+  padding: var(--space-3);
+  background: var(--ink);
+  border: 1px solid var(--coal-3);
+  border-radius: var(--radius-sm);
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 200px;
+  transition: border-color var(--duration-fast) var(--ease-expo-out);
+
+  &:focus {
+    outline: none;
+    border-color: var(--ochre);
+  }
+}
+
+.whatsappLayout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.whatsappField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.variaveis {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--cream-dim);
+
+  code {
+    padding: 2px var(--space-2);
+    background: var(--coal-2);
+    border: 1px solid var(--coal-3);
+    border-radius: var(--radius-sm);
+    color: var(--ochre);
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+}
+
+.variaveisLabel {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.whatsappPreview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.whatsappPreviewLabel {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cream-faint);
+}
+
+.whatsappPreviewText {
+  padding: var(--space-3);
+  background: var(--ink);
+  border: 1px solid var(--coal-3);
+  border-radius: var(--radius-sm);
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 200px;
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .whatsappLayout {
+    grid-template-columns: 1fr;
+  }
+}

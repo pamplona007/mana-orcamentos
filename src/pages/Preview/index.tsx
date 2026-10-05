@@ -25,27 +25,29 @@ import type { AppShellCtx } from '@/components/AppShell'
 import styles from './styles.module.scss'
 
 const mensagemWhatsApp = ({
+  template,
   nome,
   data,
   cidade,
   condicao,
+  empresa,
+  validadeHoras,
 }: {
+  template: string
   nome: string
   data: string
   cidade: string
   condicao: string
+  empresa: string
+  validadeHoras: number
 }) => {
-  const linhas = [
-    `Oi${nome ? `, ${nome}` : ''}!`,
-    '',
-    `Segue o orçamento da Maná Pizzas para o evento${data ? ` de ${data}` : ''}${cidade ? ` (${cidade})` : ''}.`,
-    '',
-    'O PDF traz os 3 planos lado a lado. Escolhe o que combina mais com o seu evento.',
-    `Condição: ${condicao}`,
-    '',
-    'Válido por 48h. Qualquer dúvida, me chama aqui!',
-  ]
-  return linhas.join('\n')
+  return template
+    .replace(/\{nome\}/g, nome ? `, ${nome}` : '')
+    .replace(/\{empresa\}/g, empresa)
+    .replace(/\{deData\}/g, data ? ` de ${data}` : '')
+    .replace(/\{emCidade\}/g, cidade ? ` (${cidade})` : '')
+    .replace(/\{condicao\}/g, condicao)
+    .replace(/\{validadeHoras\}/g, String(validadeHoras))
 }
 
 export function Preview() {
@@ -85,12 +87,23 @@ export function Preview() {
   const whatsappText = useMemo(
     () =>
       mensagemWhatsApp({
+        template: config.whatsapp.template,
         nome: state.cliente.nome,
         data: pdfData(state.evento.data),
         cidade: state.evento.cidadeBairro,
         condicao: condicaoPagamento,
+        empresa: config.empresa.nomeFantasia,
+        validadeHoras: config.validade.horas,
       }),
-    [state.cliente.nome, state.evento.data, state.evento.cidadeBairro, condicaoPagamento],
+    [
+      config.whatsapp.template,
+      config.empresa.nomeFantasia,
+      config.validade.horas,
+      state.cliente.nome,
+      state.evento.data,
+      state.evento.cidadeBairro,
+      condicaoPagamento,
+    ],
   )
 
   const whatsappLink = useMemo(() => {

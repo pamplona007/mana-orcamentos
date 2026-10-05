@@ -91,16 +91,17 @@ export function History() {
   const handleEnviarWhatsApp = (o: OrcamentoSalvo) => {
     const phone = o.cliente.whatsapp.replace(/\D/g, '')
     const total = o.totais.livreSemBebida.totalAvista
-    const linhas = [
-      `Oi${o.cliente.nome ? `, ${o.cliente.nome}` : ''}!`,
-      '',
-      `Tudo bem? Estou reenviando o orçamento que fizemos para o evento${o.evento.data ? ` de ${pdfData(o.evento.data)}` : ''}${o.evento.cidadeBairro ? ` (${o.evento.cidadeBairro})` : ''}.`,
-      '',
-      `Total a partir de ${formatBRL(total)} (Pix à vista, com 15% de desconto).`,
-      '',
-      'Qualquer dúvida, me chama aqui!',
-    ]
-    const params = new URLSearchParams({ text: linhas.join('\n') })
+    const condicao = o.pagamento === 'pix'
+      ? 'à vista no Pix com 15% de desconto'
+      : 'parcelado em 10x no cartão'
+    const texto = config.whatsapp.template
+      .replace(/\{nome\}/g, o.cliente.nome ? `, ${o.cliente.nome}` : '')
+      .replace(/\{empresa\}/g, config.empresa.nomeFantasia)
+      .replace(/\{deData\}/g, o.evento.data ? ` de ${pdfData(o.evento.data)}` : '')
+      .replace(/\{emCidade\}/g, o.evento.cidadeBairro ? ` (${o.evento.cidadeBairro})` : '')
+      .replace(/\{condicao\}/g, `${condicao} · total a partir de ${formatBRL(total)}`)
+      .replace(/\{validadeHoras\}/g, String(config.validade.horas))
+    const params = new URLSearchParams({ text: texto })
     if (phone) params.set('phone', `55${phone}`)
     window.open(`https://wa.me/?${params.toString()}`, '_blank', 'noopener,noreferrer')
   }

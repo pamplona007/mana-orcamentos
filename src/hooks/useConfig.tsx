@@ -1,5 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { CONFIG_DEFAULT, type Config, type ConfigEmpresa, type ConfigValidade } from '@/types/config'
+import {
+  CONFIG_DEFAULT,
+  type Config,
+  type ConfigEditor,
+  type ConfigEmpresa,
+  type ConfigValidade,
+  type ConfigWhatsApp,
+} from '@/types/config'
 import {
   exportarConfig as exportar,
   importarConfig as importar,
@@ -12,12 +19,15 @@ type Ctx = {
   config: Config
   setEmpresa: (empresa: Partial<ConfigEmpresa>) => void
   setValidade: (validade: Partial<ConfigValidade>) => void
+  setEditor: (editor: Partial<ConfigEditor>) => void
+  setWhatsApp: (whatsapp: Partial<ConfigWhatsApp>) => void
   reset: () => void
   importar: (json: string) => Config
   exportar: () => string
 }
 
 const ConfigContext = createContext<Ctx | null>(null)
+export { ConfigContext }
 const STORAGE_KEY = 'mana-config:v1'
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
@@ -53,6 +63,28 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  const setEditor = useCallback((editor: Partial<ConfigEditor>) => {
+    setConfig((prev) => {
+      const next: Config = {
+        ...prev,
+        editor: { ...prev.editor, ...editor },
+      }
+      salvarConfig(next)
+      return next
+    })
+  }, [])
+
+  const setWhatsApp = useCallback((whatsapp: Partial<ConfigWhatsApp>) => {
+    setConfig((prev) => {
+      const next: Config = {
+        ...prev,
+        whatsapp: { ...prev.whatsapp, ...whatsapp },
+      }
+      salvarConfig(next)
+      return next
+    })
+  }, [])
+
   const reset = useCallback(() => {
     restaurarConfig()
     setConfig(structuredClone(CONFIG_DEFAULT))
@@ -67,8 +99,8 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
   const exportarFn = useCallback(() => exportar(), [config])
 
   const value = useMemo<Ctx>(
-    () => ({ config, setEmpresa, setValidade, reset, importar: importarFn, exportar: exportarFn }),
-    [config, setEmpresa, setValidade, reset, importarFn, exportarFn],
+    () => ({ config, setEmpresa, setValidade, setEditor, setWhatsApp, reset, importar: importarFn, exportar: exportarFn }),
+    [config, setEmpresa, setValidade, setEditor, setWhatsApp, reset, importarFn, exportarFn],
   )
 
   return <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>

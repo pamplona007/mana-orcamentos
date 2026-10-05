@@ -23,9 +23,23 @@ function mergeComDefault(raw: unknown): Config {
   const r = raw as Record<string, unknown>
   const e = (r.empresa && typeof r.empresa === 'object' ? r.empresa : {}) as Record<string, unknown>
   const v = (r.validade && typeof r.validade === 'object' ? r.validade : {}) as Record<string, unknown>
+  const ed = (r.editor && typeof r.editor === 'object' ? r.editor : {}) as Record<string, unknown>
+  const w = (r.whatsapp && typeof r.whatsapp === 'object' ? r.whatsapp : {}) as Record<string, unknown>
+  const convidados = (ed.convidadosPadrao && typeof ed.convidadosPadrao === 'object'
+    ? ed.convidadosPadrao
+    : {}) as Record<string, unknown>
+  const desloc = (ed.deslocamentoPadrao && typeof ed.deslocamentoPadrao === 'object'
+    ? ed.deslocamentoPadrao
+    : {}) as Record<string, unknown>
   return {
     empresa: { ...CONFIG_DEFAULT.empresa, ...e },
     validade: { ...CONFIG_DEFAULT.validade, ...v },
+    editor: {
+      convidadosPadrao: { ...CONFIG_DEFAULT.editor.convidadosPadrao, ...convidados },
+      pagamentoPadrao: (ed.pagamentoPadrao as Config['editor']['pagamentoPadrao']) ?? CONFIG_DEFAULT.editor.pagamentoPadrao,
+      deslocamentoPadrao: { ...CONFIG_DEFAULT.editor.deslocamentoPadrao, ...desloc },
+    },
+    whatsapp: { ...CONFIG_DEFAULT.whatsapp, ...w },
   }
 }
 
