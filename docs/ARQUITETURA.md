@@ -104,10 +104,10 @@ As páginas conversam com o domínio **apenas** por `useOrcamento` e `useConfig`
 
 | Módulo | Responsabilidade |
 |---|---|
-| `src/services/precos.ts` | **Origem única dos números comerciais**: `PRECOS_PLANOS` (4 planos × parcelado/à vista), `ADICIONAL_ENTRADA`, `ADICIONAL_SALGADO_EXTRA`, `DESCONTO_AVISTA`, `PARCELAS`, `LIMITE_KM_DESLOCAMENTO`, `BATE_LIMITE_HORAS` e `PIZZAS_POR_CONVIDADO`. |
+| `src/services/precos.ts` | **Origem única dos números comerciais** (preços, adicionais, desconto à vista, parcelas, limite de km e fator de pizzas): `PRECOS_PLANOS` (4 planos × parcelado/à vista), `ADICIONAL_ENTRADA`, `ADICIONAL_SALGADO_EXTRA`, `DESCONTO_AVISTA`, `PARCELAS`, `LIMITE_KM_DESLOCAMENTO`, `BATE_LIMITE_HORAS` e `PIZZAS_POR_CONVIDADO`. |
 | `src/services/planos.ts` | Os quatro planos: id, nome, tagline, descrição, ícone, cor, preços parcelado/à vista (derivados de `precos.ts`), inclusos, bônus e (no Premium) sabores/destaques. Também exporta `OPCIONAIS` (rótulos/valores exibidos no Editor). |
 
-Os preços **efetivos** vêm de `Config.pdf.precos`; os valores de `planos.ts` são fallback quando `calcularTotais` é chamada sem `precos`. Como `CONFIG_DEFAULT.pdf.precos` e `CONFIG_DEFAULT.pdf.adicionais` derivam das constantes de `precos.ts`, cada número comercial tem uma origem única. O `Plano.saboresPremium` hoje não é consumido por ninguém.
+Os preços **efetivos** vêm de `Config.pdf.precos`; os valores de `planos.ts` são fallback quando `calcularTotais` é chamada sem `precos`. Como `CONFIG_DEFAULT.pdf.precos` e `CONFIG_DEFAULT.pdf.adicionais` derivam das constantes de `precos.ts`, cada número comercial tem uma origem única — exceto o rótulo fixo `~R$ 150,00` do toggle de deslocamento (`OPCIONAIS.deslocamento.valor`), que continua sendo um literal (ver débito 26). O `Plano.saboresPremium` hoje não é consumido por ninguém.
 
 ### 6. Persistência (`src/services/`)
 

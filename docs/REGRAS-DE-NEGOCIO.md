@@ -5,8 +5,8 @@ regra que o código implementa, com a fórmula exata, um exemplo numérico e a r
 `arquivo:linha` do código que a implementa. O objetivo é que ninguém precise ler `src/`
 para saber como um orçamento é calculado.
 
-> **Fonte de verdade:** o código na branch deste documento (commit base `8718af8`, head do
-> PR #3 do epic PAMP-221 — estágio 2, ainda sem merge).
+> **Fonte de verdade:** o código na branch deste documento (commit base `8718af8`, estágio 2
+> do epic PAMP-221).
 > Onde o texto do PDF, o texto da tela ou o `PRODUCT.md` divergem do código, a divergência
 > está registrada aqui e em [`PENDENCIAS-DE-PRODUTO.md`](./PENDENCIAS-DE-PRODUTO.md).
 >
@@ -623,7 +623,7 @@ OrcamentoSalvo = Orcamento & { totais: TotaisPorPlano }   // src/services/orcame
 
 ### O que é configurável
 
-Tudo em `Config` (`src/types/config.ts:70-76`), editável em `src/pages/Settings/index.tsx`:
+Tudo em `Config` (`src/types/config.ts:79-85`), editável em `src/pages/Settings/index.tsx`:
 
 | Bloco | Campos | Efeito real |
 |---|---|---|
