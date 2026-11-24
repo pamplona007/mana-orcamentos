@@ -150,12 +150,17 @@ precoPlano(planoId) = config.pdf.precos[planoId]  se config existir
 - `src/utils/calculo.ts:32-44` (`precoPlano`), usado em `:59` (subtotal) e `:96`
   (`precoPessoaUsado`, só informativo).
 
-⚠️ **Divergente:** de cada par de preços, o código lê **apenas `parcelado`**.
-`config.pdf.precos.*.avista` (e o `precoPessoaAvista`/`precoPizzaAvista` de `plans.ts`)
-**não entra em nenhum cálculo**. O "à vista" exibido é sempre derivado do total pelo
-percentual de desconto de `config.pdf.adicionais.descontoAvista` (§9). Ou seja: os
-8 campos da tela de preços são inúteis — os 4 "à vista" e os 4 "parcelado" só servem de
-referência visual, e somente os 4 "parcelado" de fato mexem em algo.
+⚠️ **Divergente:** de cada par de preços, o código lê **apenas `parcelado`**; o campo
+`avista` devolvido por `precoPlano` nunca é consumido. O "à vista" exibido é sempre
+derivado do total pelo percentual de `config.pdf.adicionais.descontoAvista` (§9), e os
+valores `precoPessoaAvista`/`precoPizzaAvista` de `plans.ts` (`:45,97,121,144,146`) só
+servem de referência. Consequência: **os 4 campos "à vista" da tela de preços são
+inúteis**; os 4 campos "parcelado" são os únicos preços da tela que entram no cálculo.
+
+No plano 4, `precoPlano` devolve `precoPessoaParcelado` (R$ 78,50) — e **não**
+`precoPizzaParcelado` (`src/data/plans.ts:22,145`), que é declarado mas nunca lido. Hoje
+os dois valores são iguais, então a conta fecha; se um dia divergirem, o cálculo continua
+usando `precoPessoaParcelado`.
 
 ---
 
@@ -173,6 +178,8 @@ Plano 4 (por unidade/pizza):
 
 - `src/utils/calculo.ts:54-76` (`calcularSubtotal`); o desvio do plano 4 está em
   `:61-67`, os demais em `:70-75`.
+- No plano 4, o preço unitário usado é `precoPessoaParcelado` do plano (via
+  `precoPlano`, `src/utils/calculo.ts:41`) — não `precoPizzaParcelado` (ver §4).
 - O campo `tipoUnidade` retornado (`'pessoas'` ou `'pizzas'`) é o que decide, em
   `calcularTotais`, qual número vai para `adultosEquivalentes` e qual vai para `pizzas`
   (`src/utils/calculo.ts:98-100`).
@@ -685,12 +692,18 @@ schema (React Hook Form + Zod estão instalados mas não são usados). Ver pend�
 | `dataValidade` | `src/utils/calculo.ts:138-142` | Só chamada por teste; bug de DST |
 | `BATE_LIMITE_HORAS` | `src/data/plans.ts:166` | Nunca lido |
 | `ADICIONAL_ENTRADA`, `ADICIONAL_SALGADO_EXTRA` | `src/data/plans.ts:162-163` | Só reexportados em `OPCIONAIS` como texto |
-| `Plano.saboresPremium`, `Plano.destaquesPremium` | `src/data/plans.ts:26-27,55-82` | PDF usa listas próprias |
+| `Plano.saboresPremium` | `src/data/plans.ts:26,55-63` | Nenhum código lê; o cardápio usa listas próprias (`PageCardapio.tsx:20-29`, `PageCardapioPrint.tsx:41-50`), com texto divergente |
 | `parseBRL`, `formatCentavos`, `formatBRLCompact` | `src/utils/money.ts:10-27` | Só testes |
-| `precoPessoaAvista` / `precoPizzaAvista` de `plans.ts` | `src/data/plans.ts:45,97,121,144,146` | Ignorados no cálculo; apenas `PageUnidade.tsx:171` lê `precoPizzaAvista` para o rótulo |
+| `precoPizzaParcelado` | `src/data/plans.ts:22,145` | Nunca lido: o plano 4 calcula com `precoPessoaParcelado` (`calculo.ts:41`) |
+| `precoPessoaAvista` / `precoPizzaAvista` de `plans.ts` | `src/data/plans.ts:45,97,121,144,146` | `precoPessoaAvista` é copiado para `precoPlano().avista` (`calculo.ts:42`), mas esse campo nunca é consumido; só `precoPizzaAvista` é lido, como rótulo em `PageUnidade.tsx:171` |
 | `config.pdf.precos.*.avista` | `src/types/config.ts:36-39` | Ignorado no cálculo |
 | `config.pdf.adicionais.limiteKmDeslocamento` | `src/types/config.ts:47` | Write-only |
 | Bônus `'Deslocamento até 25 km'` | `src/data/plans.ts:84,108,131,154` | Nunca renderizado |
+
+> **Não é código morto:** `Plano.destaquesPremium` (`src/data/plans.ts:27,65-82`) é
+> **renderizado** no card do Premium no comparativo, em ambos os PDFs
+> (`src/pdf/pages/PageComparativo.tsx:282,315-324`;
+> `src/pdf/print/PageComparativoPrint.tsx:284,313-321`). Só `saboresPremium` está morto.
 
 ### Divergências entre telas, cálculo e PDF
 
