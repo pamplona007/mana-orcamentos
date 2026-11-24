@@ -1,7 +1,7 @@
 import { useOrcamento } from '@/hooks/useOrcamento'
 import { GuestBreakdown } from '@/components/GuestBreakdown'
 import { AddonToggle } from '@/components/AddonToggle'
-import { OPCIONAIS } from '@/data/plans'
+import { OPCIONAIS } from '@/services/planos'
 import { formatBRL } from '@/utils/money'
 import styles from './styles.module.scss'
 

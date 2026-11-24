@@ -1,3 +1,6 @@
+// Fonte canônica de formatação de moeda do app. As cópias em src/pdf/utils.ts
+// (pdfFormatBRL) e src/components/PriceDisplay (split) são dívida registrada e
+// serão removidas nos estágios 5 e 3 do epic PAMP-221.
 export function formatBRL(value: number): string {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',

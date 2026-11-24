@@ -1,4 +1,10 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
 import {
   CONFIG_DEFAULT,
   type Config,
@@ -14,30 +20,15 @@ import {
   obterConfig,
   restaurarConfig,
   salvarConfig,
-} from '@/storage/config'
-
-type Ctx = {
-  config: Config
-  setEmpresa: (empresa: Partial<ConfigEmpresa>) => void
-  setValidade: (validade: Partial<ConfigValidade>) => void
-  setEditor: (editor: Partial<ConfigEditor>) => void
-  setWhatsApp: (whatsapp: Partial<ConfigWhatsApp>) => void
-  setPdf: (pdf: Partial<ConfigPdf>) => void
-  reset: () => void
-  importar: (json: string) => Config
-  exportar: () => string
-}
-
-const ConfigContext = createContext<Ctx | null>(null)
-export { ConfigContext }
-const STORAGE_KEY = 'mana-config:v1'
+} from '@/services/config'
+import { ConfigContext, CONFIG_STORAGE_KEY, type ConfigCtx } from './configContext'
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
   const [config, setConfig] = useState<Config>(() => obterConfig())
 
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY) setConfig(obterConfig())
+      if (e.key === CONFIG_STORAGE_KEY) setConfig(obterConfig())
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
@@ -96,16 +87,10 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 
   const exportarFn = useCallback(() => exportar(), [config])
 
-  const value = useMemo<Ctx>(
+  const value = useMemo<ConfigCtx>(
     () => ({ config, setEmpresa, setValidade, setEditor, setWhatsApp, setPdf, reset, importar: importarFn, exportar: exportarFn }),
     [config, setEmpresa, setValidade, setEditor, setWhatsApp, setPdf, reset, importarFn, exportarFn],
   )
 
   return <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>
-}
-
-export function useConfig(): Ctx {
-  const ctx = useContext(ConfigContext)
-  if (!ctx) throw new Error('useConfig must be used within ConfigProvider')
-  return ctx
 }

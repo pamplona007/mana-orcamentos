@@ -1,3 +1,12 @@
+import {
+  ADICIONAL_ENTRADA,
+  ADICIONAL_SALGADO_EXTRA,
+  DESCONTO_AVISTA,
+  LIMITE_KM_DESLOCAMENTO,
+  PARCELAS,
+  PRECOS_PLANOS,
+} from '@/services/precos'
+
 export type ConfigEmpresa = {
   nomeFantasia: string
   telefone: string
@@ -117,17 +126,17 @@ export const CONFIG_DEFAULT: Config = {
   },
   pdf: {
     precos: {
-      premium: { parcelado: 117.6, avista: 99.9 },
-      livreBebida: { parcelado: 66.0, avista: 55.92 },
-      livreSemBebida: { parcelado: 58.8, avista: 49.92 },
-      unidade: { parcelado: 78.5, avista: 66.67 },
+      premium: { ...PRECOS_PLANOS.premium },
+      livreBebida: { ...PRECOS_PLANOS.livreBebida },
+      livreSemBebida: { ...PRECOS_PLANOS.livreSemBebida },
+      unidade: { ...PRECOS_PLANOS.unidade },
     },
     adicionais: {
-      entrada: 350,
-      salgadoExtra: 75,
-      descontoAvista: 0.15,
-      parcelas: 10,
-      limiteKmDeslocamento: 25,
+      entrada: ADICIONAL_ENTRADA,
+      salgadoExtra: ADICIONAL_SALGADO_EXTRA,
+      descontoAvista: DESCONTO_AVISTA,
+      parcelas: PARCELAS,
+      limiteKmDeslocamento: LIMITE_KM_DESLOCAMENTO,
     },
     capa: {
       sobreKicker: 'Sobre a Maná',

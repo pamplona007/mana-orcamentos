@@ -6,6 +6,20 @@ import {
   IconStarFilled,
 } from '@tabler/icons-react';
 import type { PlanoId } from '@/types/orcamento';
+import {
+  ADICIONAL_ENTRADA,
+  ADICIONAL_SALGADO_EXTRA,
+  PRECOS_PLANOS,
+} from './precos';
+
+export {
+  ADICIONAL_ENTRADA,
+  ADICIONAL_SALGADO_EXTRA,
+  BATE_LIMITE_HORAS,
+  DESCONTO_AVISTA,
+  LIMITE_KM_DESLOCAMENTO,
+  PARCELAS,
+} from './precos';
 
 export type Plano = {
   id: PlanoId;
@@ -41,8 +55,8 @@ export const PLANOS: readonly Plano[] = [
     icone: IconCrown,
     iconeLabel: 'Coroa',
     cor: 'wine',
-    precoPessoaParcelado: 117.6,
-    precoPessoaAvista: 99.9,
+    precoPessoaParcelado: PRECOS_PLANOS.premium.parcelado,
+    precoPessoaAvista: PRECOS_PLANOS.premium.avista,
     inclusos: [
       'Serviço de garçom (pizzas e bebidas)',
       'Bebidas: refrigerante, suco e água',
@@ -93,8 +107,8 @@ export const PLANOS: readonly Plano[] = [
     icone: IconStar,
     iconeLabel: 'Estrela',
     cor: 'ochre',
-    precoPessoaParcelado: 66.0,
-    precoPessoaAvista: 55.92,
+    precoPessoaParcelado: PRECOS_PLANOS.livreBebida.parcelado,
+    precoPessoaAvista: PRECOS_PLANOS.livreBebida.avista,
     inclusos: [
       'Serviço de garçom (pizzas e bebidas)',
       'Bebidas: refrigerante, suco e água',
@@ -117,8 +131,8 @@ export const PLANOS: readonly Plano[] = [
     icone: IconStarFilled,
     iconeLabel: 'Estrela preenchida',
     cor: 'rust',
-    precoPessoaParcelado: 58.8,
-    precoPessoaAvista: 49.92,
+    precoPessoaParcelado: PRECOS_PLANOS.livreSemBebida.parcelado,
+    precoPessoaAvista: PRECOS_PLANOS.livreSemBebida.avista,
     inclusos: [
       'Serviço de garçom (pizzas)',
       '3 horas de serviço livre e ilimitado',
@@ -140,10 +154,10 @@ export const PLANOS: readonly Plano[] = [
     icone: IconTarget,
     iconeLabel: 'Alvo',
     cor: 'cream',
-    precoPessoaParcelado: 78.5,
-    precoPessoaAvista: 66.67,
-    precoPizzaParcelado: 78.5,
-    precoPizzaAvista: 66.67,
+    precoPessoaParcelado: PRECOS_PLANOS.unidade.parcelado,
+    precoPessoaAvista: PRECOS_PLANOS.unidade.avista,
+    precoPizzaParcelado: PRECOS_PLANOS.unidade.parcelado,
+    precoPizzaAvista: PRECOS_PLANOS.unidade.avista,
     pizzasPorPessoa: 0.6,
     inclusos: [
       'Self service: mesa fixa',
@@ -158,12 +172,6 @@ export const PLANOS: readonly Plano[] = [
 export const PLANO_POR_ID = Object.fromEntries(
   PLANOS.map((p) => [p.id, p]),
 ) as Record<PlanoId, Plano>;
-
-export const ADICIONAL_ENTRADA = 350;
-export const ADICIONAL_SALGADO_EXTRA = 75;
-export const DESCONTO_AVISTA = 0.15;
-export const PARCELAS = 10;
-export const BATE_LIMITE_HORAS = 22;
 
 export const OPCIONAIS = {
   entrada: {
