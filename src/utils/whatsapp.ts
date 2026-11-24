@@ -18,12 +18,12 @@ export function mensagemWhatsApp({
   validadeHoras = '',
 }: DadosMensagemWhatsApp): string {
   return template
-    .replace(/\{nome\}/g, nome ? `, ${nome}` : '')
-    .replace(/\{empresa\}/g, empresa)
-    .replace(/\{deData\}/g, data ? ` de ${data}` : '')
-    .replace(/\{emCidade\}/g, cidade ? ` (${cidade})` : '')
-    .replace(/\{condicao\}/g, condicao)
-    .replace(/\{validadeHoras\}/g, String(validadeHoras))
+    .replace(/\{nome\}/g, () => (nome ? `, ${nome}` : ''))
+    .replace(/\{empresa\}/g, () => empresa)
+    .replace(/\{deData\}/g, () => (data ? ` de ${data}` : ''))
+    .replace(/\{emCidade\}/g, () => (cidade ? ` (${cidade})` : ''))
+    .replace(/\{condicao\}/g, () => condicao)
+    .replace(/\{validadeHoras\}/g, () => String(validadeHoras))
 }
 
 export function linkWhatsApp(texto: string, telefone: string): string {

@@ -1,8 +1,8 @@
+import { PIZZAS_POR_CONVIDADO } from '@/services/precos'
 import type { Convidado } from '@/types/orcamento'
 
 export const MULTIPLICADOR_CRIANCA_5A9 = 0.5
 export const MULTIPLICADOR_CRIANCA_0A4 = 0
-export const PIZZAS_POR_CONVIDADO = 0.6
 
 export function calcularConvidados(c: Convidado): number {
   const adultos = Math.max(0, c.adultos)

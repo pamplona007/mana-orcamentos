@@ -9,6 +9,7 @@ import type { PlanoId } from '@/types/orcamento';
 import {
   ADICIONAL_ENTRADA,
   ADICIONAL_SALGADO_EXTRA,
+  PIZZAS_POR_CONVIDADO,
   PRECOS_PLANOS,
 } from './precos';
 
@@ -158,7 +159,7 @@ export const PLANOS: readonly Plano[] = [
     precoPessoaAvista: PRECOS_PLANOS.unidade.avista,
     precoPizzaParcelado: PRECOS_PLANOS.unidade.parcelado,
     precoPizzaAvista: PRECOS_PLANOS.unidade.avista,
-    pizzasPorPessoa: 0.6,
+    pizzasPorPessoa: PIZZAS_POR_CONVIDADO,
     inclusos: [
       'Self service: mesa fixa',
       'Luvas e guardanapos',

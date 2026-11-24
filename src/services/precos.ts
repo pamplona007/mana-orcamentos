@@ -16,3 +16,4 @@ export const DESCONTO_AVISTA = 0.15
 export const PARCELAS = 10
 export const LIMITE_KM_DESLOCAMENTO = 25
 export const BATE_LIMITE_HORAS = 22
+export const PIZZAS_POR_CONVIDADO = 0.6
