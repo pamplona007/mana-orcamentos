@@ -5,13 +5,15 @@ regra que o código implementa, com a fórmula exata, um exemplo numérico e a r
 `arquivo:linha` do código que a implementa. O objetivo é que ninguém precise ler `src/`
 para saber como um orçamento é calculado.
 
-> **Fonte de verdade:** o código na branch deste documento (commit base `1c3a656`).
+> **Fonte de verdade:** o código na branch deste documento (commit base `8718af8`, head do
+> PR #3 do epic PAMP-221 — estágio 2, ainda sem merge).
 > Onde o texto do PDF, o texto da tela ou o `PRODUCT.md` divergem do código, a divergência
 > está registrada aqui e em [`PENDENCIAS-DE-PRODUTO.md`](./PENDENCIAS-DE-PRODUTO.md).
 >
-> **Observação sobre caminhos:** a estrutura real do repositório usa `src/storage/`
-> (não `src/services/`) e `src/hooks/` (não `src/contexts/`). As referências abaixo
-> apontam para os caminhos reais.
+> **Observação sobre caminhos:** desde o estágio 2 do epic PAMP-221, a estrutura real do
+> repositório usa `src/services/` (dados comerciais e persistência), `src/contexts/`
+> (providers, contexto e reducer) e `src/hooks/` (apenas hooks de consumo). As
+> referências abaixo apontam para os caminhos reais.
 
 ## Legenda de status
 
@@ -68,10 +70,10 @@ Um orçamento é montado no Editor sobre um estado (`State`) com seis blocos:
 | `desconto` | `tipo` (`nenhum`/`percentual`/`absoluto`), `valor` | `nenhum` / `0` |
 | `deslocamento` | `ativo`, `valor` | `config.editor.deslocamentoPadrao` |
 
-- Estado inicial: `src/hooks/useOrcamento.tsx:42-58` (`buildInitialState`).
-- Tipos: `src/types/orcamento.ts:3-41`.
+- Estado inicial: `src/contexts/orcamentoReducer.ts:23-39` (`buildInitialState`).
+- Tipos: `src/types/orcamento.ts:1-52` (`State` em `:52`).
 - O padrão de convidados vem de `CONFIG_DEFAULT.editor.convidadosPadrao` = 25 adultos
-  (`src/types/config.ts:94-105`).
+  (`src/types/config.ts:104-108`).
 - O `pagamento` não altera nenhum total: ele só muda o texto da condição e a mensagem
   de WhatsApp. Todos os 4 planos sempre têm total à vista **e** total parcelado calculados.
 
@@ -91,8 +93,8 @@ adultosEquivalentes = max(0, adultos)
 ```
 
 - Constantes: `MULTIPLICADOR_CRIANCA_5A9 = 0,5` e `MULTIPLICADOR_CRIANCA_0A4 = 0`
-  em `src/utils/calculo.ts:16-17`.
-- Função: `calcularConvidados` em `src/utils/calculo.ts:19-24`.
+  em `src/utils/convidados.ts:4-5`.
+- Função: `calcularConvidados` em `src/utils/convidados.ts:7-12`.
 - Valores negativos são zerados por `Math.max(0, …)` (mesma função).
 
 **Exemplo:** 20 adultos + 10 crianças de 5–9 + 5 crianças de 0–4
@@ -111,13 +113,14 @@ adultosEquivalentes = max(0, adultos)
 pizzasSugeridas = ceil(adultosEquivalentes × 0,6)
 ```
 
-- `src/utils/calculo.ts:26-28` (`calcularPizzasSugeridas`).
+- `src/utils/convidados.ts:14-16` (`calcularPizzasSugeridas`), com o fator
+  `PIZZAS_POR_CONVIDADO = 0,6` em `src/services/precos.ts:19`.
 - O fator 0,6 significa **1 pizza a cada 1,67 pessoa** (o PDF diz "1,6 pessoa" — ver §17).
 
 **Exemplo:** 25 equivalentes → `ceil(25 × 0,6) = ceil(15) = 15` pizzas.
 
 A função só é usada em dois lugares que importam para dinheiro:
-`calcularSubtotal` do plano por unidade (`src/utils/calculo.ts:61-67`) e o PDF
+`calcularSubtotal` do plano por unidade (`src/utils/calculo.ts:48-55`) e o PDF
 (`src/pdf/pages/PageUnidade.tsx:169`, `src/pdf/print/PageUnidadePrint.tsx:170`).
 
 ⚠️ **Divergente na UI:** o componente `GuestBreakdown` recalcula o mesmo número inline
@@ -133,32 +136,34 @@ são duas fontes para o mesmo número.
 
 Há **duas** tabelas de preço no repositório:
 
-1. `src/data/plans.ts:32-156` — tabela comercial fixa (`precoPessoaParcelado`,
-   `precoPessoaAvista`, e no plano 4 `precoPizzaParcelado`/`precoPizzaAvista`).
+1. `src/services/planos.ts:47-171` — tabela comercial fixa (`precoPessoaParcelado`,
+   `precoPessoaAvista`, e no plano 4 `precoPizzaParcelado`/`precoPizzaAvista`), com os
+   valores vindos das constantes de `src/services/precos.ts:6-11`.
 2. `config.pdf.precos` — os 8 campos da tela "Preços dos planos"
-   (`src/pages/Settings/index.tsx:375-414`, tipo em `src/types/config.ts:35-40`,
-   padrão em `src/types/config.ts:119-124`).
+   (`src/pages/Settings/index.tsx:375-414`, tipo em `src/types/config.ts:44-49`,
+   padrão em `src/types/config.ts:128-133`).
 
-O cálculo usa `config.pdf.precos` quando ele existe e cai na tabela de `plans.ts` quando
+O cálculo usa `config.pdf.precos` quando ele existe e cai na tabela de `planos.ts` quando
 não existe:
 
 ```
 precoPlano(planoId) = config.pdf.precos[planoId]  se config existir
-                    = plans.ts[planoId]            caso contrário
+                    = planos.ts[planoId]          caso contrário
 ```
 
-- `src/utils/calculo.ts:32-44` (`precoPlano`), usado em `:59` (subtotal) e `:96`
+- `src/utils/calculo.ts:19-31` (`precoPlano`), usado em `:46` (subtotal) e `:83`
   (`precoPessoaUsado`, só informativo).
 
 ⚠️ **Divergente:** de cada par de preços, o código lê **apenas `parcelado`**; o campo
 `avista` devolvido por `precoPlano` nunca é consumido. O "à vista" exibido é sempre
 derivado do total pelo percentual de `config.pdf.adicionais.descontoAvista` (§9), e os
-valores `precoPessoaAvista`/`precoPizzaAvista` de `plans.ts` (`:45,97,121,144,146`) só
+valores `precoPessoaAvista`/`precoPizzaAvista` de `planos.ts`
+(`src/services/planos.ts:60,112,136,159,161`) só
 servem de referência. Consequência: **os 4 campos "à vista" da tela de preços são
 inúteis**; os 4 campos "parcelado" são os únicos preços da tela que entram no cálculo.
 
 No plano 4, `precoPlano` devolve `precoPessoaParcelado` (R$ 78,50) — e **não**
-`precoPizzaParcelado` (`src/data/plans.ts:22,145`), que é declarado mas nunca lido. Hoje
+`precoPizzaParcelado` (`src/services/planos.ts:37,160`), que é declarado mas nunca lido. Hoje
 os dois valores são iguais, então a conta fecha; se um dia divergirem, o cálculo continua
 usando `precoPessoaParcelado`.
 
@@ -176,13 +181,13 @@ Plano 4 (por unidade/pizza):
     subtotal = pizzasSugeridas × precoParcelado(plano 4)
 ```
 
-- `src/utils/calculo.ts:54-76` (`calcularSubtotal`); o desvio do plano 4 está em
-  `:61-67`, os demais em `:70-75`.
+- `src/utils/calculo.ts:41-63` (`calcularSubtotal`); o desvio do plano 4 está em
+  `:48-55`, os demais em `:57-62`.
 - No plano 4, o preço unitário usado é `precoPessoaParcelado` do plano (via
-  `precoPlano`, `src/utils/calculo.ts:41`) — não `precoPizzaParcelado` (ver §4).
+  `precoPlano`, `src/utils/calculo.ts:46`) — não `precoPizzaParcelado` (ver §4).
 - O campo `tipoUnidade` retornado (`'pessoas'` ou `'pizzas'`) é o que decide, em
   `calcularTotais`, qual número vai para `adultosEquivalentes` e qual vai para `pizzas`
-  (`src/utils/calculo.ts:98-100`).
+  (`src/utils/calculo.ts:86-87`).
 
 **Exemplos (25 adultos, preços padrão):**
 
@@ -211,11 +216,11 @@ A ordem é fixa e igual para todos os planos:
 7. parcela           = round(total / parcelas)             (§10)
 ```
 
-- `src/utils/calculo.ts:78-110` (`calcularTotais`). Ordem visível em `:86-95`.
-- O deslocamento entra **antes** do desconto (`:87-91`), então um desconto percentual
+- `src/utils/calculo.ts:65-96` (`calcularTotais`). Ordem visível em `:74-82`.
+- O deslocamento entra **antes** do desconto (`:74-77`), então um desconto percentual
   também incide sobre o deslocamento.
 - Os totais dos **4 planos** são calculados a cada mudança de estado:
-  `src/hooks/useOrcamento.tsx:102-110`.
+  `src/contexts/OrcamentoProvider.tsx:19-27`.
 
 ---
 
@@ -228,10 +233,10 @@ valorDeslocamento = ativo ? max(0, valor) : 0
 base              = subtotal + valorDeslocamento
 ```
 
-- `src/utils/calculo.ts:87-88`.
+- `src/utils/calculo.ts:74-75`.
 - Entra no total dos **4 planos**, e entra **antes** do desconto.
 - O valor é digitado livremente no Editor (`src/pages/Editor/index.tsx:98-113`, campo
-  `min={0}`); o toggle usa `OPCIONAIS.deslocamento` (`src/data/plans.ts:178-182`), cujo
+  `min={0}`); o toggle usa `OPCIONAIS.deslocamento` (`src/services/planos.ts:187-191`), cujo
   rótulo mostra `'~R$ 150,00'` **fixo**, ignorando `config.editor.deslocamentoPadrao.valor`
   (`src/pages/Editor/index.tsx:94`).
 
@@ -257,8 +262,8 @@ se tipo == 'absoluto':
     descontoAplicado  = min(base, max(0, valor))           // limitado à base
 ```
 
-- `src/utils/calculo.ts:112-119` (`calcularDesconto`), chamado em `:90`.
-- A base é `subtotal + deslocamento` (§6). O total nunca fica negativo (`:91`).
+- `src/utils/calculo.ts:99-106` (`calcularDesconto`), chamado em `:77`.
+- A base é `subtotal + deslocamento` (§6). O total nunca fica negativo (`:78`).
 
 **Exemplos (Premium, 25 adultos):**
 
@@ -271,7 +276,7 @@ se tipo == 'absoluto':
 **Divergências:**
 - O Editor diz que o desconto é "aplicado sobre o total do plano Premium (referência) e
   aparece no PDF" (`src/pages/Editor/index.tsx:120-124`). Na prática o código aplica o
-  desconto a **todos os 4 planos** (`src/hooks/useOrcamento.tsx:104-109`) e o desconto
+  desconto a **todos os 4 planos** (`src/contexts/OrcamentoProvider.tsx:20-27`) e o desconto
   **nunca é impresso no PDF** (nenhuma página lê `descontoAplicado`). Ver pendência 3.
 
 ---
@@ -284,10 +289,10 @@ se tipo == 'absoluto':
 totalAvista = round(total × (1 − descontoAvista) × 100) / 100
 ```
 
-- `src/utils/money.ts:33-35` (`applyDescontoAvista`), chamado em `src/utils/calculo.ts:93`.
+- `src/utils/money.ts:36-38` (`applyDescontoAvista`), chamado em `src/utils/calculo.ts:80`.
 - `descontoAvista` vem de `config.pdf.adicionais.descontoAvista` (padrão **0,15 = 15%**,
-  `src/types/config.ts:128`), com fallback para `DESCONTO_AVISTA = 0,15`
-  (`src/data/plans.ts:164`, `src/utils/calculo.ts:46-48`).
+  `src/types/config.ts:137`), com fallback para `DESCONTO_AVISTA = 0,15`
+  (`src/services/precos.ts:15`, `src/utils/calculo.ts:33-35`).
 
 **Exemplos:** 2.940,00 → **2.499,00**; 1.650,00 → **1.402,50**; 1.177,50 → **1.000,88**
 (1.177,50 × 0,85 = 1.000,875, arredondado para cima no centavo).
@@ -298,7 +303,7 @@ totalAvista = round(total × (1 − descontoAvista) × 100) / 100
   valor derivado (`PageComparativo.tsx:257,301`).
 - A tela de preços promete que o campo "à vista" define esse valor, mas ele é ignorado
   (§4, pendência 2).
-- O PDF do plano 4 mostra o preço "Pix por pizza" a partir de `plans.ts`
+- O PDF do plano 4 mostra o preço "Pix por pizza" a partir de `src/services/planos.ts`
   (`PageUnidade.tsx:171`), ignorando `config.pdf.precos.unidade` — o número exibido pode
   não bater com o total.
 
@@ -312,9 +317,9 @@ totalAvista = round(total × (1 − descontoAvista) × 100) / 100
 parcela = round(total / parcelas × 100) / 100
 ```
 
-- `src/utils/money.ts:29-31` (`roundParcela`), chamado em `src/utils/calculo.ts:95`.
+- `src/utils/money.ts:32-34` (`roundParcela`), chamado em `src/utils/calculo.ts:82`.
 - `parcelas` vem de `config.pdf.adicionais.parcelas` (padrão **10**,
-  `src/types/config.ts:129`; fallback em `src/data/plans.ts:165`).
+  `src/types/config.ts:138`; fallback em `src/services/precos.ts:16`).
 - O total parcelado (`totalParcelado`) é o próprio total: o parcelamento **não** acrescenta
   juros.
 
@@ -328,7 +333,8 @@ ajuste no PDF.
 
 ## 11. Tabela dos 4 planos
 
-✅ **Implementada** — os dados comerciais vivem em `src/data/plans.ts:32-156`
+✅ **Implementada** — os dados comerciais vivem em `src/services/planos.ts:47-171` (valores
+comuns em `src/services/precos.ts`)
 
 | # | Plano (`PlanoId`) | Preço parcelado | Preço "à vista" de tabela* | Unidade | Duração | Bônus | O que inclui (resumo) |
 |---|---|---|---|---|---|---|---|
@@ -350,7 +356,7 @@ de ~15,05–15,27% (arredondado), não os 15% exatos aplicados pelo cálculo.
 | Por unidade (15 pizzas) | R$ 1.177,50 | R$ 1.000,88 | R$ 117,75 |
 
 **Onde os 4 planos aparecem:**
-- Cálculo: `src/hooks/useOrcamento.tsx:104-109`.
+- Cálculo: `src/contexts/OrcamentoProvider.tsx:20-27`.
 - Comparativo no PDF: apenas os planos 1, 2 e 3 (`src/pdf/pages/PageComparativo.tsx:8`).
 - Página própria do plano 4: `src/pdf/pages/PageUnidade.tsx`.
 - **No app (telas), nenhum plano é exibido com total** — ver pendência 14.
@@ -367,7 +373,7 @@ se alguém incluir o plano 4 na lista.
 ⚠️ **Divergente — calculada de duas origens diferentes**
 
 Regra de negócio: o orçamento é válido por `config.validade.horas` (padrão **48h**,
-`src/types/config.ts:91-93`).
+`src/types/config.ts:100-102`).
 
 | Onde | Fórmula | Referência |
 |---|---|---|
@@ -380,10 +386,10 @@ orçamento e gerar o PDF em 02/11 às 10:00, a capa imprime **"Válido até 04/1
 (`agora + 48h`). No dia 03/11 às 11:00, o Histórico já marca **"Expirado"**, embora o PDF
 entregue ao cliente diga que vale até 04/11. É o mesmo orçamento com duas validades.
 
-`dataValidade(criadoEm, horas)` existe em `src/utils/calculo.ts:138-142` (com
-`setHours(getHours() + horas)`) mas **não é chamada por nenhum fluxo** — é código morto
-(só usada em teste). Também tem bug de DST (perde 1h em transições de horário de verão).
-Ver pendência 5.
+`dataValidade(criadoEm, horas)` existe em `src/utils/validade.ts:1-5` (reexportada por
+`src/utils/calculo.ts:15`, com `setHours(getHours() + horas)`) mas **não é chamada por
+nenhum fluxo** — é código morto (só usada em teste). Também tem bug de DST (perde 1h em
+transições de horário de verão). Ver pendência 5.
 
 ---
 
@@ -412,7 +418,7 @@ poderá sofrer alteração."*
 - Colorido: `src/pdf/pages/PageCondicoes.tsx:240-243`.
 - P&B: `src/pdf/print/PageCondicoesPrint.tsx:244`.
 
-- `BATE_LIMITE_HORAS = 22` existe em `src/data/plans.ts:166` e **não é lido por ninguém**.
+- `BATE_LIMITE_HORAS = 22` existe em `src/services/precos.ts:18` e **não é lido por ninguém**.
 - O app **não tem campo de horário do evento** — só a data (`src/pages/Editor/index.tsx:47-54`).
 - Não existe cálculo de hora extra nem adicional por horário.
 
@@ -424,13 +430,13 @@ Ver pendência 9.
 
 📄 **Apenas textual** (e nem chega a ser impresso)
 
-Os 4 planos declaram o bônus `'Deslocamento até 25 km'` (`src/data/plans.ts:84,108,131,154`),
+Os 4 planos declaram o bônus `'Deslocamento até 25 km'` (`src/services/planos.ts:99,123,146,169`),
 mas a palavra `bonus` **não é referenciada em nenhuma página do PDF** (`src/pdf/`) nem em
 nenhuma tela. Ou seja: o bônus existe só no array de dados.
 
 - `config.pdf.adicionais.limiteKmDeslocamento` (padrão 25) é configurável em
   `src/pages/Settings/index.tsx:465-476`, mas é **write-only**: nenhum cálculo o lê.
-- `validarDeslocamento(cidadeBairro)` em `src/utils/calculo.ts:121-136` sabe dizer se a
+- `validarDeslocamento(cidadeBairro)` em `src/utils/calculo.ts:108-124` sabe dizer se a
   cidade está na área (Fortaleza, Caucaia, Maracanaú, Eusébio, Aquiraz, Pacatuba,
   Itaitinga), mas **não é chamada por nenhum fluxo** (só teste).
 - O valor do deslocamento é digitado manualmente e cobrado de todos os planos (§7), sem
@@ -451,12 +457,12 @@ Dois adicionais opcionais existem no cardápio:
 | Entrada | **R$ 350,00** | `pdf.adicionais.entrada` | 2 centos de salgados + 2 kg de batata |
 | Cento extra | **R$ 75,00** | `pdf.adicionais.salgadoExtra` | cada cento de salgados adicional |
 
-- Padrões em `src/types/config.ts:125-131`; constantes em `src/data/plans.ts:162-163`.
+- Padrões em `src/types/config.ts:134-140`; constantes em `src/services/precos.ts:13-14`.
 - Impressos no cardápio: colorido `src/pdf/pages/PageCardapio.tsx:348-357`; P&B
   `src/pdf/print/PageCardapioPrint.tsx:367-376`.
 - **Não existe toggle** no Editor para incluí-los (`src/pages/Editor/index.tsx` só tem
   deslocamento e desconto).
-- **Nunca são somados a nenhum total**: `calcularTotais` (`src/utils/calculo.ts:78-110`)
+- **Nunca são somados a nenhum total**: `calcularTotais` (`src/utils/calculo.ts:65-96`)
   não os menciona. O PDF ainda diz "Adicionais opcionais não estão incluídos neste total"
   (`src/pdf/pages/PageUnidade.tsx:249`).
 
@@ -476,7 +482,7 @@ Ver pendência 11.
 | PDF P&B (lista única com categoria) | 21 | 6 | **27** | `src/pdf/print/PageCardapioPrint.tsx:11-39` |
 | Título do cardápio (ambos) | — | — | **"26 sabores"** | `PageCardapio.tsx:299`, `PageCardapioPrint.tsx:318` |
 | Título da página do plano 4 | — | — | **"30 sabores"** | `PageUnidade.tsx:230`, `PageUnidadePrint.tsx:230` |
-| `plans.ts` (inclusos) | — | — | **"30 sabores"** | `src/data/plans.ts:105,128,139,151` |
+| `planos.ts` (inclusos) | — | — | **"30 sabores"** | `src/services/planos.ts:120,143,154,166` |
 | Tela de Configurações (placeholders) | **21** | **6** | 27 | `src/pages/Settings/index.tsx:577,592` |
 
 Além disso:
@@ -484,7 +490,7 @@ Além disso:
   `docesCustomizados` (`PageCardapio.tsx:287-290`), mas o **P&B ignora totalmente** a
   config (usa a lista `SABORES` fixa, `PageCardapioPrint.tsx:308-309`) — um cardápio
   configurado não aparece na versão preta e branca.
-- A lista de sabores premium está duplicada com texto diferente: `plans.ts:55-63`
+- A lista de sabores premium está duplicada com texto diferente: `src/services/planos.ts:70-79`
   (`'Pepperoni premium'`) vs `PageCardapio.tsx:20-29` e `PageCardapioPrint.tsx:41-50`
   (`'Pepperoni premium (búfala)'`); o campo `Plano.saboresPremium` é código morto.
 
@@ -492,10 +498,10 @@ Além disso:
 
 | Texto | Referência |
 |---|---|
-| "Massa maturada por **48h**" | `src/data/plans.ts:39` |
-| "maturada por **48 horas**" | `src/data/plans.ts:68` |
+| "Massa maturada por **48h**" | `src/services/planos.ts:54` |
+| "maturada por **48 horas**" | `src/services/planos.ts:83` |
 | "massa maturada **12h**" | `PageCardapio.tsx:299`, `PageCardapioPrint.tsx:318` |
-| "**12 horas** de fermentação natural" | `src/types/config.ts:136` (capa padrão) |
+| "**12 horas** de fermentação natural" | `src/types/config.ts:145` (capa padrão) |
 
 ### 17.3 Estimativa de pizza no plano 4
 
@@ -536,7 +542,7 @@ derivado da config. Ver pendência 7.
 ⚠️ **Divergente — três implementações da mesma mensagem**
 
 A mensagem é montada a partir de `config.whatsapp.template` (padrão em
-`src/types/config.ts:106-117`), com as variáveis `{nome}`, `{empresa}`, `{deData}`,
+`src/types/config.ts:116-125`), com as variáveis `{nome}`, `{empresa}`, `{deData}`,
 `{emCidade}`, `{condicao}`, `{validadeHoras}`.
 
 | Tela | Condição `{condicao}` | Inclui total? | Referência |
@@ -548,6 +554,9 @@ A mensagem é montada a partir de `config.whatsapp.template` (padrão em
 Problemas:
 - O mesmo orçamento gera textos diferentes em Preview e Histórico (o Histórico acrescenta
   o total).
+- A implementação canônica (`src/utils/whatsapp.ts:11-27`) foi criada no estágio 2 do epic
+  PAMP-221, mas Preview, Histórico e Configurações ainda usam as cópias inline (a migração
+  das páginas é do estágio 3).
 - O "15%" está fixo nas três, ignorando `config.pdf.adicionais.descontoAvista` e o
   `pagamento` selecionado só troca entre duas frases fixas, sem olhar `parcelas`.
 - O telefone é normalizado só com `\D` e prefixado com `55` (`Preview:106-111`,
@@ -561,7 +570,8 @@ Ver pendência 13.
 
 ✅ **Implementada** / ⚠️ **Regra de "Rascunho" arbitrária**
 
-`statusDoOrcamento` (`src/pages/History/index.tsx:31-42`) decide, nesta ordem:
+`statusDoOrcamento` (`src/pages/History/index.tsx:31-42`; implementação canônica em
+`src/utils/orcamento.ts:6-16`, ainda sem consumidor) decide, nesta ordem:
 
 ```
 se criadoEm > agora − 5 minutos        → "Rascunho"  (fresh)
@@ -581,8 +591,8 @@ senão                                  → "Válido"    (ok)
 
 | Chave | Conteúdo | Referência |
 |---|---|---|
-| `mana-config:v1` | config completa (`Config`) | `src/storage/config.ts:3` (leitura/escrita `:5-19`) |
-| `mana-orcamentos:v1` | array de orçamentos salvos (`OrcamentoSalvo[]`) | `src/storage/orcamentos.ts:7` |
+| `mana-config:v1` | config completa (`Config`) | `src/services/config.ts:3` (leitura/escrita `:5-19`) |
+| `mana-orcamentos:v1` | array de orçamentos salvos (`OrcamentoSalvo[]`) | `src/services/orcamentos.ts:7` |
 | `mana:theme` | `'dark'` ou `'light'` | `src/hooks/useTheme.ts:5` |
 
 ### O que é congelado no histórico
@@ -591,10 +601,10 @@ Ao salvar no Preview (`handleSalvar`, `src/pages/Preview/index.tsx:115-119`), o 
 um **snapshot** do orçamento **mais** os totais calculados naquele momento:
 
 ```ts
-OrcamentoSalvo = Orcamento & { totais: TotaisPorPlano }   // src/storage/orcamentos.ts:3-5
+OrcamentoSalvo = Orcamento & { totais: TotaisPorPlano }   // src/services/orcamentos.ts:3-5
 ```
 
-- `salvarOrcamento` insere ou atualiza por `id` (`src/storage/orcamentos.ts:48-59`).
+- `salvarOrcamento` insere ou atualiza por `id` (`src/services/orcamentos.ts:48-59`).
 - Os `totais` ficam **congelados**: mudar preços nas Configurações depois não altera os
   totais já salvos. É isso que o Histórico exibe (`History:154,184`) e o que a mensagem
   do Histórico usa (`History:92,101`).
@@ -602,13 +612,13 @@ OrcamentoSalvo = Orcamento & { totais: TotaisPorPlano }   // src/storage/orcamen
   `OrcamentoProvider` e navega para o Preview, que **recalcula** os totais com a config
   atual. Ou seja: o orçamento salvo mostra um valor no Histórico e pode mostrar outro no
   Preview/PDF depois de uma mudança de preço.
-- `listarOrcamentos` ordena por `criadoEm` descendente (`src/storage/orcamentos.ts:38-42`).
+- `listarOrcamentos` ordena por `criadoEm` descendente (`src/services/orcamentos.ts:38-42`).
 - `duplicarOrcamento` cria novo `id`, novo `criadoEm` e sufixo `" (cópia)"` no nome
-  (`src/storage/orcamentos.ts:65-78`).
-- `removerOrcamento` reescreve o array filtrando o id (`src/storage/orcamentos.ts:61-63`)
+  (`src/services/orcamentos.ts:65-78`).
+- `removerOrcamento` reescreve o array filtrando o id (`src/services/orcamentos.ts:61-63`)
   — reescreve mesmo se o id não existir.
 - Leitura tolerante: `isOrcamentoSalvo` filtra entradas corrompidas
-  (`src/storage/orcamentos.ts:27-36`); `readAll` engole `JSON.parse` inválido
+  (`src/services/orcamentos.ts:27-36`); `readAll` engole `JSON.parse` inválido
   (`:9-20`).
 
 ### O que é configurável
@@ -626,16 +636,16 @@ Tudo em `Config` (`src/types/config.ts:70-76`), editável em `src/pages/Settings
 | `pdf.capa` | textos do "Sobre" + 3 promessas + rodapé | aparecem na capa |
 | `pdf.cardapio` | listas customizadas de salgados/doces | só no PDF colorido (§17) |
 
-- Merge tolerante de config parcial: `mergeComDefault` (`src/storage/config.ts:21-73`) —
+- Merge tolerante de config parcial: `mergeComDefault` (`src/services/config.ts:21-73`) —
   mescla por seção, cai no default se a seção tiver tipo errado, mas **não valida tipos
   numéricos** (ex.: `validade.horas: "abc"` é aceito).
-- Exportar: `exportarConfig` gera JSON indentado (`src/storage/config.ts:87-89`).
+- Exportar: `exportarConfig` gera JSON indentado (`src/services/config.ts:87-89`).
 - Importar: `importarConfig` faz `JSON.parse` **sem `try/catch`**
-  (`src/storage/config.ts:91-96`); a exceção é capturada só na tela de Configurações
+  (`src/services/config.ts:91-96`); a exceção é capturada só na tela de Configurações
   (`src/pages/Settings/index.tsx:36-43`).
-- Restaurar padrão: reescreve `CONFIG_DEFAULT` (`src/storage/config.ts:83-85`;
-  `src/hooks/useConfig.tsx:86-89`).
-- Sincronia entre abas pelo evento `storage` (`src/hooks/useConfig.tsx:38-44`).
+- Restaurar padrão: reescreve `CONFIG_DEFAULT` (`src/services/config.ts:83-85`;
+  `src/contexts/ConfigProvider.tsx:77-80`).
+- Sincronia entre abas pelo evento `storage` (`src/contexts/ConfigProvider.tsx:29-35`).
 
 ---
 
@@ -671,10 +681,11 @@ schema (React Hook Form + Zod estão instalados mas não são usados). Ver pend�
 | `parseBRL` | texto → número | **Não** (só teste) |
 | `roundParcela` | `round(total/parcelas × 100)/100` | Sim (§10) |
 | `applyDescontoAvista` | `round(total × (1−desconto) × 100)/100` | Sim (§9) |
-| `dataValidade` | `criadoEm + horas` via `setHours` | **Não** (código morto) |
+| `dataValidade` (`src/utils/validade.ts:1-5`) | `criadoEm + horas` via `setHours` | **Não** (código morto) |
 
-- Dinheiro: `src/utils/money.ts:1-35`.
-- Datas/PDF: `src/pdf/utils.ts:1-18`.
+- Dinheiro: `src/utils/money.ts:1-38`.
+- Datas/PDF: `src/pdf/utils.ts:1-18` (a mesma formatação por extenso existe em
+  `src/utils/datas.ts:11-19`, ainda sem consumidor).
 - Observação: `pdfData` fixa meio-dia quando recebe data sem hora
   (`src/pdf/utils.ts:10`), para evitar deslocamento de fuso.
 - Um 4º formato inline de moeda existe em `PageCapa.tsx` (`toLocaleString` direto) e um
@@ -688,19 +699,19 @@ schema (React Hook Form + Zod estão instalados mas não são usados). Ver pend�
 
 | Item | Referência | Observação |
 |---|---|---|
-| `validarDeslocamento` | `src/utils/calculo.ts:121-136` | Só chamada por teste |
-| `dataValidade` | `src/utils/calculo.ts:138-142` | Só chamada por teste; bug de DST |
-| `BATE_LIMITE_HORAS` | `src/data/plans.ts:166` | Nunca lido |
-| `ADICIONAL_ENTRADA`, `ADICIONAL_SALGADO_EXTRA` | `src/data/plans.ts:162-163` | Só reexportados em `OPCIONAIS` como texto |
-| `Plano.saboresPremium` | `src/data/plans.ts:26,55-63` | Nenhum código lê; o cardápio usa listas próprias (`PageCardapio.tsx:20-29`, `PageCardapioPrint.tsx:41-50`), com texto divergente |
-| `parseBRL`, `formatCentavos`, `formatBRLCompact` | `src/utils/money.ts:10-27` | Só testes |
-| `precoPizzaParcelado` | `src/data/plans.ts:22,145` | Nunca lido: o plano 4 calcula com `precoPessoaParcelado` (`calculo.ts:41`) |
-| `precoPessoaAvista` / `precoPizzaAvista` de `plans.ts` | `src/data/plans.ts:45,97,121,144,146` | `precoPessoaAvista` é copiado para `precoPlano().avista` (`calculo.ts:42`), mas esse campo nunca é consumido; só `precoPizzaAvista` é lido, como rótulo em `PageUnidade.tsx:171` |
-| `config.pdf.precos.*.avista` | `src/types/config.ts:36-39` | Ignorado no cálculo |
-| `config.pdf.adicionais.limiteKmDeslocamento` | `src/types/config.ts:47` | Write-only |
-| Bônus `'Deslocamento até 25 km'` | `src/data/plans.ts:84,108,131,154` | Nunca renderizado |
+| `validarDeslocamento` | `src/utils/calculo.ts:108-124` | Só chamada por teste |
+| `dataValidade` | `src/utils/validade.ts:1-5` | Só chamada por teste; bug de DST |
+| `BATE_LIMITE_HORAS` | `src/services/precos.ts:18` | Nunca lido |
+| `ADICIONAL_ENTRADA`, `ADICIONAL_SALGADO_EXTRA` | `src/services/precos.ts:13-14` | Só reexportados em `OPCIONAIS` como texto |
+| `Plano.saboresPremium` | `src/services/planos.ts:41,70-79` | Nenhum código lê; o cardápio usa listas próprias (`PageCardapio.tsx:20-29`, `PageCardapioPrint.tsx:41-50`), com texto divergente |
+| `parseBRL`, `formatCentavos`, `formatBRLCompact` | `src/utils/money.ts:13-30` | Só testes |
+| `precoPizzaParcelado` | `src/services/planos.ts:37,160` | Nunca lido: o plano 4 calcula com `precoPessoaParcelado` (`calculo.ts:46`) |
+| `precoPessoaAvista` / `precoPizzaAvista` de `planos.ts` | `src/services/planos.ts:60,112,136,159,161` | `precoPessoaAvista` é copiado para `precoPlano().avista` (`calculo.ts:30`), mas esse campo nunca é consumido; só `precoPizzaAvista` é lido, como rótulo em `PageUnidade.tsx:171` |
+| `config.pdf.precos.*.avista` | `src/types/config.ts:44-49` | Ignorado no cálculo |
+| `config.pdf.adicionais.limiteKmDeslocamento` | `src/types/config.ts:56` | Write-only |
+| Bônus `'Deslocamento até 25 km'` | `src/services/planos.ts:99,123,146,169` | Nunca renderizado |
 
-> **Não é código morto:** `Plano.destaquesPremium` (`src/data/plans.ts:27,65-82`) é
+> **Não é código morto:** `Plano.destaquesPremium` (`src/services/planos.ts:42,80-97`) é
 > **renderizado** no card do Premium no comparativo, em ambos os PDFs
 > (`src/pdf/pages/PageComparativo.tsx:282,315-324`;
 > `src/pdf/print/PageComparativoPrint.tsx:284,313-321`). Só `saboresPremium` está morto.
