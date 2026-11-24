@@ -2,7 +2,7 @@
 
 Aplicativo web interno que **monta orçamentos e os entrega em PDF** para a Maná Pizzas & Eventos. O atendente preenche os dados do evento, o app calcula os quatro planos comerciais e gera um PDF editorial — colorido ou preto e branco — pronto para ser enviado no WhatsApp.
 
-> **Estado atual: prova de conceito funcional.** O app roda de ponta a ponta no navegador, mas não tem backend, autenticação nem sincronização. O histórico vive no `localStorage` da máquina. A organização de código e a cobertura de testes estão em andamento no epic [PAMP-221](https://github.com/pamplona007/mana-orcamentos) (ver [débitos técnicos](docs/ARQUITETURA.md#débitos-técnicos-conhecidos)).
+> **Estado atual: prova de conceito funcional.** O app roda de ponta a ponta no navegador, mas não tem backend, autenticação nem sincronização. O histórico vive no `localStorage` da máquina. A organização de código e a cobertura de testes estão em andamento no epic PAMP-221 (ver [débitos técnicos](docs/ARQUITETURA.md#débitos-técnicos-conhecidos)).
 
 ## Quem usa
 
@@ -103,6 +103,7 @@ Não há CI no repositório (não existe `.github/`).
 
 ```text
 mana-orcamentos/
+├── .impeccable/           # configuração e briefing do processo de design (Impeccable)
 ├── docs/                  # documentação do projeto (arquitetura, regras, glossário)
 ├── design/                # decisões de design (commit sheet da direção visual)
 ├── public/                # assets estáticos: fontes (.woff2/.ttf), imagens, logo

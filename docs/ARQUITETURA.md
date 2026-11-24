@@ -84,7 +84,7 @@ As páginas conversam com o domínio **apenas** por `useOrcamento` e `useConfig`
 | `src/utils/calculo.ts` | `calcularConvidados` (adultos + meia entrada 5–9 + grátis 0–4), `calcularPizzasSugeridas` (0,6 pizza por convidado equivalente, arredondado para cima), `calcularSubtotal` por plano, `calcularTotais` (deslocamento, desconto, total à vista, parcela), além de `validarDeslocamento` e `dataValidade`. |
 | `src/utils/money.ts` | Formatação BRL (`formatBRL`, `formatBRLCompact`, `formatCentavos`), parsing (`parseBRL`), `roundParcela` e `applyDescontoAvista`. |
 
-`calcularTotais` é a **única** fonte do total cobrado na UI, mas não é a única fonte de números do PDF (ver débito 7). A ordem das operações é: subtotal → + deslocamento → − desconto manual → total; o total à vista aplica o desconto percentual configurado sobre esse total; a parcela é o total dividido pelo número de parcelas.
+`calcularTotais` é a **única** fonte dos totais que alimentam o PDF e o Histórico (o `salvarOrcamento` grava os `totais` calculados por ele). Ainda assim, há números recalculados dentro do PDF fora desse caminho (ver débito 7). A ordem das operações é: subtotal → + deslocamento → − desconto manual → total; o total à vista aplica o desconto percentual configurado sobre esse total; a parcela é o total dividido pelo número de parcelas.
 
 O módulo importa **o tipo** `State` de `src/hooks/useOrcamento`, ou seja, a camada de domínio conhece o formato da camada de estado (import type, apagado no build, mas é uma inversão de dependência — ver débito 22).
 
@@ -115,7 +115,7 @@ Os preços **efetivos** vêm de `Config.pdf.precos`; os valores de `plans.ts` s�
 | `OrcamentoPDF.tsx` | Documento colorido: Capa → Cardápio → Comparativo → Unidade → Condições. |
 | `OrcamentoPDFPrint.tsx` | Documento P&B: a mesma sequência, com componentes `*Print`. |
 | `pages/*.tsx` | As cinco páginas do PDF colorido (Capa 353, Cardápio 368, Comparativo 336, Unidade 254, Condições 262 linhas). |
-| `print/*.tsx` | As cinco páginas do PDF P&B (356, 387, 333, 264, 254 linhas) — quase idênticas às coloridas. |
+| `print/*.tsx` | As cinco páginas do PDF P&B (Capa 356, Cardápio 387, Comparativo 333, Unidade 254, Condições 264 linhas) — quase idênticas às coloridas. |
 
 Cada página recebe `{ orcamento, totais, validadeISO, config }`. O componente de página decide o que usar: por exemplo, Capa/Comparativo/Unidade leem preços e adicionais da config, enquanto o Cardápio P&B usa uma lista de sabores embutida (ver débito 2).
 
@@ -136,7 +136,7 @@ Os tipos são a única fonte de verdade dos contratos; não há geração a part
 | `src/styles/global.scss` | Reset, fundo, tipografia base. |
 | `src/styles/fonts.scss` | `@font-face` das fontes web (`woff2`). |
 | `src/components/*/styles.module.scss` | Estilos escopados por componente (SCSS Modules). |
-| `public/fonts/` | 9 `.woff2` (web) + 6 `.ttf` (react-pdf). |
+| `public/fonts/` | 8 `.woff2` (web) + 7 `.ttf` (react-pdf). |
 | `public/images/`, `public/logo-mana.png` | Fotos e logo usados pela UI/PDF. |
 
 ### 10. Componentes
@@ -204,7 +204,7 @@ Lista de problemas **já verificados** no código atual. Não é backlog deste d
 2. **O PDF P&B ignora o cardápio configurado.** `src/pdf/print/PageCardapioPrint.tsx:307-309` filtra listas embutidas (`SABORES`) e nunca lê `config.pdf.cardapio.salgadosCustomizados/docesCustomizados`. O cliente recebe um cardápio diferente do que o atendente configurou.
 3. **Três fontes de verdade para o cardápio/sabores.** `src/pdf/pages/PageCardapio.tsx:7-18` (`SABORES_SALGADOS`/`SABORES_DOCES`), `src/pdf/print/PageCardapioPrint.tsx:11-38` (`SABORES` com categoria) e `src/data/plans.ts:55-63` (`Plano.saboresPremium`, sem consumidor). Os textos premium divergem entre elas.
 4. **Fontes duplicadas em `public/`.** `public/fonts/` tem 580 KB somando `.woff2` (web) e `.ttf` (react-pdf); os `.ttf` são copiados para `dist/fonts/` e nunca baixados pelo navegador. O `dist/` medido tem 3,9 MB.
-5. **Matriz de pesos inconsistente entre web e PDF.** A web registra Fraunces 700 itálico (`src/styles/fonts.scss`); o PDF registra apenas 400 normal, 400 itálico e 700 normal (`src/pdf/fonts.ts:14-21`). O mesmo texto pode renderizar com face diferente nos dois meios.
+5. **Matriz de pesos inconsistente entre web e PDF.** A web registra Fraunces 700 itálico (`src/styles/fonts.scss`); o PDF registra apenas 400 normal, 400 itálico e 700 normal (`src/pdf/fonts.ts:12-19`). O mesmo texto pode renderizar com face diferente nos dois meios.
 6. **O "patch do fontkit" citado nos comentários não existe em uma instalação limpa.** `src/pdf/fonts.ts:5-13` descreve um patch manual em `node_modules/fontkit`, mas não há `patch-package`, `postinstall` nem patch em `node_modules/fontkit` após `npm ci`. Verificado: um PDF simples com Fraunces renderiza normalmente. O comentário está desatualizado e a fragilidade que ele descreve não é reproduzível nem garantida.
 7. **O PDF do plano "Por unidade" recalcula com pessoas brutas.** `src/pdf/pages/PageUnidade.tsx:165-169` usa `adultos + criancas0a4 + criancas5a9` e `Math.ceil(pessoas × 0,6)`, ignorando os multiplicadores infantis; o texto do PDF contradiz o total impresso. Na linha 171 usa o preço estático `PLANO_POR_ID.unidade.precoPizzaAvista`, ignorando `config.pdf.precos.unidade`.
 8. **`PLANO_TOTAL_KEY` mapeia o plano 4 para `premium`.** `src/pdf/pages/PageComparativo.tsx:239-244` (`unidade: 'premium'`): se o comparativo passar a incluir o plano 4, ele exibirá o total do Premium.
@@ -225,12 +225,12 @@ Lista de problemas **já verificados** no código atual. Não é backlog deste d
 17. **A validade tem duas origens.** Preview calcula `agora + validade.horas` (`src/pages/Preview/index.tsx:56-59`); Histórico calcula `criadoEm + validade.horas` (`src/pages/History/index.tsx:155-158`). O mesmo orçamento pode aparecer válido em uma tela e expirado em outra.
 18. **O estado "Salvo" do Preview fica obsoleto.** `src/pages/Preview/index.tsx:66-71` só invalida o selo quando nome do cliente ou data mudam; alterações de convidados, desconto ou deslocamento mantêm o badge "Salvo" com totais antigos.
 19. **`importarConfig` pode lançar exceção.** `src/storage/config.ts:91-95` faz `JSON.parse` sem `try/catch`. A tela de Configurações captura o erro, mas o caminho do provider (`useConfig.importarFn`) o deixa subir para o React.
-20. **`mergeComDefault` não valida tipos.** `src/storage/config.ts:22-85` faz merge raso; um `validade.horas: "abc"` é aceito e propagado.
+20. **`mergeComDefault` não valida tipos.** `src/storage/config.ts:21-73` faz merge raso; um `validade.horas: "abc"` é aceito e propagado.
 21. **`removerOrcamento` reescreve a lista mesmo sem remover nada.** `src/storage/orcamentos.ts:61-63` filtra e grava sempre.
 22. **Inversão de camada: o domínio importa um tipo do estado da UI.** `src/utils/calculo.ts` faz `import type { State } from '@/hooks/useOrcamento'`. O import de tipo é apagado no build, mas acopla a camada pura de cálculo ao formato interno do provider e mantém o ciclo `utils ↔ hooks` no grafo de módulos.
 23. **`exportarFn` tem dependência desnecessária em `config`.** `src/hooks/useConfig.tsx:97` (avisado pelo oxlint). O export lê do `localStorage`; a dependência só recria a função.
 24. **"Rascunho" é uma janela arbitrária de 5 minutos.** `src/pages/History/index.tsx:35`: qualquer orçamento criado há menos de 5 minutos é "Rascunho", independentemente de validade ou de ter sido salvo.
-25. **A mensagem de WhatsApp é montada em dois lugares que já divergem.** Preview (`src/pages/Preview/index.tsx:24-44`) e Histórico (`src/pages/History/index.tsx:90-105`) repetem a substituição do template; o Histórico acrescenta "total a partir de" e usa o total do plano `livreSemBebida`. Ambos fixam "15%" e "10x" em vez de derivar da config.
+25. **A mensagem de WhatsApp é montada em dois lugares que já divergem.** Preview (`src/pages/Preview/index.tsx:24-48`) e Histórico (`src/pages/History/index.tsx:90-106`) repetem a substituição do template; o Histórico acrescenta "total a partir de" e usa o total do plano `livreSemBebida`. Ambos fixam "15%" e "10x" em vez de derivar da config.
 
 ### UI e produto
 
@@ -239,7 +239,7 @@ Lista de problemas **já verificados** no código atual. Não é backlog deste d
 28. **`Settings/index.tsx` concentra 631 linhas e oito seções** em um único componente.
 29. **Dois componentes sem consumidor:** `PriceDisplay` e `RecommendedBadge`.
 30. **`GuestBreakdown` recalcula pizzas inline.** `src/components/GuestBreakdown/index.tsx:12-13` repete `Math.ceil(total * 0.6)` em vez de chamar `calcularPizzasSugeridas`.
-31. **`toOrcamento` recria o objeto a cada render.** `src/hooks/useOrcamento.tsx:114-123`, usado em `useMemo` do Preview com dependência da função; o documento do PDF re-renderiza mais do que o necessário.
+31. **`toOrcamento` recria o objeto a cada render.** `src/hooks/useOrcamento.tsx:112-121`, usado em `useMemo` do Preview com dependência da função; o documento do PDF re-renderiza mais do que o necessário.
 32. **O toggle de tema usa glifos `☀`/`☾`** em vez de ícones Tabler (`src/components/AppShell/index.tsx`), diferente do resto da UI.
 33. **O favicon não existe.** `index.html:9` referencia `/favicon.svg`; o arquivo não existe. Verificado: o servidor Vite devolve o `index.html` (`Content-Type: text/html`) para essa URL, então o navegador recebe um ícone inválido em vez de uma imagem.
 
