@@ -39,7 +39,7 @@ flowchart TD
     T[useTheme] <--> TS[(localStorage<br/>mana:theme)]
 ```
 
-O detalhe importante: **o Editor só alimenta o estado**. Ele não calcula nem exibe totais. O cálculo acontece no provider (`useOrcamento`) e os números aparecem no PDF e no resumo do Preview; o Histórico grava uma cópia dos totais no momento do "Salvar".
+O detalhe importante: **o Editor só alimenta o estado**. Ele não calcula nem exibe totais. O cálculo acontece no provider (`useOrcamento`) e os números aparecem no PDF; o Histórico grava uma cópia dos totais no momento do "Salvar".
 
 ## Camadas e mapa de módulos
 
