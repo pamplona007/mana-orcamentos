@@ -1,0 +1,53 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+
+  :is(input, select, textarea) {
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    background: var(--ink);
+    border: 1px solid var(--coal-3);
+    border-radius: var(--radius-sm);
+    color: var(--cream);
+    font-family: var(--font-body);
+    font-size: 13px;
+    transition: border-color var(--duration-fast) var(--ease-expo-out);
+
+    &:focus {
+      outline: none;
+      border-color: var(--ochre);
+    }
+
+    &::placeholder {
+      color: var(--cream-faint);
+    }
+  }
+
+  :is(input, textarea) {
+    line-height: 1.5;
+  }
+
+  input::placeholder {
+    opacity: 0.6;
+  }
+
+  textarea {
+    padding: var(--space-3);
+    resize: vertical;
+    min-height: 200px;
+  }
+}
+
+.fieldFull {
+  grid-column: 1 / -1;
+}
+
+.fieldLabel {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cream-faint);
+}

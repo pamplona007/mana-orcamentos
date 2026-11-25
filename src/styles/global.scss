@@ -29,30 +29,6 @@ body {
   flex-direction: column;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display);
-  font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin: 0;
-  font-variation-settings: 'opsz' 96;
-  color: var(--cream);
-}
-
-p {
-  margin: 0;
-}
-
-button {
-  font: inherit;
-  color: inherit;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  letter-spacing: inherit;
-}
-
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
@@ -68,25 +44,6 @@ textarea:focus-visible,
 a {
   color: inherit;
   text-decoration: none;
-}
-
-input, select, textarea {
-  font: inherit;
-  color: inherit;
-  background: var(--coal);
-  border: 1px solid var(--coal-3);
-  border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-4);
-  width: 100%;
-  transition: border-color var(--duration-fast) var(--ease-expo-out);
-}
-
-input:hover, select:hover, textarea:hover {
-  border-color: var(--coal-3);
-}
-
-input::placeholder, textarea::placeholder {
-  color: var(--cream-faint);
 }
 
 ::selection {
