@@ -107,6 +107,7 @@
   font-family: var(--font-body);
   font-size: 12px;
   font-weight: 500;
+  line-height: 1.5;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--cream-dim);
@@ -119,6 +120,16 @@
 .navLink:hover {
   color: var(--cream);
   background: var(--coal-2);
+}
+
+.themeToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .navLinkActive {

@@ -1,0 +1,35 @@
+.section {
+  background: var(--coal);
+  border: 1px solid var(--coal-3);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ochre);
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.1;
+  font-variation-settings: 'opsz' 96;
+  color: var(--cream);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.helperText {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--cream-dim);
+  line-height: 1.5;
+  margin: 0;
+}

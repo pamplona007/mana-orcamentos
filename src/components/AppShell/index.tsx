@@ -1,4 +1,5 @@
 import { Outlet, NavLink, Link } from 'react-router-dom'
+import { IconSun, IconMoon } from '@tabler/icons-react'
 import { useCallback, useEffect, useState } from 'react'
 import styles from './styles.module.scss'
 import { useTheme } from '@/hooks/useTheme'
@@ -88,10 +89,14 @@ export function AppShell({ showSavedBadge: initialShowSavedBadge = false }: AppS
           <button
             type="button"
             onClick={toggle}
-            className={styles.navLink}
+            className={`${styles.navLink} ${styles.themeToggle}`}
             aria-label={`Trocar para tema ${theme === 'dark' ? 'claro' : 'escuro'}`}
           >
-            {theme === 'dark' ? '☀' : '☾'}
+            {theme === 'dark' ? (
+              <IconSun size={16} aria-hidden="true" />
+            ) : (
+              <IconMoon size={16} aria-hidden="true" />
+            )}
           </button>
         </div>
       </header>
