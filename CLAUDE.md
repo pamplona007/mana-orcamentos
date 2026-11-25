@@ -29,21 +29,22 @@ Use **npm** (há `package-lock.json`; instale com `npm ci`).
 ```text
 src/
 ├── components/   # reutilizáveis: uma pasta por componente (index.tsx + styles.module.scss)
-├── data/         # dados comerciais estáticos (os 4 planos e textos)
-├── hooks/        # estado global: useOrcamento (reducer), useConfig (provider), useTheme
+├── contexts/     # providers React e contextos (ConfigProvider, OrcamentoProvider, reducers)
+├── hooks/        # apenas hooks de consumo: useOrcamento, useConfig, useTheme
 ├── pages/        # rotas: Editor, Preview, History, Settings
 ├── pdf/          # documentos e páginas do PDF (pages/ = colorido, print/ = P&B)
-├── storage/      # leitura/escrita no localStorage
+├── services/     # dados comerciais e persistência: precos.ts (números canônicos), planos.ts, config.ts, orcamentos.ts
 ├── styles/       # tokens.scss, global.scss, fonts.scss
-├── types/        # contratos (Config, Orcamento, Totais)
-└── utils/        # domínio puro (calculo.ts, money.ts)
+├── types/        # contratos (Config, Orcamento, Totais, State)
+└── utils/        # domínio puro: calculo.ts, convidados.ts, validade.ts, money.ts, datas.ts, whatsapp.ts, orcamento.ts
 tests/unit/       # testes Vitest
 docs/             # documentação do projeto
 ```
 
 - Alias de import: `@/` → `src/`. Use-o em vez de caminhos relativos longos.
 - Cada componente/página tem **pasta própria** com `index.tsx` e `styles.module.scss`. Nunca crie classes globais para estilo de componente.
-- A camada de domínio (`utils/`) não deve importar de `pages/`, `components/` ou `pdf/`. Estado via providers em `hooks/`; persistência via `storage/`.
+- A camada de domínio (`utils/`) não deve importar de `pages/`, `components/`, `pdf/` nem `hooks/`. Estado via providers em `contexts/`; persistência e dados comerciais via `services/`.
+- Números comerciais têm **uma** origem: `src/services/precos.ts`. `CONFIG_DEFAULT` (`src/types/config.ts`) e `src/services/planos.ts` derivam dessas constantes — não duplique preço/adicional em outro lugar.
 
 ## TypeScript e estilo
 

@@ -40,6 +40,17 @@ export type Orcamento = {
   desconto: Desconto;
 };
 
+export type LoadableState = {
+  cliente: Cliente;
+  evento: Evento;
+  convidados: Convidado;
+  pagamento: Pagamento;
+  desconto: Desconto;
+  deslocamento: Deslocamento;
+};
+
+export type State = LoadableState;
+
 export type Totais = {
   adultosEquivalentes: number;
   pizzas: number;

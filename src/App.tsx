@@ -4,8 +4,8 @@ import { AppShell } from '@/components/AppShell'
 import { Editor } from '@/pages/Editor'
 import { History } from '@/pages/History'
 import { Settings } from '@/pages/Settings'
-import { OrcamentoProvider } from '@/hooks/useOrcamento'
-import { ConfigProvider } from '@/hooks/useConfig'
+import { OrcamentoProvider } from '@/contexts/OrcamentoProvider'
+import { ConfigProvider } from '@/contexts/ConfigProvider'
 
 const Preview = lazy(() =>
   import('@/pages/Preview').then((m) => ({ default: m.Preview })),

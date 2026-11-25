@@ -1,5 +1,5 @@
 import { Page, View, Text, StyleSheet } from '@react-pdf/renderer'
-import { PLANO_POR_ID } from '../../data/plans'
+import { PLANO_POR_ID } from '@/services/planos'
 import { pdfFormatBRL } from '../utils'
 import type { Orcamento, TotaisPorPlano, PlanoId } from '../../types/orcamento'
 import type { Config } from '../../types/config'

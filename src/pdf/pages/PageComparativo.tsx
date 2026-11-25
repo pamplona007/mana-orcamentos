@@ -1,6 +1,6 @@
 import { Page, View, Text, StyleSheet, Image } from '@react-pdf/renderer'
 import { PDF_COLORS } from '../styles'
-import { PLANO_POR_ID } from '@/data/plans'
+import { PLANO_POR_ID } from '@/services/planos'
 import { pdfFormatBRL } from '../utils'
 import type { Orcamento, TotaisPorPlano, PlanoId } from '@/types/orcamento'
 import type { Config } from '@/types/config'

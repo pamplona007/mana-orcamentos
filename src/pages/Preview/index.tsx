@@ -17,7 +17,7 @@ import { OrcamentoPDFPrint } from '@/pdf/OrcamentoPDFPrint'
 import { useOrcamento } from '@/hooks/useOrcamento'
 import { useConfig } from '@/hooks/useConfig'
 import { pdfData } from '@/pdf/utils'
-import { salvarOrcamento, type OrcamentoSalvo } from '@/storage/orcamentos'
+import { salvarOrcamento, type OrcamentoSalvo } from '@/services/orcamentos'
 import type { AppShellCtx } from '@/components/AppShell'
 import styles from './styles.module.scss'
 

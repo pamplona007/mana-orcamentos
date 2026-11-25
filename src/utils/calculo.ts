@@ -1,31 +1,18 @@
-import {
-  DESCONTO_AVISTA,
-  PARCELAS,
-  PLANO_POR_ID,
-} from '@/data/plans'
+import { DESCONTO_AVISTA, PARCELAS } from '@/services/precos'
+import { PLANO_POR_ID } from '@/services/planos'
 import type {
   Convidado,
   Desconto,
   PlanoId,
+  State,
   Totais,
 } from '@/types/orcamento'
 import type { ConfigPdfAdicionais, ConfigPdfPrecos } from '@/types/config'
+import { calcularConvidados, calcularPizzasSugeridas } from './convidados'
 import { applyDescontoAvista, roundParcela } from './money'
-import type { State } from '@/hooks/useOrcamento'
 
-const MULTIPLICADOR_CRIANCA_5A9 = 0.5
-const MULTIPLICADOR_CRIANCA_0A4 = 0
-
-export function calcularConvidados(c: Convidado): number {
-  const adultos = Math.max(0, c.adultos)
-  const c0a4 = Math.max(0, c.criancas0a4) * MULTIPLICADOR_CRIANCA_0A4
-  const c5a9 = Math.max(0, c.criancas5a9) * MULTIPLICADOR_CRIANCA_5A9
-  return adultos + c0a4 + c5a9
-}
-
-export function calcularPizzasSugeridas(c: Convidado): number {
-  return Math.ceil(calcularConvidados(c) * 0.6)
-}
+export { calcularConvidados, calcularPizzasSugeridas } from './convidados'
+export { dataValidade } from './validade'
 
 type PrecoEntry = { parcelado: number; avista: number }
 
@@ -135,8 +122,3 @@ export function validarDeslocamento(cidadeBairro: string): boolean {
   return termosDentro.some((t) => lower.includes(t))
 }
 
-export function dataValidade(criadoEm: string, horas: number): string {
-  const data = new Date(criadoEm)
-  data.setHours(data.getHours() + horas)
-  return data.toISOString()
-}
