@@ -5,9 +5,10 @@ type PriceFieldProps = {
   value: number
   onChange: (v: number) => void
   step?: number
+  error?: string
 }
 
-export function PriceField({ label, value, onChange, step = 0.01 }: PriceFieldProps) {
+export function PriceField({ label, value, onChange, step = 0.01, error }: PriceFieldProps) {
   const id = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
   return (
     <div className={styles.field}>
@@ -23,6 +24,11 @@ export function PriceField({ label, value, onChange, step = 0.01 }: PriceFieldPr
         value={value}
         onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
       />
+      {error && (
+        <span className={styles.fieldError} role="alert">
+          {error}
+        </span>
+      )}
     </div>
   )
 }

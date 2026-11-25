@@ -1,5 +1,8 @@
+import { Controller, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { IconReceipt } from '@tabler/icons-react'
 import { useConfig } from '@/hooks/useConfig'
+import { precosSchema } from '@/schemas/configSchema'
 import type { ConfigPdfPrecos } from '@/types/config'
 import { SettingsSection } from '@/components/SettingsSection'
 import { SettingsGrid } from '@/components/SettingsGrid'
@@ -21,14 +24,19 @@ const CAMPOS: { plano: PlanoKey; modo: Modo; label: string }[] = [
 
 export function SettingsPrecos() {
   const { config, setPdf } = useConfig()
+  const { control } = useForm<ConfigPdfPrecos>({
+    resolver: zodResolver(precosSchema),
+    values: config.pdf.precos,
+    mode: 'onChange',
+  })
 
-  const setPreco = (plano: PlanoKey, modo: Modo, valor: number) => {
-    setPdf({
-      precos: {
-        ...config.pdf.precos,
-        [plano]: { ...config.pdf.precos[plano], [modo]: valor },
-      },
-    })
+  const update = (plano: PlanoKey, modo: Modo, valor: number) => {
+    const next: ConfigPdfPrecos = {
+      ...config.pdf.precos,
+      [plano]: { ...config.pdf.precos[plano], [modo]: valor },
+    }
+    const parsed = precosSchema.safeParse(next)
+    if (parsed.success) setPdf({ precos: parsed.data })
   }
 
   return (
@@ -44,11 +52,21 @@ export function SettingsPrecos() {
     >
       <SettingsGrid>
         {CAMPOS.map((campo) => (
-          <PriceField
+          <Controller
             key={`${campo.plano}-${campo.modo}`}
-            label={campo.label}
-            value={config.pdf.precos[campo.plano][campo.modo]}
-            onChange={(v) => setPreco(campo.plano, campo.modo, v)}
+            control={control}
+            name={`${campo.plano}.${campo.modo}`}
+            render={({ field, fieldState }) => (
+              <PriceField
+                label={campo.label}
+                value={field.value}
+                onChange={(valor) => {
+                  field.onChange(valor)
+                  update(campo.plano, campo.modo, valor)
+                }}
+                error={fieldState.error?.message}
+              />
+            )}
           />
         ))}
       </SettingsGrid>

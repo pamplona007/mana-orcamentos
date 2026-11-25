@@ -5,10 +5,17 @@ type SettingsFieldProps = {
   id: string
   label?: string
   full?: boolean
+  error?: string
   children: ReactNode
 }
 
-export function SettingsField({ id, label, full = false, children }: SettingsFieldProps) {
+export function SettingsField({
+  id,
+  label,
+  full = false,
+  error,
+  children,
+}: SettingsFieldProps) {
   return (
     <div className={full ? `${styles.field} ${styles.fieldFull}` : styles.field}>
       {label && (
@@ -17,6 +24,11 @@ export function SettingsField({ id, label, full = false, children }: SettingsFie
         </label>
       )}
       {children}
+      {error && (
+        <span className={styles.fieldError} role="alert">
+          {error}
+        </span>
+      )}
     </div>
   )
 }

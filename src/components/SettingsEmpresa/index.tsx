@@ -1,5 +1,8 @@
+import { Controller, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { IconBuilding } from '@tabler/icons-react'
 import { useConfig } from '@/hooks/useConfig'
+import { empresaSchema } from '@/schemas/configSchema'
 import type { ConfigEmpresa } from '@/types/config'
 import { SettingsSection } from '@/components/SettingsSection'
 import { SettingsGrid } from '@/components/SettingsGrid'
@@ -36,28 +39,48 @@ const CAMPOS: CampoEmpresa[] = [
 
 export function SettingsEmpresa() {
   const { config, setEmpresa } = useConfig()
+  const { control } = useForm<ConfigEmpresa>({
+    resolver: zodResolver(empresaSchema),
+    values: config.empresa,
+    mode: 'onChange',
+  })
+
+  const update = (key: keyof ConfigEmpresa, valor: string) => {
+    const parsed = empresaSchema.safeParse({ ...config.empresa, [key]: valor })
+    if (parsed.success) setEmpresa(parsed.data)
+  }
 
   return (
     <SettingsSection icon={<IconBuilding size={18} aria-hidden="true" />} title="Empresa">
       <SettingsGrid>
         {CAMPOS.map((campo) => (
-          <SettingsField
+          <Controller
             key={campo.id}
-            id={campo.id}
-            label={campo.label}
-            full={campo.full}
-          >
-            <input
-              id={campo.id}
-              type={campo.type ?? 'text'}
-              maxLength={campo.maxLength}
-              value={config.empresa[campo.key]}
-              onChange={(e) =>
-                setEmpresa({ [campo.key]: e.target.value } as Partial<ConfigEmpresa>)
-              }
-              placeholder={campo.placeholder}
-            />
-          </SettingsField>
+            control={control}
+            name={campo.key}
+            render={({ field, fieldState }) => (
+              <SettingsField
+                id={campo.id}
+                label={campo.label}
+                full={campo.full}
+                error={fieldState.error?.message}
+              >
+                <input
+                  id={campo.id}
+                  name={field.name}
+                  type={campo.type ?? 'text'}
+                  maxLength={campo.maxLength}
+                  value={field.value}
+                  onBlur={field.onBlur}
+                  onChange={(e) => {
+                    field.onChange(e.target.value)
+                    update(campo.key, e.target.value)
+                  }}
+                  placeholder={campo.placeholder}
+                />
+              </SettingsField>
+            )}
+          />
         ))}
       </SettingsGrid>
     </SettingsSection>

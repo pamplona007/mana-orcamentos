@@ -51,3 +51,10 @@
   text-transform: uppercase;
   color: var(--cream-faint);
 }
+
+.fieldError {
+  font-family: var(--font-body);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--rust-glow);
+}
