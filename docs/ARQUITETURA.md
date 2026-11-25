@@ -17,7 +17,7 @@ Para regras de cálculo com fórmula e exemplos, ver [REGRAS-DE-NEGOCIO.md](REGR
 ```mermaid
 flowchart TD
     U([Atendente]) -->|preenche| E[Editor<br/>src/pages/Editor]
-    E -->|setCliente · setEvento · setConvidados · setDesconto · setDeslocamento| O[useOrcamento<br/>useReducer + Context]
+    E -->|setCliente · setEvento · setConvidados · setDesconto · setDeslocamento| O[OrcamentoProvider<br/>useReducer + Context]
     O -->|state| C[calcularTotais<br/>src/utils/calculo.ts]
     C -->|TotaisPorPlano| O
     O -->|state + totais| P[Preview<br/>src/pages/Preview]
@@ -30,7 +30,7 @@ flowchart TD
     S --> H[Histórico]
     H -->|load| O
     H -->|reenviar| W
-    CFG[useConfig / ConfigProvider] -->|preços · adicionais · validade · textos| O
+    CFG[ConfigProvider<br/>src/contexts] -->|preços · adicionais · validade · textos| O
     CFG -->|preços · textos · cardápio| P
     CFG <--> CS[(localStorage<br/>mana-config:v1)]
     Ajustes[Configurações<br/>src/pages/Settings] -->|setEmpresa · setPdf · setEditor · ...| CFG
@@ -39,7 +39,7 @@ flowchart TD
     T[useTheme] <--> TS[(localStorage<br/>mana:theme)]
 ```
 
-O detalhe importante: **o Editor só alimenta o estado**. Ele não calcula nem exibe totais. O cálculo acontece no provider (`useOrcamento`) e os números aparecem no PDF; o Histórico grava uma cópia dos totais no momento do "Salvar".
+O detalhe importante: **o Editor só alimenta o estado**. Ele não calcula nem exibe totais. O cálculo acontece no provider (`OrcamentoProvider`, consumido por `useOrcamento`) e os números aparecem no PDF; o Histórico grava uma cópia dos totais no momento do "Salvar".
 
 ## Camadas e mapa de módulos
 
@@ -63,45 +63,58 @@ O `Preview` é o único carregamento lazy; é ele quem puxa `@react-pdf/renderer
 | Histórico | `src/pages/History/index.tsx` (241 linhas) | Lista agrupada por mês, busca por cliente, status, abrir/duplicar/excluir/reenviar. |
 | Configurações | `src/pages/Settings/index.tsx` (631 linhas) | Oito seções de configuração, exportar/importar JSON e restaurar padrão. |
 
-As páginas conversam com o domínio **apenas** por `useOrcamento` e `useConfig` (e por `src/storage/*` no caso de Histórico, que lê a lista diretamente).
+As páginas conversam com o domínio **apenas** por `useOrcamento` e `useConfig` (e por `src/services/orcamentos` no caso de Histórico, que lê a lista diretamente).
 
-### 3. Estado da aplicação (`src/hooks/`)
+### 3. Estado da aplicação (`src/contexts/` e `src/hooks/`)
 
 | Módulo | Responsabilidade |
 |---|---|
-| `useOrcamento.tsx` | Fonte do orçamento em edição. `useReducer` com ações `setCliente`, `setEvento`, `setConvidados`, `setPagamento`, `setDesconto`, `setDeslocamento`, `reset`, `load`. Expõe `TotaisPorPlano` memoizado e `toOrcamento(id?)`. Lê a config via `ConfigContext` (não via `useConfig`, para não exigir o provider na ordem). |
-| `useConfig.tsx` | Provider da configuração da pizzaria. Estado espelhado no `localStorage`, setters por seção, `reset`, `exportar`, `importar`, e sincronização entre abas pelo evento `storage`. |
-| `useTheme.ts` | Tema claro/escuro persistido em `mana:theme`, aplicado como `data-theme` e `colorScheme` no `<html>`. |
+| `src/contexts/OrcamentoProvider.tsx` | Provider do orçamento em edição. `useReducer` com ações `setCliente`, `setEvento`, `setConvidados`, `setPagamento`, `setDesconto`, `setDeslocamento`, `reset`, `load`. Expõe `TotaisPorPlano` memoizado e `toOrcamento(id?)`. Lê a config via `ConfigContext` (não via `useConfig`, para não exigir o provider na ordem). |
+| `src/contexts/orcamentoReducer.ts` | `Action`, `buildInitialState(config)` e `reducer` — a lógica de estado, separada do componente React. |
+| `src/contexts/orcamentoContext.ts` | `OrcamentoContext` e o tipo `OrcamentoCtx` (a superfície exposta às páginas). |
+| `src/contexts/ConfigProvider.tsx` | Provider da configuração da pizzaria. Estado espelhado no `localStorage`, setters por seção, `reset`, `exportar`, `importar`, e sincronização entre abas pelo evento `storage`. |
+| `src/contexts/configContext.ts` | `ConfigContext`, o tipo `ConfigCtx` e a chave `CONFIG_STORAGE_KEY`. |
+| `src/hooks/useOrcamento.ts` | Hook de consumo do `OrcamentoContext`. Reexporta os tipos `State`/`LoadableState` de `src/types/orcamento.ts`. |
+| `src/hooks/useConfig.ts` | Hook de consumo do `ConfigContext`. |
+| `src/hooks/useTheme.ts` | Tema claro/escuro persistido em `mana:theme`, aplicado como `data-theme` e `colorScheme` no `<html>`. |
 
 **Estado versus derivado:** só `state` é armazenado. `totais` é derivado por `useMemo` a partir de `state`, `config.pdf.precos` e `config.pdf.adicionais`. Não existe cache de cálculo.
 
-**Ciclo de vida do orçamento:** `buildInitialState(config)` define convidados, forma de pagamento e deslocamento a partir dos padrões do editor. `reset` volta a esse estado. `load` substitui o estado inteiro (usado pelo Histórico). Salvar não altera o estado em edição — apenas grava uma cópia em `src/storage/orcamentos.ts`.
+**Ciclo de vida do orçamento:** `buildInitialState(config)` define convidados, forma de pagamento e deslocamento a partir dos padrões do editor. `reset` volta a esse estado. `load` substitui o estado inteiro (usado pelo Histórico). Salvar não altera o estado em edição — apenas grava uma cópia em `src/services/orcamentos.ts`.
 
 ### 4. Domínio (`src/utils/`)
 
 | Módulo | Responsabilidade |
 |---|---|
-| `src/utils/calculo.ts` | `calcularConvidados` (adultos + meia entrada 5–9 + grátis 0–4), `calcularPizzasSugeridas` (0,6 pizza por convidado equivalente, arredondado para cima), `calcularSubtotal` por plano, `calcularTotais` (deslocamento, desconto, total à vista, parcela), além de `validarDeslocamento` e `dataValidade`. |
-| `src/utils/money.ts` | Formatação BRL (`formatBRL`, `formatBRLCompact`, `formatCentavos`), parsing (`parseBRL`), `roundParcela` e `applyDescontoAvista`. |
+| `src/utils/calculo.ts` | `precoPlano`, `calcularSubtotal` por plano, `calcularTotais` (deslocamento, desconto, total à vista, parcela) e `validarDeslocamento`. Reexporta `calcularConvidados`, `calcularPizzasSugeridas` e `dataValidade` para manter a API pública. |
+| `src/utils/convidados.ts` | `calcularConvidados` (adultos + meia entrada 5–9 + grátis 0–4), `calcularPizzasSugeridas` (0,6 pizza por convidado equivalente, arredondado para cima) e os multiplicadores `MULTIPLICADOR_CRIANCA_5A9`/`MULTIPLICADOR_CRIANCA_0A4`. |
+| `src/utils/validade.ts` | `dataValidade` (data + horas de validade). |
+| `src/utils/datas.ts` | `MESES`, `formatarMes` (agrupamento por mês) e `formatarData` (data por extenso em pt-BR). |
+| `src/utils/whatsapp.ts` | `mensagemWhatsApp` (interpolação parametrizada do template) e `linkWhatsApp` (link `wa.me`). |
+| `src/utils/orcamento.ts` | `statusDoOrcamento` (Rascunho / Válido / Expirado). |
+| `src/utils/money.ts` | Formatação BRL (`formatBRL`, `formatBRLCompact`, `formatCentavos`), parsing (`parseBRL`), `roundParcela` e `applyDescontoAvista`. É a implementação canônica de moeda do app. |
 
 `calcularTotais` é a **única** fonte dos totais que alimentam o PDF e o Histórico (o `salvarOrcamento` grava os `totais` calculados por ele). Ainda assim, há números recalculados dentro do PDF fora desse caminho (ver débito 7). A ordem das operações é: subtotal → + deslocamento → − desconto manual → total; o total à vista aplica o desconto percentual configurado sobre esse total; a parcela é o total dividido pelo número de parcelas.
 
-O módulo importa **o tipo** `State` de `src/hooks/useOrcamento`, ou seja, a camada de domínio conhece o formato da camada de estado (import type, apagado no build, mas é uma inversão de dependência — ver débito 22).
+**O domínio não depende mais da camada de estado.** O tipo `State` vive em `src/types/orcamento.ts`, e `utils/` importa apenas tipos de `src/types/` e constantes de `src/services/`. O ciclo `utils ↔ hooks` foi eliminado no estágio 2 do epic PAMP-221.
 
-### 5. Dados comerciais (`src/data/`)
+**Os utilitários canônicos ainda não têm consumidores.** `whatsapp.ts`, `datas.ts` e `orcamento.ts` foram criados no estágio 2, mas Preview, Histórico, Configurações e Editor continuam com as cópias inline (ver débito 39). A migração das páginas é do estágio 3.
+
+### 5. Dados comerciais (`src/services/`)
 
 | Módulo | Responsabilidade |
 |---|---|
-| `src/data/plans.ts` | Os quatro planos: id, nome, tagline, descrição, ícone, cor, preços parcelado/à vista, inclusos, bônus e (no Premium) sabores/destaques. Também exporta constantes de fallback (`ADICIONAL_ENTRADA`, `ADICIONAL_SALGADO_EXTRA`, `DESCONTO_AVISTA`, `PARCELAS`, `BATE_LIMITE_HORAS`) e `OPCIONAIS` (rótulos/valores exibidos no Editor). |
+| `src/services/precos.ts` | **Origem única dos números comerciais** (preços, adicionais, desconto à vista, parcelas, limite de km e fator de pizzas): `PRECOS_PLANOS` (4 planos × parcelado/à vista), `ADICIONAL_ENTRADA`, `ADICIONAL_SALGADO_EXTRA`, `DESCONTO_AVISTA`, `PARCELAS`, `LIMITE_KM_DESLOCAMENTO`, `BATE_LIMITE_HORAS` e `PIZZAS_POR_CONVIDADO`. |
+| `src/services/planos.ts` | Os quatro planos: id, nome, tagline, descrição, ícone, cor, preços parcelado/à vista (derivados de `precos.ts`), inclusos, bônus e (no Premium) sabores/destaques. Também exporta `OPCIONAIS` (rótulos/valores exibidos no Editor). |
 
-Os preços **efetivos** vêm de `Config.pdf.precos`; os valores de `plans.ts` são fallback quando `calcularTotais` é chamada sem `precos`. O `Plano.saboresPremium` hoje não é consumido por ninguém.
+Os preços **efetivos** vêm de `Config.pdf.precos`; os valores de `planos.ts` são fallback quando `calcularTotais` é chamada sem `precos`. Como `CONFIG_DEFAULT.pdf.precos` e `CONFIG_DEFAULT.pdf.adicionais` derivam das constantes de `precos.ts`, cada número comercial tem uma origem única — exceto o rótulo fixo `~R$ 150,00` do toggle de deslocamento (`OPCIONAIS.deslocamento.valor`), que continua sendo um literal (ver débito 26). O `Plano.saboresPremium` hoje não é consumido por ninguém.
 
-### 6. Persistência (`src/storage/`)
+### 6. Persistência (`src/services/`)
 
 | Módulo | Chave | Responsabilidade |
 |---|---|---|
-| `config.ts` | `mana-config:v1` | `obterConfig` (lê e faz merge sobre `CONFIG_DEFAULT`), `salvarConfig`, `restaurarConfig`, `exportarConfig`, `importarConfig`. |
-| `orcamentos.ts` | `mana-orcamentos:v1` | `listarOrcamentos` (ordem decrescente por `criadoEm`), `obterOrcamento`, `salvarOrcamento` (upsert por id), `removerOrcamento`, `duplicarOrcamento` (novo id e sufixo "(cópia)"), `isOrcamentoSalvo` (validação estrutural mínima). |
+| `src/services/config.ts` | `mana-config:v1` | `obterConfig` (lê e faz merge sobre `CONFIG_DEFAULT`), `salvarConfig`, `restaurarConfig`, `exportarConfig`, `importarConfig`. |
+| `src/services/orcamentos.ts` | `mana-orcamentos:v1` | `listarOrcamentos` (ordem decrescente por `criadoEm`), `obterOrcamento`, `salvarOrcamento` (upsert por id), `removerOrcamento`, `duplicarOrcamento` (novo id e sufixo "(cópia)"), `isOrcamentoSalvo` (validação estrutural mínima). |
 
 `OrcamentoSalvo = Orcamento & { totais: TotaisPorPlano }`: o histórico guarda **um retrato dos totais** no momento em que foi salvo, não recalcula ao abrir. Reabrir carrega o `Orcamento` (sem os totais) no provider e o cálculo é refeito com a config atual — por isso um orçamento antigo pode exibir números diferentes dos gravados.
 
@@ -123,8 +136,8 @@ Cada página recebe `{ orcamento, totais, validadeISO, config }`. O componente d
 
 | Módulo | Conteúdo |
 |---|---|
-| `types/orcamento.ts` | `PlanoId`, `Cliente`, `Evento`, `Convidado`, `Deslocamento`, `Pagamento`, `Desconto`, `Orcamento`, `Totais`, `TotaisPorPlano`, `MensagemWhatsApp`. |
-| `types/config.ts` | `Config` e suas seções (`empresa`, `validade`, `editor`, `whatsapp`, `pdf.precos`, `pdf.adicionais`, `pdf.capa`, `pdf.cardapio`) e o valor `CONFIG_DEFAULT`. |
+| `types/orcamento.ts` | `PlanoId`, `Cliente`, `Evento`, `Convidado`, `Deslocamento`, `Pagamento`, `Desconto`, `Orcamento`, `State`/`LoadableState`, `Totais`, `TotaisPorPlano`, `MensagemWhatsApp`. |
+| `types/config.ts` | `Config` e suas seções (`empresa`, `validade`, `editor`, `whatsapp`, `pdf.precos`, `pdf.adicionais`, `pdf.capa`, `pdf.cardapio`) e o valor `CONFIG_DEFAULT` (derivado das constantes de `src/services/precos.ts`). |
 
 Os tipos são a única fonte de verdade dos contratos; não há geração a partir de schema (Zod ainda não é usado).
 
@@ -165,7 +178,7 @@ Os tipos são a única fonte de verdade dos contratos; não há geração a part
 ## Contratos de dados principais
 
 ```ts
-// Estado em edição (src/hooks/useOrcamento.tsx)
+// Estado em edição (src/types/orcamento.ts)
 type State = {
   cliente: Cliente          // nome, whatsapp
   evento: Evento            // data, cidadeBairro, observacoes
@@ -186,9 +199,9 @@ type Totais = {
 
 | Número exibido | Origem | Observação |
 |---|---|---|
-| Convidados equivalentes | `calcularConvidados` (`utils/calculo.ts`) | 0–4 = 0; 5–9 = 0,5. |
-| Pizzas sugeridas | `calcularPizzasSugeridas` | `ceil(equivalentes × 0,6)`. |
-| Total por plano | `calcularTotais` | Preço unitário de `config.pdf.precos`; deslocamento antes do desconto. |
+| Convidados equivalentes | `calcularConvidados` (`utils/convidados.ts`) | 0–4 = 0; 5–9 = 0,5. |
+| Pizzas sugeridas | `calcularPizzasSugeridas` (`utils/convidados.ts`) | `ceil(equivalentes × 0,6)`; fator `PIZZAS_POR_CONVIDADO` em `services/precos.ts`. |
+| Total por plano | `calcularTotais` | Preço unitário de `config.pdf.precos` (fallback: `services/planos.ts`); deslocamento antes do desconto. |
 | Parcela | `roundParcela(total, config.pdf.adicionais.parcelas)` | Arredonda a parcela; o produto das parcelas pode não fechar o total. |
 | Total à vista | `applyDescontoAvista(total, config.pdf.adicionais.descontoAvista)` | Percentual de desconto, não o preço "à vista" da config. |
 | Validade | Preview: agora + `config.validade.horas`; Histórico: `criadoEm` + `config.validade.horas` | Duas origens diferentes. |
@@ -202,7 +215,7 @@ Lista de problemas **já verificados** no código atual. Não é backlog deste d
 
 1. **Duas árvores duplicadas.** `src/pdf/pages/*` e `src/pdf/print/*` repetem a mesma estrutura; a estimativa do épico é ~70% de linhas duplicadas. Contagem atual: 1.573 linhas no colorido e 1.594 no P&B. Toda correção de conteúdo precisa ser feita duas vezes e já há divergências.
 2. **O PDF P&B ignora o cardápio configurado.** `src/pdf/print/PageCardapioPrint.tsx:307-309` filtra listas embutidas (`SABORES`) e nunca lê `config.pdf.cardapio.salgadosCustomizados/docesCustomizados`. O cliente recebe um cardápio diferente do que o atendente configurou.
-3. **Três fontes de verdade para o cardápio/sabores.** `src/pdf/pages/PageCardapio.tsx:7-18` (`SABORES_SALGADOS`/`SABORES_DOCES`), `src/pdf/print/PageCardapioPrint.tsx:11-38` (`SABORES` com categoria) e `src/data/plans.ts:55-63` (`Plano.saboresPremium`, sem consumidor). Os textos premium divergem entre elas.
+3. **Três fontes de verdade para o cardápio/sabores.** `src/pdf/pages/PageCardapio.tsx:7-18` (`SABORES_SALGADOS`/`SABORES_DOCES`), `src/pdf/print/PageCardapioPrint.tsx:11-38` (`SABORES` com categoria) e `src/services/planos.ts:70-79` (`Plano.saboresPremium`, sem consumidor). Os textos premium divergem entre elas.
 4. **Fontes duplicadas em `public/`.** `public/fonts/` tem 580 KB somando `.woff2` (web) e `.ttf` (react-pdf); os `.ttf` são copiados para `dist/fonts/` e nunca baixados pelo navegador. O `dist/` medido tem 3,9 MB.
 5. **Matriz de pesos inconsistente entre web e PDF.** A web registra Fraunces 700 itálico (`src/styles/fonts.scss`); o PDF registra apenas 400 normal, 400 itálico e 700 normal (`src/pdf/fonts.ts:12-19`). O mesmo texto pode renderizar com face diferente nos dois meios.
 6. **O "patch do fontkit" citado nos comentários não existe em uma instalação limpa.** `src/pdf/fonts.ts:5-13` descreve um patch manual em `node_modules/fontkit`, mas não há `patch-package`, `postinstall` nem patch em `node_modules/fontkit` após `npm ci`. Verificado: um PDF simples com Fraunces renderiza normalmente. O comentário está desatualizado e a fragilidade que ele descreve não é reproduzível nem garantida.
@@ -214,47 +227,48 @@ Lista de problemas **já verificados** no código atual. Não é backlog deste d
 
 10. **Os preços "à vista" da configuração não têm efeito.** `src/utils/calculo.ts` lê apenas `precos[plano].parcelado`; `totalAvista` é derivado aplicando `adicionais.descontoAvista` sobre o total. Os oito campos "à vista" da tela de Preços são write-only.
 11. **Deslocamento e desconto manual entram nos quatro planos ao mesmo tempo.** O Editor (`src/pages/Editor/index.tsx`) diz que o desconto é "sobre o total do plano Premium (referência)" e que "aparece no PDF", mas `calcularTotais` aplica a mesma base a qualquer plano e nenhuma página do PDF renderiza linha de desconto.
-12. **`formatCentavos` erra valores negativos.** `src/utils/money.ts:17-21` usa `Math.floor` no inteiro: `-1,5` vira `"-2,50"`.
-13. **`parseBRL` interpreta ponto decimal como separador de milhar.** `src/utils/money.ts:23-27`: `"12.5"` vira `125` (10× maior). Entrada inválida vira `0` silenciosamente.
-14. **`roundParcela` perde centavos.** `src/utils/money.ts:29-31`: um total de 10 em 3× gera 3,33 por parcela (9,99 no total), sem linha de ajuste no PDF.
-15. **`dataValidade` usa aritmética de hora local.** `src/utils/calculo.ts:138-141` (`setHours(getHours() + horas)`) perde 1 hora em transições de horário de verão.
-16. **`validarDeslocamento` é código morto.** `src/utils/calculo.ts:121-136` não é chamado por nada em `src/`; só os testes o usam. `BATE_LIMITE_HORAS` (`src/data/plans.ts:166`) também não tem consumidor.
+12. **`formatCentavos` erra valores negativos.** `src/utils/money.ts:20-24` usa `Math.floor` no inteiro: `-1,5` vira `"-2,50"`.
+13. **`parseBRL` interpreta ponto decimal como separador de milhar.** `src/utils/money.ts:26-30`: `"12.5"` vira `125` (10× maior). Entrada inválida vira `0` silenciosamente.
+14. **`roundParcela` perde centavos.** `src/utils/money.ts:32-34`: um total de 10 em 3× gera 3,33 por parcela (9,99 no total), sem linha de ajuste no PDF.
+15. **`dataValidade` usa aritmética de hora local.** `src/utils/validade.ts:1-5` (`setHours(getHours() + horas)`) perde 1 hora em transições de horário de verão.
+16. **`validarDeslocamento` é código morto.** `src/utils/calculo.ts:108-124` não é chamado por nada em `src/`; só os testes o usam. `BATE_LIMITE_HORAS` (`src/services/precos.ts:18`) também não tem consumidor.
 
 ### Estado e persistência
 
 17. **A validade tem duas origens.** Preview calcula `agora + validade.horas` (`src/pages/Preview/index.tsx:56-59`); Histórico calcula `criadoEm + validade.horas` (`src/pages/History/index.tsx:155-158`). O mesmo orçamento pode aparecer válido em uma tela e expirado em outra.
 18. **O estado "Salvo" do Preview fica obsoleto.** `src/pages/Preview/index.tsx:66-71` só invalida o selo quando nome do cliente ou data mudam; alterações de convidados, desconto ou deslocamento mantêm o badge "Salvo" com totais antigos.
-19. **`importarConfig` pode lançar exceção.** `src/storage/config.ts:91-95` faz `JSON.parse` sem `try/catch`. A tela de Configurações captura o erro, mas o caminho do provider (`useConfig.importarFn`) o deixa subir para o React.
-20. **`mergeComDefault` não valida tipos.** `src/storage/config.ts:21-73` faz merge raso; um `validade.horas: "abc"` é aceito e propagado.
-21. **`removerOrcamento` reescreve a lista mesmo sem remover nada.** `src/storage/orcamentos.ts:61-63` filtra e grava sempre.
-22. **Inversão de camada: o domínio importa um tipo do estado da UI.** `src/utils/calculo.ts` faz `import type { State } from '@/hooks/useOrcamento'`. O import de tipo é apagado no build, mas acopla a camada pura de cálculo ao formato interno do provider e mantém o ciclo `utils ↔ hooks` no grafo de módulos.
-23. **`exportarFn` tem dependência desnecessária em `config`.** `src/hooks/useConfig.tsx:97` (avisado pelo oxlint). O export lê do `localStorage`; a dependência só recria a função.
-24. **"Rascunho" é uma janela arbitrária de 5 minutos.** `src/pages/History/index.tsx:35`: qualquer orçamento criado há menos de 5 minutos é "Rascunho", independentemente de validade ou de ter sido salvo.
-25. **A mensagem de WhatsApp é montada em dois lugares que já divergem.** Preview (`src/pages/Preview/index.tsx:24-48`) e Histórico (`src/pages/History/index.tsx:90-106`) repetem a substituição do template; o Histórico acrescenta "total a partir de" e usa o total do plano `livreSemBebida`. Ambos fixam "15%" e "10x" em vez de derivar da config.
+19. **`importarConfig` pode lançar exceção.** `src/services/config.ts:91-96` faz `JSON.parse` sem `try/catch`. A tela de Configurações captura o erro, mas o caminho do provider (`ConfigProvider.importarFn`) o deixa subir para o React.
+20. **`mergeComDefault` não valida tipos.** `src/services/config.ts:21-73` faz merge raso; um `validade.horas: "abc"` é aceito e propagado.
+21. **`removerOrcamento` reescreve a lista mesmo sem remover nada.** `src/services/orcamentos.ts:61-63` filtra e grava sempre.
+22. **`exportarFn` tem dependência desnecessária em `config`.** `src/contexts/ConfigProvider.tsx:88` (avisado pelo oxlint). O export lê do `localStorage`; a dependência só recria a função.
+23. **"Rascunho" é uma janela arbitrária de 5 minutos.** `src/pages/History/index.tsx:35`: qualquer orçamento criado há menos de 5 minutos é "Rascunho", independentemente de validade ou de ter sido salvo.
+24. **A mensagem de WhatsApp é montada em três lugares que já divergem.** Preview (`src/pages/Preview/index.tsx:24-48`), Histórico (`src/pages/History/index.tsx:90-106`) e o preview de Configurações (`src/pages/Settings/index.tsx:351-360`) repetem a substituição do template; o Histórico acrescenta "total a partir de" e usa o total do plano `livreSemBebida`. Todos fixam "15%" e "10x" em vez de derivar da config. A implementação canônica (`src/utils/whatsapp.ts:11-27`) existe desde o estágio 2, mas as páginas ainda não a consomem.
 
 ### UI e produto
 
-26. **O Editor não mostra total ao vivo.** O provider calcula os quatro planos, mas nenhuma tela do Editor/Preview exibe os totais em texto; eles só existem dentro do PDF. Contraria o `PRODUCT.md` ("o cálculo aparece ao vivo", "comparação lado a lado é obrigatória").
-27. **O valor do deslocamento no Editor é fixo.** `src/data/plans.ts:181` define `OPCIONAIS.deslocamento.valor = '~R$ 150,00'`, exibido pelo `AddonToggle`, ignorando `config.editor.deslocamentoPadrao.valor`.
-28. **`Settings/index.tsx` concentra 631 linhas e oito seções** em um único componente.
-29. **Dois componentes sem consumidor:** `PriceDisplay` e `RecommendedBadge`.
-30. **`GuestBreakdown` recalcula pizzas inline.** `src/components/GuestBreakdown/index.tsx:12-13` repete `Math.ceil(total * 0.6)` em vez de chamar `calcularPizzasSugeridas`.
-31. **`toOrcamento` recria o objeto a cada render.** `src/hooks/useOrcamento.tsx:112-121`, usado em `useMemo` do Preview com dependência da função; o documento do PDF re-renderiza mais do que o necessário.
-32. **O toggle de tema usa glifos `☀`/`☾`** em vez de ícones Tabler (`src/components/AppShell/index.tsx`), diferente do resto da UI.
-33. **O favicon não existe.** `index.html:9` referencia `/favicon.svg`; o arquivo não existe. Verificado: o servidor Vite devolve o `index.html` (`Content-Type: text/html`) para essa URL, então o navegador recebe um ícone inválido em vez de uma imagem.
+25. **O Editor não mostra total ao vivo.** O provider calcula os quatro planos, mas nenhuma tela do Editor/Preview exibe os totais em texto; eles só existem dentro do PDF. Contraria o `PRODUCT.md` ("o cálculo aparece ao vivo", "comparação lado a lado é obrigatória").
+26. **O valor do deslocamento no Editor é fixo.** `src/services/planos.ts:190` define `OPCIONAIS.deslocamento.valor = '~R$ 150,00'`, exibido pelo `AddonToggle`, ignorando `config.editor.deslocamentoPadrao.valor`.
+27. **`Settings/index.tsx` concentra 631 linhas e oito seções** em um único componente.
+28. **Dois componentes sem consumidor:** `PriceDisplay` e `RecommendedBadge`.
+29. **`GuestBreakdown` recalcula pizzas inline.** `src/components/GuestBreakdown/index.tsx:12-13` repete `Math.ceil(total * 0.6)` em vez de chamar `calcularPizzasSugeridas`.
+30. **`toOrcamento` recria o objeto a cada render.** `src/contexts/OrcamentoProvider.tsx:29-38`, usado em `useMemo` do Preview com dependência da função; o documento do PDF re-renderiza mais do que o necessário.
+31. **O toggle de tema usa glifos `☀`/`☾`** em vez de ícones Tabler (`src/components/AppShell/index.tsx`), diferente do resto da UI.
+32. **O favicon não existe.** `index.html:9` referencia `/favicon.svg`; o arquivo não existe. Verificado: o servidor Vite devolve o `index.html` (`Content-Type: text/html`) para essa URL, então o navegador recebe um ícone inválido em vez de uma imagem.
 
 ### Ferramental e processo
 
-34. **Não há CI.** Não existe `.github/`; typecheck, lint, testes e build não são executados automaticamente.
-35. **Scripts de teste quebrados.** `test:ui` falha por falta de `@vitest/ui`; `test:e2e`/`test:e2e:ui` falham por falta de `playwright.config.ts` e por o Playwright coletar `tests/unit/`. `npx vitest run --coverage` falha por falta de `@vitest/coverage-v8`.
-36. **Lint com sete avisos.** `npm run lint` sai com código 0, mas acusa: variável não usada em `test-preview.mjs`, `only-export-components` em `useOrcamento`/`useConfig` (exportam context e hook), dependência desnecessária em `useConfig`, `Date.now()` em render e `setState` síncrono em efeito no Preview/AppShell.
-37. **Cobertura de testes restrita.** Três arquivos / 41 casos, cobrindo `money`, `calculo` e `AppShell`. Sem teste para `storage`, `useConfig`, `useOrcamento`, páginas e PDF.
-38. **Chunk do Preview com 1,27 MB** (455 KB gzip), acima do limite de aviso do Vite, por causa de `@react-pdf/renderer`. Só a rota é separada; não há outros cortes.
-39. **Sem backend, auth, sync ou variáveis de ambiente.** Por design no MVP, mas significa que histórico e config são por navegador e se perdem ao limpar os dados do site.
+33. **Não há CI.** Não existe `.github/`; typecheck, lint, testes e build não são executados automaticamente.
+34. **Scripts de teste quebrados.** `test:ui` falha por falta de `@vitest/ui`; `test:e2e`/`test:e2e:ui` falham por falta de `playwright.config.ts` e por o Playwright coletar `tests/unit/`. `npx vitest run --coverage` falha por falta de `@vitest/coverage-v8`.
+35. **Lint com cinco avisos.** `npm run lint` sai com código 0, mas acusa: variável não usada em `test-preview.mjs`, dependência desnecessária em `ConfigProvider`, `Date.now()` em render e `setState` síncrono em efeito no Preview e no AppShell. (Os dois avisos de `only-export-components` sumiram com a separação entre `src/contexts/` e `src/hooks/`.)
+36. **Cobertura de testes restrita.** Três arquivos / 41 casos, cobrindo `money`, `calculo` e `AppShell`. Sem teste para `services`, `contexts`, páginas e PDF.
+37. **Chunk do Preview com 1,27 MB** (455 KB gzip), acima do limite de aviso do Vite, por causa de `@react-pdf/renderer`. Só a rota é separada; não há outros cortes.
+38. **Sem backend, auth, sync ou variáveis de ambiente.** Por design no MVP, mas significa que histórico e config são por navegador e se perdem ao limpar os dados do site.
+
+39. **Os utilitários canônicos existem, mas ainda não são consumidos.** `src/utils/whatsapp.ts`, `src/utils/datas.ts` e `src/utils/orcamento.ts` foram criados no estágio 2, mas Preview (`src/pages/Preview/index.tsx:24-48`), Histórico (`src/pages/History/index.tsx:21-29,31-42`) e Configurações (`src/pages/Settings/index.tsx:351-360`) continuam com as cópias inline. A migração das páginas é do estágio 3.
 
 ### Nota sobre o inventário do épico
 
-O inventário do epic PAMP-221 cita `src/services/`, `src/contexts/`, `src/utils/whatsapp.ts` e `src/utils/orcamento.ts`. Esses caminhos **não existem** hoje: a persistência está em `src/storage/`, o estado está em `src/hooks/` e a mensagem de WhatsApp/validade são inline (Preview/Histórico/`calculo.ts`). Provavelmente descrevem o alvo da reorganização (estágio 2), não o estado atual. A reorganização pode mover esses módulos; quando isso acontecer, este documento e os caminhos citados nele precisam ser atualizados.
+O inventário do epic PAMP-221 previa `src/services/`, `src/contexts/`, `src/utils/whatsapp.ts` e `src/utils/orcamento.ts`. Isso **já existe** desde o estágio 2 (PR #3): a persistência e os dados comerciais estão em `src/services/` (com `src/services/precos.ts` como origem única dos números), o estado está em `src/contexts/` (providers) e `src/hooks/` (apenas hooks de consumo), e a mensagem de WhatsApp, a formatação de datas e o status do orçamento têm implementação canônica em `src/utils/whatsapp.ts`, `src/utils/datas.ts` e `src/utils/orcamento.ts` — ainda sem consumidores, porque as páginas só serão migradas no estágio 3. Este documento e os caminhos citados nele foram atualizados junto com o estágio 2; os estágios 3–5 (componentes, páginas e PDF) exigirão uma nova atualização dos `arquivo:linha`.
 
 ## Documentos relacionados
 
