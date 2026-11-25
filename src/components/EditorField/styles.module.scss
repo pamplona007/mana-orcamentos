@@ -46,3 +46,10 @@
   text-transform: uppercase;
   color: var(--cream-dim);
 }
+
+.fieldError {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--rust-glow);
+}

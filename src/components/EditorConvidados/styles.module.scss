@@ -1,3 +1,11 @@
 .block {
   display: contents;
 }
+
+.feedback {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--rust-glow);
+  margin: 0;
+}

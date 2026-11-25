@@ -1,5 +1,9 @@
+import { Controller, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { IconPalette } from '@tabler/icons-react'
 import { useConfig } from '@/hooks/useConfig'
+import { cardapioSchema } from '@/schemas/configSchema'
+import type { ConfigPdfCardapio } from '@/types/config'
 import { SettingsSection } from '@/components/SettingsSection'
 import { SettingsGrid } from '@/components/SettingsGrid'
 import { SettingsField } from '@/components/SettingsField'
@@ -13,7 +17,16 @@ function parseLinhas(valor: string): string[] {
 
 export function SettingsCardapio() {
   const { config, setPdf } = useConfig()
-  const cardapio = config.pdf.cardapio
+  const { control } = useForm<ConfigPdfCardapio>({
+    resolver: zodResolver(cardapioSchema),
+    values: config.pdf.cardapio,
+    mode: 'onChange',
+  })
+
+  const update = (patch: Partial<ConfigPdfCardapio>) => {
+    const parsed = cardapioSchema.safeParse({ ...config.pdf.cardapio, ...patch })
+    if (parsed.success) setPdf({ cardapio: parsed.data })
+  }
 
   return (
     <SettingsSection
@@ -27,36 +40,56 @@ export function SettingsCardapio() {
       }
     >
       <SettingsGrid>
-        <SettingsField id="card-salgados" label="Salgados customizados" full>
-          <textarea
-            id="card-salgados"
-            placeholder="Um por linha. Vazio = lista padrão (21 sabores)."
-            value={cardapio.salgadosCustomizados.join('\n')}
-            onChange={(e) =>
-              setPdf({
-                cardapio: {
-                  ...cardapio,
-                  salgadosCustomizados: parseLinhas(e.target.value),
-                },
-              })
-            }
-          />
-        </SettingsField>
-        <SettingsField id="card-doces" label="Doces customizados" full>
-          <textarea
-            id="card-doces"
-            placeholder="Um por linha. Vazio = lista padrão (6 sabores)."
-            value={cardapio.docesCustomizados.join('\n')}
-            onChange={(e) =>
-              setPdf({
-                cardapio: {
-                  ...cardapio,
-                  docesCustomizados: parseLinhas(e.target.value),
-                },
-              })
-            }
-          />
-        </SettingsField>
+        <Controller
+          control={control}
+          name="salgadosCustomizados"
+          render={({ field, fieldState }) => (
+            <SettingsField
+              id="card-salgados"
+              label="Salgados customizados"
+              full
+              error={fieldState.error?.message}
+            >
+              <textarea
+                id="card-salgados"
+                name={field.name}
+                placeholder="Um por linha. Vazio = lista padrão (21 sabores)."
+                value={field.value.join('\n')}
+                onBlur={field.onBlur}
+                onChange={(e) => {
+                  const salgadosCustomizados = parseLinhas(e.target.value)
+                  field.onChange(salgadosCustomizados)
+                  update({ salgadosCustomizados })
+                }}
+              />
+            </SettingsField>
+          )}
+        />
+        <Controller
+          control={control}
+          name="docesCustomizados"
+          render={({ field, fieldState }) => (
+            <SettingsField
+              id="card-doces"
+              label="Doces customizados"
+              full
+              error={fieldState.error?.message}
+            >
+              <textarea
+                id="card-doces"
+                name={field.name}
+                placeholder="Um por linha. Vazio = lista padrão (6 sabores)."
+                value={field.value.join('\n')}
+                onBlur={field.onBlur}
+                onChange={(e) => {
+                  const docesCustomizados = parseLinhas(e.target.value)
+                  field.onChange(docesCustomizados)
+                  update({ docesCustomizados })
+                }}
+              />
+            </SettingsField>
+          )}
+        />
       </SettingsGrid>
     </SettingsSection>
   )

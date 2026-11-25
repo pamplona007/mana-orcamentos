@@ -1,7 +1,11 @@
 import { useMemo } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { IconMessageDots } from '@tabler/icons-react'
 import { useConfig } from '@/hooks/useConfig'
+import { whatsappConfigSchema } from '@/schemas/configSchema'
 import { mensagemWhatsApp } from '@/utils/whatsapp'
+import type { ConfigWhatsApp } from '@/types/config'
 import { SettingsSection } from '@/components/SettingsSection'
 import styles from './styles.module.scss'
 
@@ -10,6 +14,16 @@ const VARIAVEIS = ['{nome}', '{empresa}', '{deData}', '{emCidade}', '{condicao}'
 export function SettingsMensagem() {
   const { config, setWhatsApp } = useConfig()
   const percentualDesconto = Math.round(config.pdf.adicionais.descontoAvista * 100)
+  const { control } = useForm<ConfigWhatsApp>({
+    resolver: zodResolver(whatsappConfigSchema),
+    values: config.whatsapp,
+    mode: 'onChange',
+  })
+
+  const update = (template: string) => {
+    const parsed = whatsappConfigSchema.safeParse({ template })
+    if (parsed.success) setWhatsApp(parsed.data)
+  }
 
   const preview = useMemo(
     () =>
@@ -42,24 +56,40 @@ export function SettingsMensagem() {
       }
     >
       <div className={styles.whatsappLayout}>
-        <div className={styles.whatsappField}>
-          <label className={styles.fieldLabel} htmlFor="wa-template">
-            Template
-          </label>
-          <textarea
-            id="wa-template"
-            className={styles.templateTextarea}
-            rows={12}
-            value={config.whatsapp.template}
-            onChange={(e) => setWhatsApp({ template: e.target.value })}
-          />
-          <div className={styles.variaveis}>
-            <span className={styles.variaveisLabel}>Variáveis:</span>
-            {VARIAVEIS.map((v) => (
-              <code key={v}>{v}</code>
-            ))}
-          </div>
-        </div>
+        <Controller
+          control={control}
+          name="template"
+          render={({ field, fieldState }) => (
+            <div className={styles.whatsappField}>
+              <label className={styles.fieldLabel} htmlFor="wa-template">
+                Template
+              </label>
+              <textarea
+                id="wa-template"
+                name={field.name}
+                className={styles.templateTextarea}
+                rows={12}
+                value={field.value}
+                onBlur={field.onBlur}
+                onChange={(e) => {
+                  field.onChange(e.target.value)
+                  update(e.target.value)
+                }}
+              />
+              {fieldState.error?.message && (
+                <span className={styles.fieldError} role="alert">
+                  {fieldState.error.message}
+                </span>
+              )}
+              <div className={styles.variaveis}>
+                <span className={styles.variaveisLabel}>Variáveis:</span>
+                {VARIAVEIS.map((v) => (
+                  <code key={v}>{v}</code>
+                ))}
+              </div>
+            </div>
+          )}
+        />
         <div className={styles.whatsappPreview}>
           <span className={styles.whatsappPreviewLabel}>Preview</span>
           <pre className={styles.whatsappPreviewText}>{preview}</pre>
