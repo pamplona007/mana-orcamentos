@@ -22,7 +22,7 @@ export function PriceField({ label, value, onChange, step = 0.01, error }: Price
         step={step}
         className={styles.fieldInput}
         value={value}
-        onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
+        onChange={(e) => onChange(Number(e.target.value))}
       />
       {error && (
         <span className={styles.fieldError} role="alert">

@@ -249,6 +249,26 @@ describe('sanitizarConfig', () => {
     expect(sanitizada.pdf.capa.promessas).toEqual(CONFIG_DEFAULT.pdf.capa.promessas)
   })
 
+  it('não compartilha referências com o CONFIG_DEFAULT', () => {
+    const sanitizada = sanitizarConfig({ empresa: CONFIG_DEFAULT.empresa })
+    expect(sanitizada.empresa).not.toBe(CONFIG_DEFAULT.empresa)
+    expect(sanitizada.pdf).not.toBe(CONFIG_DEFAULT.pdf)
+    expect(sanitizada.pdf.capa.promessas).not.toBe(CONFIG_DEFAULT.pdf.capa.promessas)
+    expect(sanitizada.pdf.cardapio.salgadosCustomizados).not.toBe(
+      CONFIG_DEFAULT.pdf.cardapio.salgadosCustomizados,
+    )
+
+    sanitizada.pdf.capa.promessas.push({ titulo: 'contaminado', corpo: 'x' })
+    sanitizada.pdf.cardapio.salgadosCustomizados.push('contaminado')
+
+    expect(CONFIG_DEFAULT.pdf.capa.promessas).toHaveLength(3)
+    expect(CONFIG_DEFAULT.pdf.cardapio.salgadosCustomizados).toEqual([])
+  })
+
+  it('preserva o CONFIG_DEFAULT inteiro (paridade schema × default)', () => {
+    expect(sanitizarConfig(CONFIG_DEFAULT)).toEqual(CONFIG_DEFAULT)
+  })
+
   it('produz uma config sempre válida para o schema', () => {
     const sanitizada = sanitizarConfig({
       empresa: 'quebrada',

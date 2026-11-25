@@ -118,10 +118,10 @@ function lerCampo(schema: z.ZodType, bruto: unknown, padrao: unknown): unknown {
       base[chave] = lerCampo(filho, bruto[chave], padrao[chave])
     }
     const tentativa = schema.safeParse(base)
-    return tentativa.success ? tentativa.data : padrao
+    return tentativa.success ? tentativa.data : structuredClone(padrao)
   }
 
-  return padrao
+  return structuredClone(padrao)
 }
 
 /**
