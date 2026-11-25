@@ -24,9 +24,8 @@ export function History() {
   const [lista, setLista] = useState<OrcamentoSalvo[]>(() => listarOrcamentos())
 
   const grupos = useMemo(() => {
-    const termo = busca.trim().toLowerCase()
-    const filtrado = termo
-      ? lista.filter((o) => o.cliente.nome.toLowerCase().includes(termo))
+    const filtrado = busca.trim()
+      ? lista.filter((o) => o.cliente.nome.toLowerCase().includes(busca.toLowerCase()))
       : lista
     const porMes = new Map<string, OrcamentoSalvo[]>()
     for (const o of filtrado) {
